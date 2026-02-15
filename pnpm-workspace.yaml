@@ -1,0 +1,6 @@
+# https://pnpm.io/settings
+blockExoticSubdeps: true
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+# FIXME: subdep of @tanstack/router@^1.159.0. it should also use @1.159.x
+- '@tanstack/router-core@1.160.0'

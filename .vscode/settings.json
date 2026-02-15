@@ -1,0 +1,46 @@
+{
+  // the biome vscod* extension corrupts files
+  // https://github.com/biomejs/biome-vscode/issues/923
+  // https://github.com/biomejs/biome-vscode/issues/912
+  "[css]": {
+    "editor.defaultFormatter": null
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": null
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": null
+  },
+  "editor.codeActionsOnSave": {
+    "source.addMissingImports.ts": "never",
+    "source.biome": "never",
+    "source.fixAll.biome": "never",
+    "source.fixAll.ts": "never",
+    "source.organizeImports": "never",
+    "source.organizeImports.biome": "never",
+    "source.organizeLinkDefinitions": "never",
+    "source.removeUnused.ts": "never",
+    "source.removeUnusedImports": "never",
+    "source.sort.json": "explicit",
+    "source.sortImports": "never"
+  },
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": false,
+  "editor.formatOnSaveMode": "file",
+  "editor.formatOnType": false,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "files.readonlyInclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "files.watcherExclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "search.exclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "todo-tree.tree.disableCompactFolders": false,
+  "todo-tree.tree.flat": true,
+  "todo-tree.tree.showBadges": true
+}
