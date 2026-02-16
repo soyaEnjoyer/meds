@@ -16,6 +16,7 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
+      "playground/**",
       "!!node_modules",
       "!!.next",
       "!!dist",
@@ -61,28 +62,8 @@
           "options": {
             "hooks": [
               {
-                "name": "useModal",
-                "stableResult": ["modalRef", "open", "close", "toggle"]
-              },
-              {
-                "name": "useLogger",
-                "stableResult": true
-              },
-              {
-                "name": "useQueryClient",
-                "stableResult": true
-              },
-              {
-                "name": "useSse",
-                "stableResult": ["subscribe"]
-              },
-              {
-                "name": "useToast",
-                "stableResult": ["setToasts", "showToast"]
-              },
-              {
-                "name": "usePopover",
-                "stableResult": ["setIsOpen", "open", "close", "toggle"]
+                "name": "useNav",
+                "stableResult": ["setOpen", "setSearch"]
               }
             ],
             "reportMissingDependenciesArray": true
