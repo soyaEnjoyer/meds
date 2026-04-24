@@ -90,3 +90,6 @@ export const historyUpdateSchema = historySchema.omit({
 
 export type HistoryRow = z.infer<typeof historySchema>;
 export type HistoryUpdate = z.infer<typeof historyUpdateSchema>;
+
+// Derived
+export type HistoryWithItemCatUnitRow = HistoryRow & { categoryName: string; itemName: string; unitName: string };

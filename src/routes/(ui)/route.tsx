@@ -3,12 +3,21 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Outlet, createFileRoute } from '@tanstack/react-router';
 
 import { SseReloader } from '@/components/sse-reloader';
+import { categoryGet } from '@/functions.server/category';
+import { itemGet } from '@/functions.server/item';
+import { scheduleGet } from '@/functions.server/schedule';
+import { unitGet } from '@/functions.server/unit';
 
 export const Route = createFileRoute('/(ui)')({
   component: UiLayout,
   loader: async () => {
-    const [categories, items] = [null, null];
-    return { categories, items };
+    const [categories, items, schedules, units] = await Promise.all([
+      categoryGet(),
+      itemGet(),
+      scheduleGet(),
+      unitGet(),
+    ]);
+    return { categories, items, schedules, units };
   },
 });
 

@@ -150,6 +150,7 @@ CREATE TABLE `schedule` (
 	FOREIGN KEY (`unitId`) REFERENCES `unit`(`id`) ON UPDATE cascade ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `scheduleUnique` ON `schedule` (`categoryId`,`itemId`,`unitId`,`hour`,`minute`);--> statement-breakpoint
 INSERT INTO `schedule` (
 	`id`,
 	`itemId`,
