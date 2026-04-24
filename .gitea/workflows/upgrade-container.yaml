@@ -1,0 +1,13 @@
+name: Upgrade container
+run-name: Upgrade container
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  Upgrade-container:
+    runs-on: media
+    steps:
+      - run: docker-git groceries --strict
+      - run: systemctl restart groceries
