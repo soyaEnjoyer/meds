@@ -1,114 +1,128 @@
 import { sql } from 'drizzle-orm';
-import { sqliteTable, uniqueIndex, integer, text, real, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core';
 
-export const unitTable = sqliteTable(
-  'unit',
-  {
-    createdAt: integer('created_at')
-      .default(sql`(unixepoch())`)
-      .notNull(),
-    id: integer().primaryKey({ autoIncrement: true }).notNull(),
-    unitName: text('unit_name').notNull(),
-    updatedAt: integer('updated_at')
-      .default(sql`(unixepoch())`)
-      .notNull(),
-  },
-  (table) => [uniqueIndex('unit_unit_name_unique').on(table.unitName)]
-);
+// oxlint-disable eslint/sort-keys
 
-export const categoryTable = sqliteTable(
-  'category',
-  {
-    categoryName: text('category_name').notNull(),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-    hue: real().notNull(),
-    id: integer().primaryKey({ autoIncrement: true }).notNull(),
-    updatedAt: integer('updated_at', { mode: 'timestamp' })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-  },
-  (table) => [uniqueIndex('category_category_name_unique').on(table.categoryName)]
-);
+export const categoryTable = sqliteTable('category', {
+  id: integer().primaryKey({ autoIncrement: true }).notNull(),
+  name: text().notNull().unique(),
 
-export const itemTable = sqliteTable(
-  'item',
-  {
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-    id: integer().primaryKey({ autoIncrement: true }).notNull(),
-    itemName: text('item_name').notNull(),
-    stepSize: real('step_size').default(1).notNull(),
-    sumTotal: integer('sum_total', { mode: 'boolean' }).default(true).notNull(),
-    tags: text(),
-    unitId: integer('unit_id')
-      .notNull()
-      .references(() => unitTable.id),
-    updatedAt: integer('updated_at', { mode: 'timestamp' })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-  },
-  (table) => [uniqueIndex('item_item_name_unit_id_unique').on(table.itemName, table.unitId)]
-);
+  createdAt: integer({ mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch('subsec') * 1000)`),
+  updatedAt: integer({ mode: 'timestamp_ms' })
+    .notNull()
+    .$onUpdate(() => sql`(unixepoch('subsec') * 1000)`),
+  deletedAt: integer({ mode: 'timestamp_ms' }),
+});
 
-export const scheduleTable = sqliteTable(
-  'schedule',
-  {
-    amount: real().default(1).notNull(),
-    categoryId: integer('category_id')
-      .notNull()
-      .references(() => categoryTable.id),
-    completedAt: integer('completed_at', { mode: 'timestamp' }),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-    cycleOffDays: integer('cycle_off_days').default(0).notNull(),
-    cycleOnDays: integer('cycle_on_days').default(0).notNull(),
-    cycleTotalDaysGen: integer('cycle_total_days_gen').generatedAlwaysAs(sql`cycle_on_days+cycle_off_days`, {
-      mode: 'virtual',
-    }),
-    dayMask: integer('day_mask').default(127).notNull(),
-    dueAt: integer('due_at', { mode: 'timestamp' }),
-    enabled: integer({ mode: 'boolean' }).default(true).notNull(),
-    endAt: integer('end_at', { mode: 'timestamp' }),
-    hour: integer().default(7).notNull(),
-    id: integer().primaryKey({ autoIncrement: true }).notNull(),
-    itemId: integer('item_id')
-      .notNull()
-      .references(() => itemTable.id),
-    lastAmount: real('last_amount'),
-    migratedId: integer('migrated_id'),
-    minute: integer().default(0).notNull(),
-    monthMask: integer('month_mask').default(4095).notNull(),
-    repeatCount: integer('repeat_count').default(1).notNull(),
-    restDays: integer('rest_days').default(0).notNull(),
-    skippedAt: integer('skipped_at', { mode: 'timestamp' }),
-    sort: integer().default(0).notNull(),
-    startAt: integer('start_at', { mode: 'timestamp' })
-      .default(sql`(unixepoch('now','start of day'))`)
-      .notNull(),
-    updatedAt: integer('updated_at', { mode: 'timestamp' })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-  },
-  (table) => [uniqueIndex('schedule_migrated_id_unique').on(table.migratedId)]
-);
+export const unitTable = sqliteTable('unit', {
+  id: integer().primaryKey({ autoIncrement: true }).notNull(),
+  name: text().notNull().unique(),
 
-export const historyTable = sqliteTable(
-  'history',
-  {
-    amount: real(),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-    id: integer().primaryKey({ autoIncrement: true }).notNull(),
-    scheduleId: integer('schedule_id')
-      .notNull()
-      .references(() => scheduleTable.id),
-    scheduledAmount: real('scheduled_amount'),
-    scheduledAt: integer('scheduled_at', { mode: 'timestamp' }),
-  },
-  (table) => [index('schedule_id_created_at_ix').on(table.scheduleId, table.createdAt)]
-);
+  createdAt: integer({ mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch('subsec') * 1000)`),
+  updatedAt: integer({ mode: 'timestamp_ms' })
+    .notNull()
+    .$onUpdate(() => sql`(unixepoch('subsec') * 1000)`),
+  deletedAt: integer({ mode: 'timestamp_ms' }),
+});
+
+export const itemTable = sqliteTable('item', {
+  id: integer().primaryKey({ autoIncrement: true }).notNull(),
+  name: text().notNull().unique(),
+
+  defaultCategoryId: integer()
+    .notNull()
+    .references(() => categoryTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  defaultUnitId: integer()
+    .notNull()
+    .references(() => unitTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  defaultAmount: real().notNull().default(1),
+
+  createdAt: integer({ mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch('subsec') * 1000)`),
+  updatedAt: integer({ mode: 'timestamp_ms' })
+    .notNull()
+    .$onUpdate(() => sql`(unixepoch('subsec') * 1000)`),
+  deletedAt: integer({ mode: 'timestamp_ms' }),
+});
+
+export const scheduleTable = sqliteTable('schedule', {
+  id: integer().primaryKey({ autoIncrement: true }).notNull(),
+  categoryId: integer()
+    .notNull()
+    .references(() => categoryTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  itemId: integer()
+    .notNull()
+    .references(() => itemTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  unitId: integer()
+    .notNull()
+    .references(() => unitTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+
+  amount: real().notNull(),
+
+  cycleOffDays: integer().notNull().default(0),
+  cycleOnDays: integer().notNull().default(0),
+  restDays: integer().notNull().default(0),
+  repeatCount: integer().notNull().default(1),
+
+  dayMask: integer().notNull().default(127),
+  monthMask: integer().notNull().default(4095),
+  hour: integer().notNull().default(7),
+  minute: integer().notNull().default(0),
+
+  startAt: integer({ mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch('now','start of day'))`),
+  endAt: integer({ mode: 'timestamp_ms' }),
+
+  enabled: integer({ mode: 'boolean' }).notNull().default(true),
+  adHoc: integer({ mode: 'boolean' }).notNull().default(false),
+  sort: integer().default(0).notNull(),
+
+  dueAt: integer({ mode: 'timestamp_ms' }),
+  completedAt: integer({ mode: 'timestamp_ms' }),
+  skippedAt: integer({ mode: 'timestamp_ms' }),
+  lastAmount: real(),
+
+  createdAt: integer({ mode: 'timestamp_ms' })
+    .default(sql`(unixepoch('subsec') * 1000)`)
+    .notNull(),
+  updatedAt: integer({ mode: 'timestamp_ms' })
+    .default(sql`(unixepoch('subsec') * 1000)`)
+    .notNull(),
+  deletedAt: integer({ mode: 'timestamp_ms' }),
+});
+
+export const historyTable = sqliteTable('history', {
+  id: integer().primaryKey({ autoIncrement: true }).notNull(),
+  scheduleId: integer()
+    .notNull()
+    .references(() => scheduleTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+
+  categoryId: integer()
+    .notNull()
+    .references(() => categoryTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  itemId: integer()
+    .notNull()
+    .references(() => itemTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  unitId: integer()
+    .notNull()
+    .references(() => unitTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+
+  scheduledAt: integer({ mode: 'timestamp_ms' }),
+  scheduledAmount: real(),
+
+  amount: real(),
+
+  createdAt: integer({ mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch('subsec') * 1000)`),
+  updatedAt: integer({ mode: 'timestamp_ms' })
+    .notNull()
+    .$onUpdate(() => sql`(unixepoch('subsec') * 1000)`),
+  deletedAt: integer({ mode: 'timestamp_ms' }),
+});
