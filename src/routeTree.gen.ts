@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IconDotChar123extChar125RouteImport } from './routes/icon[.]{$ext}'
 import { Route as uiRouteRouteImport } from './routes/(ui)/route'
+import { Route as uiIndexRouteImport } from './routes/(ui)/index'
 import { Route as ApiSseRouteImport } from './routes/api/sse'
 import { Route as ApiPingRouteImport } from './routes/api/ping'
 
@@ -23,6 +24,11 @@ const IconDotChar123extChar125Route =
 const uiRouteRoute = uiRouteRouteImport.update({
   id: '/(ui)',
   getParentRoute: () => rootRouteImport,
+} as any)
+const uiIndexRoute = uiIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => uiRouteRoute,
 } as any)
 const ApiSseRoute = ApiSseRouteImport.update({
   id: '/api/sse',
@@ -39,29 +45,38 @@ export interface FileRoutesByFullPath {
   '/icon.{$ext}': typeof IconDotChar123extChar125Route
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
+  '/': typeof uiIndexRoute
 }
 export interface FileRoutesByTo {
   '/icon.{$ext}': typeof IconDotChar123extChar125Route
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
+  '/': typeof uiIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/(ui)': typeof uiRouteRoute
+  '/(ui)': typeof uiRouteRouteWithChildren
   '/icon.{$ext}': typeof IconDotChar123extChar125Route
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
+  '/(ui)/': typeof uiIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/icon.{$ext}' | '/api/ping' | '/api/sse'
+  fullPaths: '/icon.{$ext}' | '/api/ping' | '/api/sse' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/icon.{$ext}' | '/api/ping' | '/api/sse'
-  id: '__root__' | '/(ui)' | '/icon.{$ext}' | '/api/ping' | '/api/sse'
+  to: '/icon.{$ext}' | '/api/ping' | '/api/sse' | '/'
+  id:
+    | '__root__'
+    | '/(ui)'
+    | '/icon.{$ext}'
+    | '/api/ping'
+    | '/api/sse'
+    | '/(ui)/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  uiRouteRoute: typeof uiRouteRoute
+  uiRouteRoute: typeof uiRouteRouteWithChildren
   IconDotChar123extChar125Route: typeof IconDotChar123extChar125Route
   ApiPingRoute: typeof ApiPingRoute
   ApiSseRoute: typeof ApiSseRoute
@@ -83,6 +98,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof uiRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(ui)/': {
+      id: '/(ui)/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof uiIndexRouteImport
+      parentRoute: typeof uiRouteRoute
+    }
     '/api/sse': {
       id: '/api/sse'
       path: '/api/sse'
@@ -100,8 +122,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface uiRouteRouteChildren {
+  uiIndexRoute: typeof uiIndexRoute
+}
+
+const uiRouteRouteChildren: uiRouteRouteChildren = {
+  uiIndexRoute: uiIndexRoute,
+}
+
+const uiRouteRouteWithChildren =
+  uiRouteRoute._addFileChildren(uiRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  uiRouteRoute: uiRouteRoute,
+  uiRouteRoute: uiRouteRouteWithChildren,
   IconDotChar123extChar125Route: IconDotChar123extChar125Route,
   ApiPingRoute: ApiPingRoute,
   ApiSseRoute: ApiSseRoute,

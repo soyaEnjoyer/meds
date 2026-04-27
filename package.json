@@ -10,6 +10,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:pull": "cp /mnt/docker/meds/data.db* .local/",
     "db:reset": "rm .local/data.db; drizzle-kit migrate",
+    "dead": "pnpx fallow",
     "dev": "vite dev",
     "docker": "pnpm docker:build && pnpm docker:run",
     "docker:build": "docker build --tag meds:latest --progress plain .",
@@ -17,9 +18,8 @@
     "format": "oxfmt",
     "lint": "oxlint --fix",
     "lint:fix": "oxlint --fix --fix-suggestions",
-    "start": "node .output/server/index.mjs",
     "local": "pnpm build && pnpm start",
-    "dead": "pnpx fallow"
+    "start": "node .output/server/index.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
@@ -56,6 +56,7 @@
     "@vitejs/plugin-react": "^6.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
     "drizzle-kit": "^0.31.10",
+    "eslint-plugin-react-compiler": "19.1.0-rc.2",
     "fallow": "^2.44.0",
     "nitro": "3.0.260415-beta",
     "oxfmt": "^0.46.0",

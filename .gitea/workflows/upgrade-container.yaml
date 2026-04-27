@@ -9,5 +9,5 @@ jobs:
   Upgrade-container:
     runs-on: media
     steps:
-      - run: docker-git groceries --strict
-      - run: systemctl restart groceries
+      - run: docker-git meds --strict
+      - run: systemctl restart meds

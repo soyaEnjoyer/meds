@@ -1,5 +1,6 @@
 import tanstackQuery from '@tanstack/eslint-plugin-query';
 import tanstackRouter from '@tanstack/eslint-plugin-router';
+import reactCompiler from 'eslint-plugin-react-compiler';
 import { defineConfig } from 'oxlint';
 
 export default defineConfig({
@@ -24,6 +25,10 @@ export default defineConfig({
     {
       name: 'tanstack-router',
       specifier: '@tanstack/eslint-plugin-router',
+    },
+    {
+      name: 'react-compiler',
+      specifier: 'eslint-plugin-react-compiler',
     },
   ],
   options: {
@@ -100,6 +105,7 @@ export default defineConfig({
     ...Object.fromEntries(Object.keys(tanstackQuery.rules).map((rule) => [`tanstack-query/${rule}`, 'warn'])),
     ...Object.fromEntries(Object.keys(tanstackRouter.rules).map((rule) => [`tanstack-router/${rule}`, 'warn'])),
     'tanstack-query/prefer-query-options': 'off',
+    ...Object.fromEntries(Object.keys(reactCompiler.rules).map((rule) => [`react-compiler/${rule}`, 'warn'])),
   },
   settings: {
     jsdoc: {
