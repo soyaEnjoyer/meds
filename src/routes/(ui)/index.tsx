@@ -1,83 +1,78 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useCallback, useState } from 'react';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { useScheduleGroupsQuery } from '@/hooks/query/schedule';
+import { Button } from '@/components/ui/button';
+import { useScheduleDoneMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
+import type { ScheduleGroup, ScheduleItem } from '@/hooks/query/queries/schedule';
+import { useScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
+import { formatDateIso } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)/')({
   component: SchedulePage,
 });
 
-function SchedulePage() {
-  // const categoriesQuery = useCategoriesQuery();
-  // const unitsQuery = useUnitsQuery();
-  // const itemsQuery = useItemsQuery();
-  // const schedulesQuery = useSchedulesQuery();
-  const scheduleGroups = useScheduleGroupsQuery();
+function ScheuleAccordionItem({ id, itemName, amount, unitName, dueAt, completedAt }: ScheduleItem) {
+  const scheduleDoneMutator = useScheduleDoneMutator();
+  const scheduleSkipMutator = useScheduleSkipMutator();
+
+  const handleDoneClick = useCallback(() => scheduleDoneMutator.mutate({ data: [{ id }] }), [id, scheduleDoneMutator]);
+  const handleSkipClick = useCallback(() => scheduleSkipMutator.mutate({ data: [{ id }] }), [id, scheduleSkipMutator]);
 
   return (
-    <Accordion>
+    <div className='ms-2 me-8 flex items-center gap-4'>
+      <h3 className='me-auto text-base'>{itemName}</h3>
+      <span>
+        {amount} {unitName}
+      </span>
+      <span>{formatDateIso(dueAt)}</span>
+      <span>{formatDateIso(completedAt)}</span>
+      <Button onClick={handleDoneClick}>Done</Button>
+      <Button onClick={handleSkipClick}>Skip</Button>
+    </div>
+  );
+}
+
+function ScheduleAccordionGroup({ dueAtIso, categoryName, items }: ScheduleGroup) {
+  const scheduleDoneMutator = useScheduleDoneMutator();
+  const scheduleSkipMutator = useScheduleSkipMutator();
+
+  const handleDoneClick = useCallback(
+    () => scheduleDoneMutator.mutate({ data: items.map(({ id }) => ({ id })) }),
+    [items, scheduleDoneMutator]
+  );
+
+  const handleSkipClick = useCallback(
+    () => scheduleSkipMutator.mutate({ data: items.map(({ id }) => ({ id })) }),
+    [items, scheduleSkipMutator]
+  );
+
+  return (
+    <AccordionItem>
+      <AccordionTrigger className='flex items-center gap-4'>
+        <span>{dueAtIso}</span>
+        <h2 className='me-auto text-base'>{categoryName}</h2>
+        <Button onClick={handleDoneClick}>Done</Button>
+        <Button onClick={handleSkipClick}>Skip</Button>
+      </AccordionTrigger>
+      <AccordionContent className='flex flex-col gap-2'>
+        {items.map((item) => (
+          <ScheuleAccordionItem key={item.id} {...item} />
+        ))}
+      </AccordionContent>
+    </AccordionItem>
+  );
+}
+
+function SchedulePage() {
+  const scheduleGroups = useScheduleGroupsQuery();
+  const [accordionValue, setAccordionValue] = useState<number[]>([]);
+
+  return (
+    <Accordion value={accordionValue} onValueChange={setAccordionValue}>
       {scheduleGroups.data?.map((group) => (
-        <AccordionItem key={group.key}>
-          <AccordionTrigger className='flex gap-4'>
-            <span>{group.dueAtIso}</span>
-            <span>{group.categoryName}</span>
-          </AccordionTrigger>
-          <AccordionContent className='flex flex-col gap-2'>
-            {group.items.map((item) => (
-              <div key={item.id} className='flex gap-4'>
-                <span>{item.itemName}</span>
-                <span>{item.amount}</span>
-                <span>{item.unitName}</span>
-              </div>
-            ))}
-          </AccordionContent>
-        </AccordionItem>
+        <ScheduleAccordionGroup {...group} key={group.key} />
       ))}
     </Accordion>
   );
-
-  return (
-    <div className='flex flex-col'>
-      {scheduleGroups.data?.map((item) => (
-        <span key={item.dueAtIso}>{JSON.stringify(item, null, 2)}</span>
-      ))}
-    </div>
-  );
-
-  // return (
-  //   <div className='flex flex-row justify-between'>
-  //     <article>
-  //       <h2 className='font-semibold'>Categories</h2>
-  //       <div className='flex flex-col'>
-  //         {categoriesQuery.data.map((item) => (
-  //           <span key={item.id}>{item.name}</span>
-  //         ))}
-  //       </div>
-  //     </article>
-  //     <article>
-  //       <h2 className='font-semibold'>Units</h2>
-  //       <div className='flex flex-col'>
-  //         {unitsQuery.data.map((item) => (
-  //           <span key={item.id}>{item.name}</span>
-  //         ))}
-  //       </div>
-  //     </article>
-  //     <article>
-  //       <h2 className='font-semibold'>Items</h2>
-  //       <div className='flex flex-col'>
-  //         {itemsQuery.data.map((item) => (
-  //           <span key={item.id}>{item.name}</span>
-  //         ))}
-  //       </div>
-  //     </article>
-  //     <article>
-  //       <h2 className='font-semibold'>Schedules</h2>
-  //       <div className='flex flex-col'>
-  //         {schedulesQuery.data.map((item) => (
-  //           <span key={item.id}>{formatDateIso(item.createdAt)}</span>
-  //         ))}
-  //       </div>
-  //     </article>
-  //   </div>
-  // );
 }

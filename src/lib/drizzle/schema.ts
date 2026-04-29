@@ -81,7 +81,6 @@ export const scheduleTable = sqliteTable(
       .default(sql`(unixepoch('now','start of day'))`),
     endAt: integer({ mode: 'timestamp_ms' }),
 
-    enabled: integer({ mode: 'boolean' }).notNull().default(true),
     adHoc: integer({ mode: 'boolean' }).notNull().default(false),
     sort: integer().default(0).notNull(),
 

@@ -19,6 +19,7 @@
     "lint": "oxlint --fix",
     "lint:fix": "oxlint --fix --fix-suggestions",
     "local": "pnpm build && pnpm start",
+    "pre": "oxfmt --check && oxlint --deny-warnings",
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {

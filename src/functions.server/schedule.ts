@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
-import { desc, eq, isNull } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { db } from '@/lib/drizzle/db.server';
@@ -7,10 +7,22 @@ import { historyTable, scheduleTable } from '@/lib/drizzle/schema';
 import type { ScheduleRow } from '@/lib/drizzle/zod';
 import { scheduleInsertSchema, scheduleUpdateSchema } from '@/lib/drizzle/zod';
 
-const doneSchema = z.object({
-  amount: z.number(),
-  id: z.int(),
-});
+const MAX_SEARCH_ITERATIONS = 1000;
+
+const doneSchema = z.array(
+  z.object({
+    amount: z.number().optional(),
+    id: z.int(),
+  })
+);
+
+const skipSchema = z
+  .array(
+    z.object({
+      id: z.int(),
+    })
+  )
+  .transform((value) => value.map(({ id }) => ({ amount: null, id })));
 
 export const scheduleGet = createServerFn().handler(
   async (): Promise<ScheduleRow[]> =>
@@ -18,7 +30,7 @@ export const scheduleGet = createServerFn().handler(
       .select()
       .from(scheduleTable)
       .where(isNull(scheduleTable.deletedAt))
-      .orderBy(desc(scheduleTable.enabled), scheduleTable.dueAt)
+      .orderBy(isNull(scheduleTable.dueAt), scheduleTable.dueAt)
 );
 
 export const scheduleCreate = createServerFn()
@@ -50,38 +62,72 @@ export const scheduleDelete = createServerFn()
   });
 
 const scheduleAction = createServerFn()
-  .inputValidator((data: { id: number; amount: number | null }) => data)
+  .inputValidator((data: { id: number; amount?: number | null }[]) => data)
   .handler(
-    async ({ data: { amount, id: scheduleId } }): Promise<ScheduleRow> =>
-      await db.transaction(async (tx) => {
-        const [{ categoryId, itemId, unitId, amount: scheduledAmount, dueAt: scheduledAt, ...schedule }] = await tx
-          .select()
-          .from(scheduleTable)
-          .where(eq(scheduleTable.id, scheduleId));
-        const [{ createdAt }] = await tx
-          .insert(historyTable)
-          .values({
-            amount,
-            categoryId,
-            itemId,
-            scheduleId,
-            scheduledAmount,
-            scheduledAt,
-            unitId,
+    async ({ data: items }): Promise<ScheduleRow[]> =>
+      await Promise.all(
+        items.map(async ({ id: scheduleId, amount }) =>
+          db.transaction(async (tx) => {
+            const [{ categoryId, itemId, unitId, amount: scheduledAmount, dueAt: scheduledAt, ...schedule }] = await tx
+              .select()
+              .from(scheduleTable)
+              .where(eq(scheduleTable.id, scheduleId));
+            const [{ createdAt }] = await tx
+              .insert(historyTable)
+              .values({
+                amount: amount === null ? null : (amount ?? scheduledAmount),
+                categoryId,
+                itemId,
+                scheduleId,
+                scheduledAmount,
+                scheduledAt,
+                unitId,
+              })
+              .returning();
+            // FIXME: this is wildly inneficient
+            function getNextDueAt(): Date | null {
+              if (!scheduledAt) return null;
+              const step = amount ? schedule.restDays + 1 : 1;
+              const now = new Date();
+              const nextDueAt = scheduledAt && scheduledAt > now ? new Date(scheduledAt) : now;
+              nextDueAt.setHours(0, 0, 0, 0);
+
+              for (let i = 0; i < MAX_SEARCH_ITERATIONS; ++i) {
+                nextDueAt.setDate(nextDueAt.getDate() + step);
+                if (schedule.endAt && nextDueAt >= schedule.endAt) return null;
+
+                // convert from amerikkkan to normal
+                const weekdayBit = 1 << ((nextDueAt.getDay() || 7) - 1);
+                if ((weekdayBit & schedule.dayMask) !== weekdayBit) continue;
+
+                const monthBit = 1 << nextDueAt.getMonth();
+                if ((monthBit & schedule.monthMask) !== monthBit) continue;
+
+                // cycle is n on, n off. startAt is a date with no time
+                const cycleDay =
+                  Math.round((nextDueAt.getTime() - schedule.startAt.getTime()) / 86_400_000) %
+                  (schedule.cycleOnDays + schedule.cycleOffDays);
+                if (cycleDay >= schedule.cycleOnDays) continue;
+
+                nextDueAt.setHours(schedule.hour, schedule.minute, 0, 0);
+                return nextDueAt;
+              }
+              throw new Error('could not find next dueAt');
+            }
+            const nextDueAt = getNextDueAt();
+            console.log('scheduleAction', { amount, nextDueAt, scheduledAt });
+            const [result] = await tx
+              .update(scheduleTable)
+              .set({
+                dueAt: nextDueAt,
+                ...(amount === null ? { skippedAt: createdAt } : { completedAt: createdAt, lastAmount: amount }),
+              })
+              .where(eq(scheduleTable.id, scheduleId))
+              .returning();
+            return result;
           })
-          .returning();
-        console.log('todo: calculate next dueAt from', createdAt, schedule);
-        const [result] = await tx
-          .update(scheduleTable)
-          .set({
-            // TODO: calculate next dueAt. it's quite complicated because of all the variables
-            dueAt: new Date(),
-            ...(amount === null ? { skippedAt: createdAt } : { completedAt: createdAt, lastAmount: amount }),
-          })
-          .where(eq(scheduleTable.id, scheduleId))
-          .returning();
-        return result;
-      })
+        )
+      )
   );
 
 export const scheduleSetDone = createServerFn()
@@ -89,5 +135,5 @@ export const scheduleSetDone = createServerFn()
   .handler(async ({ data }) => scheduleAction({ data }));
 
 export const scheduleSetSkipped = createServerFn()
-  .inputValidator((id: number) => id)
-  .handler(async ({ data: id }) => scheduleAction({ data: { amount: null, id } }));
+  .inputValidator(skipSchema)
+  .handler(async ({ data }) => scheduleAction({ data }));
