@@ -60,7 +60,7 @@ export const historyWithItemGet = createServerFn()
         .where(
           and(
             isNull(historyTable.deletedAt),
-            search ? like(itemTable.name, `%${search.replaceAll('%', '\\%')}%`) : undefined
+            search ? like(itemTable.name, `%${search.replaceAll('%', String.raw`\%`)}%`) : undefined
           )
         )
         .orderBy(desc(historyTable.createdAt))

@@ -14,6 +14,10 @@ import { Route as uiRouteRouteImport } from './routes/(ui)/route'
 import { Route as uiIndexRouteImport } from './routes/(ui)/index'
 import { Route as ApiSseRouteImport } from './routes/api/sse'
 import { Route as ApiPingRouteImport } from './routes/api/ping'
+import { Route as uiUnitsRouteImport } from './routes/(ui)/units'
+import { Route as uiSchedulesRouteImport } from './routes/(ui)/schedules'
+import { Route as uiItemsRouteImport } from './routes/(ui)/items'
+import { Route as uiCategoriesRouteImport } from './routes/(ui)/categories'
 
 const IconDotChar123extChar125Route =
   IconDotChar123extChar125RouteImport.update({
@@ -40,15 +44,43 @@ const ApiPingRoute = ApiPingRouteImport.update({
   path: '/api/ping',
   getParentRoute: () => rootRouteImport,
 } as any)
+const uiUnitsRoute = uiUnitsRouteImport.update({
+  id: '/units',
+  path: '/units',
+  getParentRoute: () => uiRouteRoute,
+} as any)
+const uiSchedulesRoute = uiSchedulesRouteImport.update({
+  id: '/schedules',
+  path: '/schedules',
+  getParentRoute: () => uiRouteRoute,
+} as any)
+const uiItemsRoute = uiItemsRouteImport.update({
+  id: '/items',
+  path: '/items',
+  getParentRoute: () => uiRouteRoute,
+} as any)
+const uiCategoriesRoute = uiCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => uiRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/icon.{$ext}': typeof IconDotChar123extChar125Route
+  '/categories': typeof uiCategoriesRoute
+  '/items': typeof uiItemsRoute
+  '/schedules': typeof uiSchedulesRoute
+  '/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
   '/': typeof uiIndexRoute
 }
 export interface FileRoutesByTo {
   '/icon.{$ext}': typeof IconDotChar123extChar125Route
+  '/categories': typeof uiCategoriesRoute
+  '/items': typeof uiItemsRoute
+  '/schedules': typeof uiSchedulesRoute
+  '/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
   '/': typeof uiIndexRoute
@@ -57,19 +89,43 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(ui)': typeof uiRouteRouteWithChildren
   '/icon.{$ext}': typeof IconDotChar123extChar125Route
+  '/(ui)/categories': typeof uiCategoriesRoute
+  '/(ui)/items': typeof uiItemsRoute
+  '/(ui)/schedules': typeof uiSchedulesRoute
+  '/(ui)/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
   '/(ui)/': typeof uiIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/icon.{$ext}' | '/api/ping' | '/api/sse' | '/'
+  fullPaths:
+    | '/icon.{$ext}'
+    | '/categories'
+    | '/items'
+    | '/schedules'
+    | '/units'
+    | '/api/ping'
+    | '/api/sse'
+    | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/icon.{$ext}' | '/api/ping' | '/api/sse' | '/'
+  to:
+    | '/icon.{$ext}'
+    | '/categories'
+    | '/items'
+    | '/schedules'
+    | '/units'
+    | '/api/ping'
+    | '/api/sse'
+    | '/'
   id:
     | '__root__'
     | '/(ui)'
     | '/icon.{$ext}'
+    | '/(ui)/categories'
+    | '/(ui)/items'
+    | '/(ui)/schedules'
+    | '/(ui)/units'
     | '/api/ping'
     | '/api/sse'
     | '/(ui)/'
@@ -119,14 +175,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(ui)/units': {
+      id: '/(ui)/units'
+      path: '/units'
+      fullPath: '/units'
+      preLoaderRoute: typeof uiUnitsRouteImport
+      parentRoute: typeof uiRouteRoute
+    }
+    '/(ui)/schedules': {
+      id: '/(ui)/schedules'
+      path: '/schedules'
+      fullPath: '/schedules'
+      preLoaderRoute: typeof uiSchedulesRouteImport
+      parentRoute: typeof uiRouteRoute
+    }
+    '/(ui)/items': {
+      id: '/(ui)/items'
+      path: '/items'
+      fullPath: '/items'
+      preLoaderRoute: typeof uiItemsRouteImport
+      parentRoute: typeof uiRouteRoute
+    }
+    '/(ui)/categories': {
+      id: '/(ui)/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof uiCategoriesRouteImport
+      parentRoute: typeof uiRouteRoute
+    }
   }
 }
 
 interface uiRouteRouteChildren {
+  uiCategoriesRoute: typeof uiCategoriesRoute
+  uiItemsRoute: typeof uiItemsRoute
+  uiSchedulesRoute: typeof uiSchedulesRoute
+  uiUnitsRoute: typeof uiUnitsRoute
   uiIndexRoute: typeof uiIndexRoute
 }
 
 const uiRouteRouteChildren: uiRouteRouteChildren = {
+  uiCategoriesRoute: uiCategoriesRoute,
+  uiItemsRoute: uiItemsRoute,
+  uiSchedulesRoute: uiSchedulesRoute,
+  uiUnitsRoute: uiUnitsRoute,
   uiIndexRoute: uiIndexRoute,
 }
 

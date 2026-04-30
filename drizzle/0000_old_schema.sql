@@ -2,14 +2,14 @@ CREATE TABLE if not exists  "__drizzle_migrations" (
 	id SERIAL PRIMARY KEY,
 	hash text NOT NULL,
 	created_at numeric
-);
+);--> statement-breakpoint
 CREATE TABLE if not exists `category` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`category_name` text NOT NULL,
 	`hue` real NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL
-);
+);--> statement-breakpoint
 CREATE TABLE if not exists `history` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`schedule_id` integer NOT NULL,
@@ -18,11 +18,11 @@ CREATE TABLE if not exists `history` (
 	`scheduled_at` integer,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	FOREIGN KEY (`schedule_id`) REFERENCES `schedule`(`id`) ON UPDATE no action ON DELETE no action
-);
+);--> statement-breakpoint
 CREATE TABLE if not exists `history_status` (
 	`status_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`status_name` text NOT NULL
-);
+);--> statement-breakpoint
 CREATE TABLE if not exists `item` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`item_name` text NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE if not exists `item` (
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`step_size` real DEFAULT 1 NOT NULL,
 	FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON UPDATE no action ON DELETE no action
-);
+);--> statement-breakpoint
 CREATE TABLE if not exists `schedule` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`item_id` integer NOT NULL,
@@ -61,12 +61,12 @@ CREATE TABLE if not exists `schedule` (
 	skipped_at integer,
 	FOREIGN KEY (`item_id`) REFERENCES `item`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`category_id`) REFERENCES `category`(`id`) ON UPDATE no action ON DELETE no action
-);
+);--> statement-breakpoint
 CREATE TABLE if not exists `schedule_status` (
 	`status_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`status_name` text NOT NULL,
 	`status_emoji` text NOT NULL
-);
+);--> statement-breakpoint
 CREATE TABLE if not exists `target` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`item_id` integer,
@@ -86,26 +86,26 @@ CREATE TABLE if not exists `target` (
 	FOREIGN KEY (`category_id`) REFERENCES `category`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`unit_id`) REFERENCES `unit`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`schedule_id`) REFERENCES `schedule`(`id`) ON UPDATE no action ON DELETE no action
-);
+);--> statement-breakpoint
 CREATE TABLE if not exists `test` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`day_mask` integer NOT NULL,
 	`some_text` text,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL
-);
+);--> statement-breakpoint
 CREATE TABLE if not exists `unit` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`unit_name` text NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL
-);
-CREATE UNIQUE INDEX if not exists `category_category_name_unique` ON `category` (`category_name`);
-CREATE INDEX if not exists `schedule_id_created_at_ix` ON `history` (`schedule_id`, `created_at`);
-CREATE UNIQUE INDEX if not exists `history_status_status_name_unique` ON `history_status` (`status_name`);
-CREATE UNIQUE INDEX if not exists `item_item_name_unit_id_unique` ON `item` (`item_name`, `unit_id`);
-CREATE UNIQUE INDEX if not exists `schedule_migrated_id_unique` ON `schedule` (`migrated_id`);
-CREATE UNIQUE INDEX if not exists `schedule_status_status_name_unique` ON `schedule_status` (`status_name`);
-CREATE UNIQUE INDEX if not exists `unit_unit_name_unique` ON `unit` (`unit_name`);
+);--> statement-breakpoint
+CREATE UNIQUE INDEX if not exists `category_category_name_unique` ON `category` (`category_name`);--> statement-breakpoint
+CREATE INDEX if not exists `schedule_id_created_at_ix` ON `history` (`schedule_id`, `created_at`);--> statement-breakpoint
+CREATE UNIQUE INDEX if not exists `history_status_status_name_unique` ON `history_status` (`status_name`);--> statement-breakpoint
+CREATE UNIQUE INDEX if not exists `item_item_name_unit_id_unique` ON `item` (`item_name`, `unit_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX if not exists `schedule_migrated_id_unique` ON `schedule` (`migrated_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX if not exists `schedule_status_status_name_unique` ON `schedule_status` (`status_name`);--> statement-breakpoint
+CREATE UNIQUE INDEX if not exists `unit_unit_name_unique` ON `unit` (`unit_name`);--> statement-breakpoint
 CREATE VIEW if not exists item_view as
 select "item"."id",
 	"item"."item_name",
@@ -119,7 +119,7 @@ select "item"."id",
 from "item"
 	inner join "unit" on "unit"."id" = "item"."unit_id"
 	/* item_view(id,item_name,unit_id,unit_name,sum_total,tags,step_size,created_at,updated_at) */
-;
+;--> statement-breakpoint
 CREATE VIEW if not exists history_view as
 select "history"."id",
 	"history"."schedule_id",
@@ -150,7 +150,7 @@ from "history"
 		else 3
 	end
 	/* history_view(id,schedule_id,item_id,item_name,tags,category_id,category_name,unit_id,step_size,unit_name,amount,scheduled_amount,status_id,status_name,scheduled_at,created_at) */
-;
+;--> statement-breakpoint
 CREATE VIEW if not exists history_newest_view as
 select "history_view"."id",
 	"history_view"."schedule_id",
@@ -182,7 +182,7 @@ where (
 		or "history_view"."created_at" >= datetime('now', '-1 day')
 	)
 	/* history_newest_view(id,schedule_id,item_id,item_name,tags,category_id,category_name,unit_id,unit_name,amount,scheduled_amount,status_id,status_name,scheduled_at,created_at) */
-;
+;--> statement-breakpoint
 CREATE VIEW if not exists schedule_view as
 select "schedule"."id",
 	"schedule"."item_id",
@@ -258,7 +258,7 @@ from "schedule"
 		else 5
 	end
 	/* schedule_view(id,item_id,item_name,unit_id,unit_name,category_id,category_name,hue,hour,minute,amount,repeat_count,rest_days,cycle_on_days,cycle_off_days,cycle_total_days_gen,start_at,end_at,cycle_day_num,day_mask,month_mask,enabled,sort,tags,step_size,due_at,completed_at,skipped_at,last_amount,is_warning,is_info,status_id,status_name,status_emoji,migrated_id,created_at,updated_at) */
-;
+;--> statement-breakpoint
 CREATE VIEW if not exists water_view as
 select "water_target"."item_id",
 	"water_target"."target_amount",
@@ -393,7 +393,7 @@ from (
 			)
 	) "water_history" on 1 = 1
 	/* water_view(item_id,target_amount,now_target_amount,last_completed,last_amount,amount_day_0,amount_day_1,amount_day_2,amount_day_3,amount_day_4,amount_day_5,amount_day_6,amount_day_7,amount_day_8,amount_day_9,amount_day_10,amount_day_11,amount_day_12,amount_day_13) */
-;
+;--> statement-breakpoint
 CREATE VIEW if not exists notify_view as
 select printf(
 		'%s %d %s',
@@ -474,7 +474,7 @@ from (
 group by "schedule_today"."status_id"
 order by "schedule_today"."status_id"
 	/* notify_view(title_part,prefix,items) */
-;
+;--> statement-breakpoint
 CREATE VIEW if not exists stats_view as
 select count(1) filter(
 		where status_id = 0

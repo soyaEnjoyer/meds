@@ -18,7 +18,7 @@ export const Route = createRootRoute({
       { href: 'icon.webp', rel: 'icon', type: 'image/webp' },
       { href: appCss, rel: 'stylesheet' },
     ],
-    meta: [{ charSet: 'utf-8' }, { content: 'width=device-width, initial-scale=1', name: 'viewport' }, { title }],
+    meta: [{ charSet: 'utf8' }, { content: 'width=device-width, initial-scale=1', name: 'viewport' }, { title }],
   }),
 });
 

@@ -2,15 +2,52 @@ import type { QueryClient } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 
-import { scheduleSetDone, scheduleSetSkipped } from '@/functions.server/schedule';
-import type { ScheduleRow } from '@/lib/drizzle/zod';
+import { categoryCreate, categoryDelete, categoryUpdate } from '@/functions.server/category';
+import { itemCreate, itemDelete, itemUpdate } from '@/functions.server/item';
+import {
+  scheduleCreate,
+  scheduleDelete,
+  scheduleSetDone,
+  scheduleSetSkipped,
+  scheduleUpdate,
+} from '@/functions.server/schedule';
+import { unitCreate, unitDelete, unitUpdate } from '@/functions.server/unit';
+import type { CategoryRow, ItemRow, ScheduleRow, UnitRow } from '@/lib/drizzle/zod';
 
+//#region schedule
 async function updateScheduleQueryData(queryClient: QueryClient, ids: number[], updated: ScheduleRow[] | null) {
   await queryClient.setQueryData(['schedule'], (prev: ScheduleRow[]) =>
-    [...prev.filter((item) => !ids.includes(item.id)), ...(updated ? updated : [])].toSorted(
+    [...prev.filter((item) => !ids.includes(item.id)), ...(updated ?? [])].toSorted(
       (a, b) => (a.dueAt?.getTime() ?? Infinity) - (b.dueAt?.getTime() ?? Infinity)
     )
   );
+}
+
+export function useScheduleCreateMutator() {
+  const mutationFn = useServerFn(scheduleCreate);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (data) => updateScheduleQueryData(queryClient, [data.id], [data]),
+  });
+}
+
+export function useScheduleUpdateMutator() {
+  const mutationFn = useServerFn(scheduleUpdate);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (data) => updateScheduleQueryData(queryClient, [data.id], [data]),
+  });
+}
+
+export function useScheduleDeleteMutator() {
+  const mutationFn = useServerFn(scheduleDelete);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (_data, vars) => updateScheduleQueryData(queryClient, [vars.data], null),
+  });
 }
 
 export function useScheduleDoneMutator() {
@@ -40,3 +77,115 @@ export function useScheduleSkipMutator() {
       ),
   });
 }
+//#endregion
+
+//#region category
+async function updateCategoryQueryData(queryClient: QueryClient, id: number, updated: CategoryRow | null) {
+  await queryClient.setQueryData(['category'], (prev: CategoryRow[]) =>
+    [...prev.filter((item) => item.id !== id), ...(updated ? [updated] : [])].toSorted((a, b) =>
+      a.name.localeCompare(b.name)
+    )
+  );
+}
+
+export function useCategoryCreateMutator() {
+  const mutationFn = useServerFn(categoryCreate);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (data) => updateCategoryQueryData(queryClient, data.id, data),
+  });
+}
+
+export function useCategoryUpdateMutator() {
+  const mutationFn = useServerFn(categoryUpdate);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (data) => updateCategoryQueryData(queryClient, data.id, data),
+  });
+}
+
+export function useCategoryDeleteMutator() {
+  const mutationFn = useServerFn(categoryDelete);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (_data, vars) => updateCategoryQueryData(queryClient, vars.data, null),
+  });
+}
+//#endregion
+
+//#region item
+async function updateItemQueryData(queryClient: QueryClient, id: number, updated: ItemRow | null) {
+  await queryClient.setQueryData(['item'], (prev: ItemRow[]) =>
+    [...prev.filter((item) => item.id !== id), ...(updated ? [updated] : [])].toSorted((a, b) =>
+      a.name.localeCompare(b.name)
+    )
+  );
+}
+
+export function useItemCreateMutator() {
+  const mutationFn = useServerFn(itemCreate);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (data) => updateItemQueryData(queryClient, data.id, data),
+  });
+}
+
+export function useItemUpdateMutator() {
+  const mutationFn = useServerFn(itemUpdate);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (data) => updateItemQueryData(queryClient, data.id, data),
+  });
+}
+
+export function useItemDeleteMutator() {
+  const mutationFn = useServerFn(itemDelete);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (_data, vars) => updateItemQueryData(queryClient, vars.data, null),
+  });
+}
+//#endregion
+
+//#region unit
+async function updateUnitQueryData(queryClient: QueryClient, id: number, updated: UnitRow | null) {
+  await queryClient.setQueryData(['unit'], (prev: UnitRow[]) =>
+    [...prev.filter((item) => item.id !== id), ...(updated ? [updated] : [])].toSorted((a, b) =>
+      a.name.localeCompare(b.name)
+    )
+  );
+}
+
+export function useUnitCreateMutator() {
+  const mutationFn = useServerFn(unitCreate);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (data) => updateUnitQueryData(queryClient, data.id, data),
+  });
+}
+
+export function useUnitUpdateMutator() {
+  const mutationFn = useServerFn(unitUpdate);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (data) => updateUnitQueryData(queryClient, data.id, data),
+  });
+}
+
+export function useUnitDeleteMutator() {
+  const mutationFn = useServerFn(unitDelete);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: async (_data, vars) => updateUnitQueryData(queryClient, vars.data, null),
+  });
+}
+//#endregion

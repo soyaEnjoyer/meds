@@ -1,6 +1,3 @@
-import tanstackQuery from '@tanstack/eslint-plugin-query';
-import tanstackRouter from '@tanstack/eslint-plugin-router';
-import reactCompiler from 'eslint-plugin-react-compiler';
 import { defineConfig } from 'oxlint';
 
 export default defineConfig({
@@ -17,20 +14,6 @@ export default defineConfig({
   },
   globals: {},
   ignorePatterns: ['**/*.gen.ts', '/migrations'],
-  jsPlugins: [
-    {
-      name: 'tanstack-query',
-      specifier: '@tanstack/eslint-plugin-query',
-    },
-    {
-      name: 'tanstack-router',
-      specifier: '@tanstack/eslint-plugin-router',
-    },
-    {
-      name: 'react-compiler',
-      specifier: 'eslint-plugin-react-compiler',
-    },
-  ],
   options: {
     typeAware: true,
     typeCheck: true,
@@ -64,7 +47,19 @@ export default defineConfig({
       },
     },
   ],
-  plugins: ['eslint', 'import', 'jsdoc', 'jsx-a11y', 'node', 'oxc', 'promise', 'react', 'react-perf', 'typescript'],
+  plugins: [
+    'eslint',
+    'import',
+    'jsdoc',
+    'jsx-a11y',
+    'node',
+    'oxc',
+    'promise',
+    'react',
+    'react-perf',
+    'typescript',
+    'unicorn',
+  ],
   rules: {
     'eslint/capitalized-comments': 'off',
     'eslint/curly': 'off',
@@ -94,6 +89,7 @@ export default defineConfig({
     'oxc/no-optional-chaining': 'off',
     'oxc/no-rest-spread-properties': 'off',
     'react-perf/jsx-no-jsx-as-prop': 'off',
+    'react/forbid-component-props': 'off',
     'react/jsx-filename-extension': [
       'warn',
       {
@@ -105,10 +101,9 @@ export default defineConfig({
     'react/no-multi-comp': 'off',
     'react/only-export-components': 'off',
     'react/react-in-jsx-scope': 'off',
-    ...Object.fromEntries(Object.keys(tanstackQuery.rules).map((rule) => [`tanstack-query/${rule}`, 'warn'])),
-    ...Object.fromEntries(Object.keys(tanstackRouter.rules).map((rule) => [`tanstack-router/${rule}`, 'warn'])),
-    'tanstack-query/prefer-query-options': 'off',
-    ...Object.fromEntries(Object.keys(reactCompiler.rules).map((rule) => [`react-compiler/${rule}`, 'warn'])),
+    'unicorn/no-await-expression-member': 'off',
+    'unicorn/no-null': 'off',
+    'unicorn/no-process-exit': 'off',
   },
   settings: {
     jsdoc: {

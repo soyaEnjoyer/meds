@@ -3,6 +3,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Outlet, createFileRoute } from '@tanstack/react-router';
 import { LoaderCircle } from 'lucide-react';
 
+import { Nav } from '@/components/nav';
 import { SseReloader } from '@/components/sse-reloader';
 import { categoryGet } from '@/functions.server/category';
 import { itemGet } from '@/functions.server/item';
@@ -58,8 +59,8 @@ function Pending() {
 function UiLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <nav />
-      <main className='mx-auto mt-18 mb-2 max-w-2xl px-4'>
+      <Nav />
+      <main className='mx-auto mt-20 mb-2 max-w-2xl px-4'>
         <Outlet />
       </main>
       <SseReloader />

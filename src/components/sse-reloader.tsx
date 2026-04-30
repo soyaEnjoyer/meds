@@ -18,7 +18,7 @@ export function SseReloader() {
         deploymentId.current = event.data;
       } else if (deploymentId.current !== event.data) {
         console.info('detected new deployment', deploymentId.current, '->', event.data);
-        window.location.reload();
+        globalThis.location.reload();
       } else {
         console.debug('sse reconnected', event.data);
         void invalidateQueries();
