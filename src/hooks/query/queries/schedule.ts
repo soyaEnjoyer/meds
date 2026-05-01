@@ -29,14 +29,13 @@ export function useSchedulesWithNamesQuery() {
   const categoriesMapQuery = useCategoriesMapQuery();
   const itemsMapQuery = useItemsMapQuery();
   const unitsMapQuery = useUnitsMapQuery();
-  function queryFn() {
-    return schedulesQuery.data.map((schedule) => ({
+  const queryFn = () =>
+    schedulesQuery.data.map((schedule) => ({
       ...schedule,
       categoryName: categoriesMapQuery.data.get(schedule.categoryId)?.name,
       itemName: itemsMapQuery.data.get(schedule.itemId)?.name,
       unitName: unitsMapQuery.data.get(schedule.unitId)?.name,
     })) satisfies ScheduleItem[];
-  }
   return useQuery({
     initialData: queryFn(),
     queryFn,
@@ -55,29 +54,31 @@ export function useSchedulesWithNamesQuery() {
 
 export function useScheduleGroupsQuery() {
   const schedulesWithNamesQuery = useSchedulesWithNamesQuery();
+  const queryFn = () =>
+    Object.entries(
+      Object.groupBy(
+        schedulesWithNamesQuery.data,
+        (item) => `${formatDatetimeIso(item.dueAt) || 'Unscheduled'}.${item.categoryId}.${item.categoryName}`
+      )
+    )
+      .filter((item): item is Required<typeof item> => Boolean(item[1]?.length))
+      .map(([key, items]) => {
+        const [dueAtIso, categoryIdStr, categoryName] = key.split('.');
+        const categoryId = Number(categoryIdStr);
+        return {
+          categoryId,
+          categoryName,
+          dueAtIso,
+          // oxlint-disable-next-line typescript/no-unsafe-type-assertion already filtered out undefined
+          items: items as ScheduleItem[],
+          key,
+        };
+      }) satisfies ScheduleGroup[];
 
   // oxlint-disable-next-line tanstack-query/exhaustive-deps
   return useQuery({
-    queryFn: () =>
-      Object.entries(
-        Object.groupBy(
-          schedulesWithNamesQuery.data,
-          (item) => `${formatDatetimeIso(item.dueAt) || 'Unscheduled'}.${item.categoryId}.${item.categoryName}`
-        )
-      )
-        .filter((item): item is Required<typeof item> => Boolean(item[1]?.length))
-        .map(([key, items]) => {
-          const [dueAtIso, categoryIdStr, categoryName] = key.split('.');
-          const categoryId = Number(categoryIdStr);
-          return {
-            categoryId,
-            categoryName,
-            dueAtIso,
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion already filtered out undefined
-            items: items as ScheduleItem[],
-            key,
-          };
-        }) satisfies ScheduleGroup[],
+    initialData: queryFn(),
+    queryFn,
     queryKey: [
       'schedule',
       'groups',

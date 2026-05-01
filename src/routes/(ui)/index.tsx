@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useScheduleDoneMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
 import type { ScheduleGroup, ScheduleItem } from '@/hooks/query/queries/schedule';
 import { useScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
-import { formatDatetimeIso } from '@/lib/date';
+import { dateAdd, formatDatetimeIso } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)/')({
   component: SchedulePage,
@@ -33,7 +33,7 @@ function ScheuleAccordionItem({ id, itemName, amount, unitName, dueAt, completed
   );
 }
 
-function ScheduleAccordionGroup({ dueAtIso, categoryName, items }: ScheduleGroup) {
+function ScheduleAccordionGroup({ dueAtIso, categoryName, items, value }: ScheduleGroup & { value: string }) {
   const scheduleDoneMutator = useScheduleDoneMutator();
   const scheduleSkipMutator = useScheduleSkipMutator();
 
@@ -48,7 +48,7 @@ function ScheduleAccordionGroup({ dueAtIso, categoryName, items }: ScheduleGroup
   );
 
   return (
-    <AccordionItem>
+    <AccordionItem value={value}>
       <AccordionTrigger className='flex items-center gap-4'>
         <span>{dueAtIso}</span>
         <h2 className='me-auto text-base'>{categoryName}</h2>
@@ -66,12 +66,16 @@ function ScheduleAccordionGroup({ dueAtIso, categoryName, items }: ScheduleGroup
 
 function SchedulePage() {
   const scheduleGroups = useScheduleGroupsQuery();
-  const [accordionValue, setAccordionValue] = useState<number[]>([]);
+  const [accordionValue, setAccordionValue] = useState<string[]>(
+    scheduleGroups.data
+      .filter((item) => item.dueAtIso < formatDatetimeIso(dateAdd(new Date(), { hour: 6 })))
+      .map((item) => item.key) ?? []
+  );
 
   return (
-    <Accordion value={accordionValue} onValueChange={setAccordionValue}>
+    <Accordion value={accordionValue} onValueChange={setAccordionValue} multiple>
       {scheduleGroups.data?.map((group) => (
-        <ScheduleAccordionGroup {...group} key={group.key} />
+        <ScheduleAccordionGroup {...group} key={group.key} value={group.key} />
       ))}
     </Accordion>
   );

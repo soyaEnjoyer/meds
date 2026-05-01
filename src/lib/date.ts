@@ -30,3 +30,37 @@ export function formatDateDistance(value: Date | null): string {
   if (days > 300) return `${Math.round(days / 365)}y`;
   return `${Math.round(days / 7)}w`;
 }
+
+interface OptionalDateParts {
+  year?: number;
+  month?: number;
+  day?: number;
+  hour?: number;
+  minute?: number;
+  second?: number;
+  ms?: number;
+}
+
+export function dateAdd(value: Date, { year, month, day, hour, minute, second, ms }: OptionalDateParts): Date {
+  const date = new Date(value);
+  if (year) date.setFullYear(date.getFullYear() + year);
+  if (month) date.setMonth(date.getMonth() + month);
+  if (day) date.setDate(date.getDate() + day);
+  if (hour) date.setHours(date.getHours() + hour);
+  if (minute) date.setMinutes(date.getMinutes() + minute);
+  if (second) date.setSeconds(date.getSeconds() + second);
+  if (ms) date.setMilliseconds(date.getMilliseconds() + ms);
+  return date;
+}
+
+export function dateSet(value: Date, { year, month, day, hour, minute, second, ms }: OptionalDateParts): Date {
+  const date = new Date(value);
+  if (year) date.setFullYear(year);
+  if (month) date.setMonth(month);
+  if (day) date.setDate(day);
+  if (hour) date.setHours(hour);
+  if (minute) date.setMinutes(minute);
+  if (second) date.setSeconds(second);
+  if (ms) date.setMilliseconds(ms);
+  return date;
+}
