@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { useCategoriesQuery, useItemsQuery, useSchedulesQuery, useUnitsQuery } from '@/hooks/query/queries/base';
+import {
+  useCategoriesMapQuery,
+  useItemsMapQuery,
+  useSchedulesQuery,
+  useUnitsMapQuery,
+} from '@/hooks/query/queries/base';
 import { formatDateIso } from '@/lib/date';
 
 export type ScheduleItem = ReturnType<typeof useSchedulesQuery>['data'][number] & {
@@ -14,39 +19,6 @@ export interface ScheduleGroup {
   categoryName: string;
   dueAtIso: string;
   items: ScheduleItem[];
-}
-
-function useCategoriesMapQuery() {
-  const categoriesQuery = useCategoriesQuery();
-  const queryFn = () => new Map(categoriesQuery.data.map(({ id, name }) => [id, name]));
-  // oxlint-disable-next-line tanstack-query/exhaustive-deps
-  return useQuery({
-    initialData: queryFn(),
-    queryFn,
-    queryKey: ['category', 'map', { cat: categoriesQuery.dataUpdatedAt }],
-  });
-}
-
-function useItemsMapQuery() {
-  const itemsQuery = useItemsQuery();
-  const queryFn = () => new Map(itemsQuery.data.map(({ id, name }) => [id, name]));
-  // oxlint-disable-next-line tanstack-query/exhaustive-deps
-  return useQuery({
-    initialData: queryFn(),
-    queryFn,
-    queryKey: ['item', 'map', { cat: itemsQuery.dataUpdatedAt }],
-  });
-}
-
-function useUnitsMapQuery() {
-  const unitsQuery = useUnitsQuery();
-  const queryFn = () => new Map(unitsQuery.data.map(({ id, name }) => [id, name]));
-  // oxlint-disable-next-line tanstack-query/exhaustive-deps
-  return useQuery({
-    initialData: queryFn(),
-    queryFn,
-    queryKey: ['unit', 'map', { cat: unitsQuery.dataUpdatedAt }],
-  });
 }
 
 export function useScheduleGroupsQuery() {
@@ -71,15 +43,15 @@ export function useScheduleGroupsQuery() {
           return {
             categoryId,
             // oxlint-disable-next-line typescript/no-non-null-assertion
-            categoryName: categoriesMapQuery.data.get(categoryId)!,
+            categoryName: categoriesMapQuery.data.get(categoryId)!.name,
             dueAtIso,
             // oxlint-disable-next-line typescript/no-non-null-assertion, oxc/no-map-spread
             items: items!.map((schedule) => ({
               ...schedule,
               // oxlint-disable-next-line typescript/no-non-null-assertion
-              itemName: itemsMapQuery.data.get(schedule.itemId)!,
+              itemName: itemsMapQuery.data.get(schedule.itemId)!.name,
               // oxlint-disable-next-line typescript/no-non-null-assertion
-              unitName: unitsMapQuery.data.get(schedule.unitId)!,
+              unitName: unitsMapQuery.data.get(schedule.unitId)!.name,
             })),
             key,
           };

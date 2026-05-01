@@ -4,7 +4,7 @@ import type { SubmitEvent } from 'react';
 import { useCallback } from 'react';
 
 import { NumberPicker } from '@/components/number-picker';
-import { CategorySelect, ItemSelect, UnitSelect } from '@/components/query-select';
+import { CategoryCombobox, ItemCombobox, UnitCombobox } from '@/components/query-combobox';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useScheduleDeleteMutator } from '@/hooks/query/mutators';
@@ -100,15 +100,15 @@ function SchedulesPageAddForm() {
         */}
         <label className='contents'>
           Item
-          <ItemSelect name='itemId' required />
+          <ItemCombobox name='itemId' required />
         </label>
         <label className='contents'>
           Category
-          <CategorySelect name='categoryId' required />
+          <CategoryCombobox name='categoryId' required />
         </label>
         <label className='contents'>
           Unit
-          <UnitSelect name='unitId' required />
+          <UnitCombobox name='unitId' required />
         </label>
         <label className='contents'>
           Amount

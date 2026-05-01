@@ -1,13 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Plus, Trash2 } from 'lucide-react';
-import type { SubmitEvent } from 'react';
+import { Trash2 } from 'lucide-react';
 import { useCallback } from 'react';
 
-import { NumberPicker } from '@/components/number-picker';
-import { CategorySelect, UnitSelect } from '@/components/query-select';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useItemCreateMutator, useItemDeleteMutator } from '@/hooks/query/mutators';
+import { ItemForm } from '@/forms/item';
+import { useItemDeleteMutator } from '@/hooks/query/mutators';
 import { useItemsQuery } from '@/hooks/query/queries/base';
 import type { ItemRow } from '@/lib/drizzle/zod';
 
@@ -52,66 +49,11 @@ function ItemsPageList() {
   );
 }
 
-function ItemsPageAddForm() {
-  const createMutator = useItemCreateMutator();
-
-  const handleSubmit = useCallback(
-    (event: SubmitEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      const form = new FormData(event.target);
-      createMutator.mutate(
-        {
-          data: {
-            defaultAmount: Number(form.get('defaultAmount')),
-            defaultCategoryId: Number(form.get('defaultCategoryId')),
-            defaultUnitId: Number(form.get('defaultUnitId')),
-            // oxlint-disable-next-line typescript/no-base-to-string
-            name: String(form.get('name')),
-          },
-        },
-        { onError: (err) => console.error(err), onSuccess: () => event.target.reset() }
-      );
-    },
-    [createMutator]
-  );
-
-  return (
-    <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto font-semibold'>Add an item</h2>
-      <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2'>
-        <label className='contents'>
-          Name
-          <Input type='text' name='name' required />
-        </label>
-        <label className='contents'>
-          Default category
-          <CategorySelect name='defaultCategoryId' required />
-        </label>
-        <label className='contents'>
-          Default unit
-          <UnitSelect name='defaultUnitId' required />
-        </label>
-        <label className='contents'>
-          Default amount
-          <NumberPicker name='defaultAmount' required min={1} />
-        </label>
-      </fieldset>
-      <footer className='flex items-center justify-around'>
-        <Button type='submit'>
-          <Plus />
-        </Button>
-        <Button type='reset' variant='destructive'>
-          <Trash2 />
-        </Button>
-      </footer>
-    </form>
-  );
-}
-
 function ItemsPage() {
   return (
     <div className='grid gap-4'>
-      <ItemsPageAddForm />
+      <ItemForm mode='add' />
+      <ItemForm mode='edit' id={1} />
       <ItemsPageList />
     </div>
   );

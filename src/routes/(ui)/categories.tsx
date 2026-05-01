@@ -1,11 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Plus, Trash2 } from 'lucide-react';
-import type { SubmitEvent } from 'react';
+import { Trash2 } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useCategoryCreateMutator, useCategoryDeleteMutator } from '@/hooks/query/mutators';
+import { CategoryForm } from '@/forms/category';
+import { useCategoryDeleteMutator } from '@/hooks/query/mutators';
 import { useCategoriesQuery } from '@/hooks/query/queries/base';
 import type { CategoryRow } from '@/lib/drizzle/zod';
 
@@ -44,47 +43,11 @@ function CategoriesPageList() {
   );
 }
 
-function CategoriesPageAddForm() {
-  const createMutator = useCategoryCreateMutator();
-
-  const handleSubmit = useCallback(
-    (event: SubmitEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      const form = new FormData(event.target);
-      createMutator.mutate(
-        // oxlint-disable-next-line typescript/no-base-to-string
-        { data: { name: String(form.get('name')) } },
-        { onError: (err) => console.error(err), onSuccess: () => event.target.reset() }
-      );
-    },
-    [createMutator]
-  );
-
-  return (
-    <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto font-semibold'>Add a category</h2>
-      <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2'>
-        <label className='contents'>
-          Name
-          <Input type='text' name='name' required />
-        </label>
-      </fieldset>
-      <footer className='flex items-center justify-around'>
-        <Button type='submit'>
-          <Plus />
-        </Button>
-        <Button type='reset' variant='destructive'>
-          <Trash2 />
-        </Button>
-      </footer>
-    </form>
-  );
-}
-
 function CategoriesPage() {
   return (
     <div className='grid gap-4'>
-      <CategoriesPageAddForm />
+      <CategoryForm mode='add' />
+      <CategoryForm mode='edit' id={1} />
       <CategoriesPageList />
     </div>
   );

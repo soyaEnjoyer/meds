@@ -6,11 +6,15 @@ import { categoryTable, historyTable, itemTable, scheduleTable, unitTable } from
 // Category
 export const categorySchema = createSelectSchema(categoryTable);
 
-export const categoryUpdateSchema = categorySchema.omit({
-  createdAt: true,
-  deletedAt: true,
-  updatedAt: true,
-});
+export const categoryUpdateSchema = categorySchema
+  .omit({
+    createdAt: true,
+    deletedAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    name: categorySchema.shape.name.min(1),
+  });
 
 export const categoryInsertSchema = categoryUpdateSchema.omit({
   id: true,
@@ -23,11 +27,15 @@ export type CategoryInsert = z.infer<typeof categoryInsertSchema>;
 // Unit
 export const unitSchema = createSelectSchema(unitTable);
 
-export const unitUpdateSchema = unitSchema.omit({
-  createdAt: true,
-  deletedAt: true,
-  updatedAt: true,
-});
+export const unitUpdateSchema = unitSchema
+  .omit({
+    createdAt: true,
+    deletedAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    name: unitSchema.shape.name.min(1),
+  });
 
 export const unitInsertSchema = unitUpdateSchema.omit({
   id: true,
@@ -40,11 +48,15 @@ export type UnitInsert = z.infer<typeof unitInsertSchema>;
 // Item
 export const itemSchema = createSelectSchema(itemTable);
 
-export const itemUpdateSchema = itemSchema.omit({
-  createdAt: true,
-  deletedAt: true,
-  updatedAt: true,
-});
+export const itemUpdateSchema = itemSchema
+  .omit({
+    createdAt: true,
+    deletedAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    name: itemSchema.shape.name.min(1),
+  });
 
 export const itemInsertSchema = itemUpdateSchema.omit({
   id: true,

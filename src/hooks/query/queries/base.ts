@@ -9,6 +9,7 @@ import { unitGet } from '@/functions.server/unit';
 
 // oxlint-disable oxc/no-map-spread
 
+//#region base
 export function useCategoriesQuery() {
   const queryFn = useServerFn(categoryGet);
   const initialData = useLoaderData({
@@ -64,3 +65,50 @@ export function useUnitsQuery() {
     queryKey: ['unit'],
   });
 }
+//#endregion
+
+//#region maps
+export function useCategoriesMapQuery() {
+  const query = useCategoriesQuery();
+  const queryFn = () => new Map(query.data.map((item) => [item.id, item]));
+  // oxlint-disable-next-line tanstack-query/exhaustive-deps
+  return useQuery({
+    initialData: queryFn(),
+    queryFn,
+    queryKey: ['category', 'map', { at: query.dataUpdatedAt }],
+  });
+}
+
+export function useItemsMapQuery() {
+  const query = useItemsQuery();
+  const queryFn = () => new Map(query.data.map((item) => [item.id, item]));
+  // oxlint-disable-next-line tanstack-query/exhaustive-deps
+  return useQuery({
+    initialData: queryFn(),
+    queryFn,
+    queryKey: ['item', 'map', { at: query.dataUpdatedAt }],
+  });
+}
+
+export function useSchedulesMapQuery() {
+  const query = useSchedulesQuery();
+  const queryFn = () => new Map(query.data.map((item) => [item.id, item]));
+  // oxlint-disable-next-line tanstack-query/exhaustive-deps
+  return useQuery({
+    initialData: queryFn(),
+    queryFn,
+    queryKey: ['schedule', 'map', { at: query.dataUpdatedAt }],
+  });
+}
+
+export function useUnitsMapQuery() {
+  const query = useUnitsQuery();
+  const queryFn = () => new Map(query.data.map((item) => [item.id, item]));
+  // oxlint-disable-next-line tanstack-query/exhaustive-deps
+  return useQuery({
+    initialData: queryFn(),
+    queryFn,
+    queryKey: ['unit', 'map', { at: query.dataUpdatedAt }],
+  });
+}
+//#endregion

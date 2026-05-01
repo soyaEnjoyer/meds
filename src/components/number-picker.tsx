@@ -13,6 +13,7 @@ export function NumberPicker({
   className,
   required,
   name,
+  onBlur,
 }: {
   value?: number;
   onValueChange?: (value: number) => void;
@@ -22,6 +23,7 @@ export function NumberPicker({
   className?: string;
   required?: boolean;
   name?: string;
+  onBlur?: () => void;
 }) {
   const ref = useRef<HTMLInputElement | null>(null);
 
@@ -57,6 +59,7 @@ export function NumberPicker({
         required={required}
         name={name}
         ref={ref}
+        onBlur={onBlur}
       />
       <InputGroupButton onClick={handlePlusClick}>
         <Plus />
