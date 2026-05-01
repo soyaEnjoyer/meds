@@ -3,9 +3,19 @@ export const HOUR_MS = MINUTE_MS * 60;
 export const DAY_MS = HOUR_MS * 24;
 export const WEEK_MS = DAY_MS * 7;
 
-export function formatDateIso(value: Date | null): string {
+export function formatDatetimeIso(value: Date | null): string {
   if (!value) return '';
   return `${value.getFullYear()}-${(value.getMonth() + 1).toString().padStart(2, '0')}-${value.getDate().toString().padStart(2, '0')} ${value.getHours().toString().padStart(2, '0')}:${value.getMinutes().toString().padStart(2, '0')}`;
+}
+
+export function formatDateIso(value: Date | null): string {
+  if (!value) return '';
+  return `${value.getFullYear()}-${(value.getMonth() + 1).toString().padStart(2, '0')}-${value.getDate().toString().padStart(2, '0')}`;
+}
+
+export function formatTimeIso(value: Date | null): string {
+  if (!value) return '';
+  return `${value.getHours().toString().padStart(2, '0')}:${value.getMinutes().toString().padStart(2, '0')}`;
 }
 
 export function formatDateDistance(value: Date | null): string {

@@ -1,12 +1,8 @@
-// oxlint-disable typescript/no-unsafe-type-assertion
-// oxlint-disable typescript/consistent-return
 import { createFormHook, createFormHookContexts } from '@tanstack/react-form';
 
-import {
-  ControlledCategoryCombobox,
-  ControlledItemCombobox,
-  ControlledUnitCombobox,
-} from '@/components/controlled-query-combobox';
+import { DatePicker } from '@/components/date-picker';
+import { DayPicker } from '@/components/day-picker';
+import { MonthPicker } from '@/components/month-picker';
 import { NumberPicker } from '@/components/number-picker';
 import { CategoryCombobox, ItemCombobox, UnitCombobox } from '@/components/query-combobox';
 import { Button } from '@/components/ui/button';
@@ -22,11 +18,11 @@ export const { fieldContext, formContext, useFieldContext } = createFormHookCont
 export const { useAppForm } = createFormHook({
   fieldComponents: {
     CategoryCombobox,
-    ControlledCategoryCombobox,
-    ControlledItemCombobox,
-    ControlledUnitCombobox,
+    DatePicker,
+    DayPicker,
     Input,
     ItemCombobox,
+    MonthPicker,
     NumberPicker,
     Select,
     Switch,

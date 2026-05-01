@@ -69,14 +69,21 @@ export type ItemInsert = z.infer<typeof itemInsertSchema>;
 // Schedule
 export const scheduleSchema = createSelectSchema(scheduleTable);
 
-export const scheduleUpdateSchema = scheduleSchema.omit({
-  completedAt: true,
-  createdAt: true,
-  deletedAt: true,
-  lastAmount: true,
-  skippedAt: true,
-  updatedAt: true,
-});
+export const scheduleUpdateSchema = scheduleSchema
+  .omit({
+    completedAt: true,
+    createdAt: true,
+    deletedAt: true,
+    lastAmount: true,
+    skippedAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    cycleOffDays: scheduleSchema.shape.cycleOffDays.min(0).max(365),
+    cycleOnDays: scheduleSchema.shape.cycleOnDays.min(1).max(365),
+    restDays: scheduleSchema.shape.restDays.min(0).max(365),
+    sort: scheduleSchema.shape.sort.min(0).max(99),
+  });
 
 export const scheduleInsertSchema = scheduleUpdateSchema.omit({
   id: true,

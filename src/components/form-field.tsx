@@ -5,7 +5,7 @@ import { useFieldContext } from '@/lib/form';
 import { cn } from '@/lib/utils';
 
 function FieldErrors({ field, className, ...props }: { field: AnyFieldApi } & ComponentProps<'em'>) {
-  if (field.state.meta.errors)
+  if (field.state.meta.errors?.length)
     console.log('FieldErrors', field.name, field.state.meta.errors, field.state.meta.isValid);
   if (!field.state.meta.errors?.length) return null;
   return (

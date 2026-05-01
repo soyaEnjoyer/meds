@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
-import { formatDateDistance, formatDateIso } from '@/lib/date';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { formatDateDistance, formatDatetimeIso } from '@/lib/date';
 import { cn } from '@/lib/utils';
 
 export function DateText({
@@ -13,7 +13,7 @@ export function DateText({
   as?: 'date' | 'dist';
   className?: string;
 }) {
-  const [iso, dist] = useMemo(() => [formatDateIso(date), formatDateDistance(date)], [date]);
+  const [iso, dist] = useMemo(() => [formatDatetimeIso(date), formatDateDistance(date)], [date]);
   const [open, setOpen] = useState(false);
 
   const toggleOpen = useCallback(() => setOpen((prev) => !prev), []);

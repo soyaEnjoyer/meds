@@ -41,7 +41,7 @@ export function UnitForm(props: { mode: 'add' } | { mode: 'edit'; id: number }) 
           console.error('error submitting form', error);
         },
         onSuccess(data: unknown) {
-          console.log('subitted form', data);
+          console.log('submitted form', data);
           formApi.reset({ ...defaults });
         },
       } as const;

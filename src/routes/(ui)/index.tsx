@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useScheduleDoneMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
 import type { ScheduleGroup, ScheduleItem } from '@/hooks/query/queries/schedule';
 import { useScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
-import { formatDateIso } from '@/lib/date';
+import { formatDatetimeIso } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)/')({
   component: SchedulePage,
@@ -25,8 +25,8 @@ function ScheuleAccordionItem({ id, itemName, amount, unitName, dueAt, completed
       <span>
         {amount} {unitName}
       </span>
-      <span>{formatDateIso(dueAt)}</span>
-      <span>{formatDateIso(completedAt)}</span>
+      <span>{formatDatetimeIso(dueAt)}</span>
+      <span>{formatDatetimeIso(completedAt)}</span>
       <Button onClick={handleDoneClick}>Done</Button>
       <Button onClick={handleSkipClick}>Skip</Button>
     </div>

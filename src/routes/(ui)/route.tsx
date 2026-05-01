@@ -1,7 +1,11 @@
+import { TanStackDevtools } from '@tanstack/react-devtools';
+import { formDevtoolsPlugin } from '@tanstack/react-form-devtools';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
 import { Outlet, createFileRoute } from '@tanstack/react-router';
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { LoaderCircle } from 'lucide-react';
+import type { ComponentProps } from 'react';
 
 import { Nav } from '@/components/nav';
 import { SseReloader } from '@/components/sse-reloader';
@@ -56,6 +60,18 @@ function Pending() {
   );
 }
 
+const plugins: ComponentProps<typeof TanStackDevtools>['plugins'] = [
+  formDevtoolsPlugin(),
+  {
+    name: 'Tanstack Query',
+    render: <ReactQueryDevtoolsPanel />,
+  },
+  {
+    name: 'Tanstack Router',
+    render: <TanStackRouterDevtoolsPanel />,
+  },
+];
+
 function UiLayout() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -64,7 +80,7 @@ function UiLayout() {
         <Outlet />
       </main>
       <SseReloader />
-      <ReactQueryDevtools />
+      <TanStackDevtools plugins={plugins} />
     </QueryClientProvider>
   );
 }

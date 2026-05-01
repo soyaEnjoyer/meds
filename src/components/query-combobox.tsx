@@ -1,6 +1,6 @@
 import type { DefinedUseQueryResult } from '@tanstack/react-query';
 import type { ComponentProps } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import {
   Combobox,
@@ -10,7 +10,14 @@ import {
   ComboboxItem,
   ComboboxList,
 } from '@/components/ui/combobox';
-import { useCategoriesQuery, useItemsQuery, useUnitsQuery } from '@/hooks/query/queries/base';
+import {
+  useCategoriesMapQuery,
+  useCategoriesQuery,
+  useItemsMapQuery,
+  useItemsQuery,
+  useUnitsMapQuery,
+  useUnitsQuery,
+} from '@/hooks/query/queries/base';
 
 interface ComboboxItem {
   label: string;
@@ -21,16 +28,21 @@ function QueryCombobox({
   name,
   placeholder,
   query,
+  map,
   required,
+  value,
+  onValueChange,
+  onBlur,
 }: {
   name?: string;
   placeholder?: string;
   query: DefinedUseQueryResult<{ id: number; name: string }[]>;
+  map: DefinedUseQueryResult<Map<number, { id: number; name: string }>>;
   required?: boolean;
+  value: number | null;
+  onValueChange: (value: number | null) => void;
+  onBlur?: () => void;
 }) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [value, setValue] = useState<ComboboxItem | null>(null);
-
   const items: ComboboxItem[] = useMemo(
     // oxlint-disable-next-line no-shadow
     () => query.data.map(({ id, name }) => ({ label: name, value: String(id) })),
@@ -38,28 +50,33 @@ function QueryCombobox({
     [query.dataUpdatedAt]
   );
 
-  // HACK: <Combobox/> does not respond to form reset. can probably remove after bringing in tanstack form
-  useEffect(() => {
-    const form = inputRef.current?.closest('form');
-    if (!form) return;
-    const controller = new AbortController();
-    form.addEventListener('reset', () => setValue(null), { signal: controller.signal });
-    // oxlint-disable-next-line typescript/consistent-return
-    return () => controller.abort();
-  }, []);
+  const comboValue: ComboboxItem | null = useMemo(() => {
+    const item = typeof value === 'number' ? map.data.get(value) : null;
+    if (item) return { label: item.name, value: String(item.id) };
+    return null;
+    // oxlint-disable-next-line eslint-plugin-react-hooks/exhaustive-deps
+  }, [value, map.dataUpdatedAt]);
+
+  const handleComboValueChange = useCallback(
+    // oxlint-disable-next-line no-shadow
+    (value: ComboboxItem | null) => {
+      if (value === null) onValueChange(null);
+      else onValueChange(Number(value.value));
+    },
+    [onValueChange]
+  );
 
   return (
     <Combobox
       items={items}
       name={name}
       required={required}
-      value={value}
-      onValueChange={setValue}
-      inputRef={inputRef}
+      value={comboValue}
+      onValueChange={handleComboValueChange}
       autoHighlight
     >
       <ComboboxInput placeholder={placeholder} />
-      <ComboboxContent>
+      <ComboboxContent onBlur={onBlur}>
         <ComboboxEmpty>No items found.</ComboboxEmpty>
         <ComboboxList>
           {(item: ComboboxItem) => (
@@ -76,17 +93,26 @@ function QueryCombobox({
 export function CategoryCombobox({
   placeholder = 'Category',
   ...props
-}: Omit<ComponentProps<typeof QueryCombobox>, 'query'>) {
+}: Omit<ComponentProps<typeof QueryCombobox>, 'query' | 'map'>) {
   const query = useCategoriesQuery();
-  return <QueryCombobox query={query} placeholder={placeholder} {...props} />;
+  const map = useCategoriesMapQuery();
+  return <QueryCombobox query={query} map={map} placeholder={placeholder} {...props} />;
 }
 
-export function ItemCombobox({ placeholder = 'Item', ...props }: Omit<ComponentProps<typeof QueryCombobox>, 'query'>) {
+export function ItemCombobox({
+  placeholder = 'Item',
+  ...props
+}: Omit<ComponentProps<typeof QueryCombobox>, 'query' | 'map'>) {
   const query = useItemsQuery();
-  return <QueryCombobox query={query} placeholder={placeholder} {...props} />;
+  const map = useItemsMapQuery();
+  return <QueryCombobox query={query} map={map} placeholder={placeholder} {...props} />;
 }
 
-export function UnitCombobox({ placeholder = 'Unit', ...props }: Omit<ComponentProps<typeof QueryCombobox>, 'query'>) {
+export function UnitCombobox({
+  placeholder = 'Unit',
+  ...props
+}: Omit<ComponentProps<typeof QueryCombobox>, 'query' | 'map'>) {
   const query = useUnitsQuery();
-  return <QueryCombobox query={query} placeholder={placeholder} {...props} />;
+  const map = useUnitsMapQuery();
+  return <QueryCombobox query={query} map={map} placeholder={placeholder} {...props} />;
 }

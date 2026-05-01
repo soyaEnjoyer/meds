@@ -51,7 +51,7 @@ export function ItemForm(props: { mode: 'add' } | { mode: 'edit'; id: number }) 
           console.error('error submitting form', error);
         },
         onSuccess(data: unknown) {
-          console.log('subitted form', data);
+          console.log('submitted form', data);
           formApi.reset({ ...defaults });
         },
       } as const;
@@ -90,10 +90,10 @@ export function ItemForm(props: { mode: 'add' } | { mode: 'edit'; id: number }) 
       <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2'>
         <form.AppField name='name'>{(field) => <FormField component={field.Input} label='Name' />}</form.AppField>
         <form.AppField name='defaultCategoryId'>
-          {(field) => <FormField component={field.ControlledCategoryCombobox} label='Default category' />}
+          {(field) => <FormField component={field.CategoryCombobox} label='Default category' />}
         </form.AppField>
         <form.AppField name='defaultUnitId'>
-          {(field) => <FormField component={field.ControlledUnitCombobox} label='Default unit' />}
+          {(field) => <FormField component={field.UnitCombobox} label='Default unit' />}
         </form.AppField>
         <form.AppField name='defaultAmount'>
           {(field) => <FormField component={field.NumberPicker} label='Default amount' />}
