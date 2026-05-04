@@ -1,38 +1,28 @@
 import { useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
+import type { WeekdayTuple } from '@/lib/enums';
+import { weekdays } from '@/lib/enums';
 import { cn } from '@/lib/utils';
-
-// oxlint-disable sort-keys
-const days = [
-  { value: 1, label: 'Monday' },
-  { value: 2, label: 'Tuesday' },
-  { value: 4, label: 'Wednesday' },
-  { value: 8, label: 'Thursday' },
-  { value: 16, label: 'Friday' },
-  { value: 32, label: 'Saturday' },
-  { value: 64, label: 'Sunday' },
-] as const;
-// oxlint-enable sort-keys
 
 function DayButton({
   day,
   value,
   onValueChange,
 }: {
-  day: (typeof days)[number];
+  day: WeekdayTuple;
   value: number;
   onValueChange: (value: number) => void;
 }) {
-  const handleClick = useCallback(() => onValueChange(value ^ day.value), [value, day, onValueChange]);
+  const handleClick = useCallback(() => onValueChange(value ^ day[0]), [value, day, onValueChange]);
   return (
     <Button
       onClick={handleClick}
-      variant={(value & day.value) === day.value ? 'default' : 'secondary'}
-      className={cn('block truncate', value & day.value || 'text-muted-foreground')}
+      variant={(value & day[0]) === day[0] ? 'default' : 'secondary'}
+      className={cn('block truncate', value & day[0] || 'text-muted-foreground')}
     >
-      <span className='hidden max-md:contents'>{day.label.slice(0, 1)}</span>
-      <span className='hidden md:contents'>{day.label}</span>
+      <span className='hidden max-md:contents'>{day[1].slice(0, 1)}</span>
+      <span className='hidden md:contents'>{day[1]}</span>
     </Button>
   );
 }
@@ -53,8 +43,8 @@ export function DayPicker({
   return (
     <div onBlur={onBlur} className='grid grid-cols-7'>
       <input type='hidden' id={id} name={name} value={value} />
-      {days.map((day) => (
-        <DayButton key={day.value} day={day} value={value} onValueChange={onValueChange} />
+      {weekdays.map((weekday) => (
+        <DayButton key={weekday[0]} day={weekday} value={value} onValueChange={onValueChange} />
       ))}
     </div>
   );

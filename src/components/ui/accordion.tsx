@@ -24,11 +24,11 @@ function AccordionTrigger({ className, children, ...props }: AccordionPrimitive.
         )}
         {...props}
       >
-        {children}
         <ChevronDownIcon
           data-slot='accordion-trigger-icon'
           className='pointer-events-none shrink-0 transition-[rotate] group-aria-expanded/accordion-trigger:rotate-180'
         />
+        {children}
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   );

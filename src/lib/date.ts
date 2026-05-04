@@ -64,3 +64,9 @@ export function dateSet(value: Date, { year, month, day, hour, minute, second, m
   if (ms) date.setMilliseconds(ms);
   return date;
 }
+
+export function daysDiff(a: Date, b: Date): number {
+  const aStart = dateSet(a, { hour: 0, minute: 0, ms: 0, second: 0 }).getTime();
+  const bStart = dateSet(b, { hour: 0, minute: 0, ms: 0, second: 0 }).getTime();
+  return Math.round((bStart - aStart) / DAY_MS);
+}

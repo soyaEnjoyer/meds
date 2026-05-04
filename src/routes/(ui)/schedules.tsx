@@ -5,7 +5,7 @@ import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScheduleForm } from '@/forms/schedule';
 import { useScheduleDeleteMutator } from '@/hooks/query/mutators';
-import type { ScheduleItem } from '@/hooks/query/queries/schedule';
+import type { ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { useSchedulesWithNamesQuery } from '@/hooks/query/queries/schedule';
 
 export const Route = createFileRoute('/(ui)/schedules')({
@@ -26,7 +26,7 @@ function SchedulesPageListRow({
   minute,
   monthMask,
   restDays,
-}: ScheduleItem) {
+}: ScheduleRowWithNames) {
   const deleteMutator = useScheduleDeleteMutator();
   const handleDeleteClick = useCallback(() => deleteMutator.mutate({ data: id }), [id, deleteMutator]);
   return (
