@@ -1,7 +1,9 @@
 import type { DefinedUseQueryResult } from '@tanstack/react-query';
+import { Plus } from 'lucide-react';
 import type { ComponentProps } from 'react';
 import { useCallback, useMemo } from 'react';
 
+import { Button } from '@/components/ui/button';
 import {
   Combobox,
   ComboboxContent,
@@ -10,6 +12,8 @@ import {
   ComboboxItem,
   ComboboxList,
 } from '@/components/ui/combobox';
+import type { DialogName } from '@/hooks/dialog';
+import { useDialog } from '@/hooks/dialog';
 import {
   useCategoriesMapQuery,
   useCategoriesQuery,
@@ -33,6 +37,7 @@ function QueryCombobox({
   value,
   onValueChange,
   onBlur,
+  dialogName,
 }: {
   name?: string;
   placeholder?: string;
@@ -42,7 +47,10 @@ function QueryCombobox({
   value: number | null;
   onValueChange: (value: number | null) => void;
   onBlur?: () => void;
+  dialogName: DialogName;
 }) {
+  const openDialog = useDialog((state) => state.actions.open);
+
   const items: ComboboxItem[] = useMemo(
     // oxlint-disable-next-line no-shadow
     () => query.data.map(({ id, name }) => ({ label: name, value: String(id) })),
@@ -66,6 +74,8 @@ function QueryCombobox({
     [onValueChange]
   );
 
+  const handleAddClick = useCallback(() => openDialog(dialogName, null), [openDialog, dialogName]);
+
   return (
     <Combobox
       items={items}
@@ -75,7 +85,7 @@ function QueryCombobox({
       onValueChange={handleComboValueChange}
       autoHighlight
     >
-      <ComboboxInput placeholder={placeholder} />
+      <ComboboxInput placeholder={placeholder} showClear />
       <ComboboxContent onBlur={onBlur}>
         <ComboboxEmpty>No items found.</ComboboxEmpty>
         <ComboboxList>
@@ -85,6 +95,10 @@ function QueryCombobox({
             </ComboboxItem>
           )}
         </ComboboxList>
+        <Button className='w-full font-semibold text-muted-foreground' variant='ghost' onClick={handleAddClick}>
+          <Plus />
+          {`Create new ${placeholder?.toLocaleLowerCase()}`}
+        </Button>
       </ComboboxContent>
     </Combobox>
   );
@@ -93,26 +107,26 @@ function QueryCombobox({
 export function CategoryCombobox({
   placeholder = 'Category',
   ...props
-}: Omit<ComponentProps<typeof QueryCombobox>, 'query' | 'map'>) {
+}: Omit<ComponentProps<typeof QueryCombobox>, 'dialogName' | 'map' | 'query'>) {
   const query = useCategoriesQuery();
   const map = useCategoriesMapQuery();
-  return <QueryCombobox query={query} map={map} placeholder={placeholder} {...props} />;
+  return <QueryCombobox query={query} map={map} dialogName='category' placeholder={placeholder} {...props} />;
 }
 
 export function ItemCombobox({
   placeholder = 'Item',
   ...props
-}: Omit<ComponentProps<typeof QueryCombobox>, 'query' | 'map'>) {
+}: Omit<ComponentProps<typeof QueryCombobox>, 'dialogName' | 'map' | 'query'>) {
   const query = useItemsQuery();
   const map = useItemsMapQuery();
-  return <QueryCombobox query={query} map={map} placeholder={placeholder} {...props} />;
+  return <QueryCombobox query={query} map={map} dialogName='item' placeholder={placeholder} {...props} />;
 }
 
 export function UnitCombobox({
   placeholder = 'Unit',
   ...props
-}: Omit<ComponentProps<typeof QueryCombobox>, 'query' | 'map'>) {
+}: Omit<ComponentProps<typeof QueryCombobox>, 'dialogName' | 'map' | 'query'>) {
   const query = useUnitsQuery();
   const map = useUnitsMapQuery();
-  return <QueryCombobox query={query} map={map} placeholder={placeholder} {...props} />;
+  return <QueryCombobox query={query} map={map} dialogName='unit' placeholder={placeholder} {...props} />;
 }

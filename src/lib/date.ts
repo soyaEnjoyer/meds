@@ -26,7 +26,7 @@ export function formatDateDistance(value: Date | null): string {
   valueStart.setHours(0, 0, 0, 0);
   const days = Math.round((dayStart.getTime() - valueStart.getTime()) / DAY_MS);
   if (days === 0) return 'Today';
-  if (days < 7) return `${days}d`;
+  if (days < 28) return `${days}d`;
   if (days > 300) return `${Math.round(days / 365)}y`;
   return `${Math.round(days / 7)}w`;
 }

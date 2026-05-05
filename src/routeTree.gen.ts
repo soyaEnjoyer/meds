@@ -17,6 +17,7 @@ import { Route as ApiPingRouteImport } from './routes/api/ping'
 import { Route as uiUnitsRouteImport } from './routes/(ui)/units'
 import { Route as uiSchedulesRouteImport } from './routes/(ui)/schedules'
 import { Route as uiItemsRouteImport } from './routes/(ui)/items'
+import { Route as uiHistoryRouteImport } from './routes/(ui)/history'
 import { Route as uiCategoriesRouteImport } from './routes/(ui)/categories'
 
 const IconDotChar123extChar125Route =
@@ -59,6 +60,11 @@ const uiItemsRoute = uiItemsRouteImport.update({
   path: '/items',
   getParentRoute: () => uiRouteRoute,
 } as any)
+const uiHistoryRoute = uiHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => uiRouteRoute,
+} as any)
 const uiCategoriesRoute = uiCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
@@ -68,6 +74,7 @@ const uiCategoriesRoute = uiCategoriesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/icon.{$ext}': typeof IconDotChar123extChar125Route
   '/categories': typeof uiCategoriesRoute
+  '/history': typeof uiHistoryRoute
   '/items': typeof uiItemsRoute
   '/schedules': typeof uiSchedulesRoute
   '/units': typeof uiUnitsRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/icon.{$ext}': typeof IconDotChar123extChar125Route
   '/categories': typeof uiCategoriesRoute
+  '/history': typeof uiHistoryRoute
   '/items': typeof uiItemsRoute
   '/schedules': typeof uiSchedulesRoute
   '/units': typeof uiUnitsRoute
@@ -90,6 +98,7 @@ export interface FileRoutesById {
   '/(ui)': typeof uiRouteRouteWithChildren
   '/icon.{$ext}': typeof IconDotChar123extChar125Route
   '/(ui)/categories': typeof uiCategoriesRoute
+  '/(ui)/history': typeof uiHistoryRoute
   '/(ui)/items': typeof uiItemsRoute
   '/(ui)/schedules': typeof uiSchedulesRoute
   '/(ui)/units': typeof uiUnitsRoute
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/icon.{$ext}'
     | '/categories'
+    | '/history'
     | '/items'
     | '/schedules'
     | '/units'
@@ -112,6 +122,7 @@ export interface FileRouteTypes {
   to:
     | '/icon.{$ext}'
     | '/categories'
+    | '/history'
     | '/items'
     | '/schedules'
     | '/units'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
     | '/(ui)'
     | '/icon.{$ext}'
     | '/(ui)/categories'
+    | '/(ui)/history'
     | '/(ui)/items'
     | '/(ui)/schedules'
     | '/(ui)/units'
@@ -196,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof uiItemsRouteImport
       parentRoute: typeof uiRouteRoute
     }
+    '/(ui)/history': {
+      id: '/(ui)/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof uiHistoryRouteImport
+      parentRoute: typeof uiRouteRoute
+    }
     '/(ui)/categories': {
       id: '/(ui)/categories'
       path: '/categories'
@@ -208,6 +227,7 @@ declare module '@tanstack/react-router' {
 
 interface uiRouteRouteChildren {
   uiCategoriesRoute: typeof uiCategoriesRoute
+  uiHistoryRoute: typeof uiHistoryRoute
   uiItemsRoute: typeof uiItemsRoute
   uiSchedulesRoute: typeof uiSchedulesRoute
   uiUnitsRoute: typeof uiUnitsRoute
@@ -216,6 +236,7 @@ interface uiRouteRouteChildren {
 
 const uiRouteRouteChildren: uiRouteRouteChildren = {
   uiCategoriesRoute: uiCategoriesRoute,
+  uiHistoryRoute: uiHistoryRoute,
   uiItemsRoute: uiItemsRoute,
   uiSchedulesRoute: uiSchedulesRoute,
   uiUnitsRoute: uiUnitsRoute,

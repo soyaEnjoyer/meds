@@ -13,6 +13,8 @@ import { categoryGet } from '@/functions.server/category';
 import { itemGet } from '@/functions.server/item';
 import { scheduleGet } from '@/functions.server/schedule';
 import { unitGet } from '@/functions.server/unit';
+import { DialogProvider } from '@/hooks/dialog';
+import { FilterProvider } from '@/hooks/filter';
 
 export const Route = createFileRoute('/(ui)')({
   component: UiLayout,
@@ -74,13 +76,17 @@ const plugins: ComponentProps<typeof TanStackDevtools>['plugins'] = [
 
 function UiLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Nav />
-      <main className='mx-auto mt-20 mb-2 max-w-2xl px-4'>
-        <Outlet />
-      </main>
-      <SseReloader />
-      <TanStackDevtools plugins={plugins} />
-    </QueryClientProvider>
+    <DialogProvider>
+      <QueryClientProvider client={queryClient}>
+        <FilterProvider>
+          <Nav />
+          <main className='mx-auto mt-20 mb-2 max-w-2xl px-4'>
+            <Outlet />
+          </main>
+        </FilterProvider>
+        <SseReloader />
+        <TanStackDevtools plugins={plugins} />
+      </QueryClientProvider>
+    </DialogProvider>
   );
 }

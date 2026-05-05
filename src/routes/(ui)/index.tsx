@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Calendar, Check, Pencil, Pill, RotateCw, X } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import type { CSSProperties } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { DateText } from '@/components/date';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -96,9 +97,17 @@ function ScheduleAccordionGroup({ dueAtIso, categoryName, items, value }: Schedu
     [items, scheduleSkipMutator]
   );
 
+  const style: CSSProperties = useMemo(() => {
+    // oxlint-disable-next-line typescript/no-misused-spread
+    const hue = [...categoryName].map((char) => char.charCodeAt(0)).reduce((acc, item) => acc + item, 0) % 360;
+    return {
+      backgroundColor: `light-dark(hsl(${hue} 100% 90%), hsl(${hue} 50% 15%))`,
+    };
+  }, [categoryName]);
+
   return (
     <AccordionItem value={value}>
-      <AccordionTrigger className='flex items-center gap-4'>
+      <AccordionTrigger className='-mx-2 flex items-center gap-4 rounded-lg px-2' style={style} render={<div />}>
         <h2 className='me-auto text-base'>{categoryName}</h2>
         <span>{dueAtIso}</span>
         <Button onClick={handleDoneClick}>

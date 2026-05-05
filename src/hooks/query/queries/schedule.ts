@@ -41,10 +41,10 @@ function formatRepeatRules({
 }: ScheduleRow): string {
   if (dueAt === null || dayMask === 0 || monthMask === 0) return 'Never';
   const items: (string | { toString: () => string })[] = [];
-  if (restDays || cycleOffDays) {
+  if (restDays) items.push(`${restDays + 1}d`);
+  if (cycleOffDays) {
     const cycleLength = cycleOnDays + cycleOffDays;
     const cycleDay = daysDiff(startAt, new Date()) % cycleLength;
-    items.push(`${restDays + 1}d`);
     if (cycleOffDays) items.push(cycleOnDays, cycleOffDays, cycleDay);
   }
   if (dayMask < 127)
@@ -53,7 +53,7 @@ function formatRepeatRules({
         .reduce<WeekdayTuple[][]>((acc, item) => {
           if (!(item[0] & dayMask)) return acc;
           const prev = acc.at(-1)?.at(-1);
-          if (typeof prev === 'undefined' || prev[0] !== item[0] >> 2) acc.push([item]);
+          if (typeof prev === 'undefined' || prev[0] !== item[0] >> 1) acc.push([item]);
           else acc[acc.length - 1].push(item);
           return acc;
         }, [])
@@ -70,7 +70,7 @@ function formatRepeatRules({
         .reduce<MonthTuple[][]>((acc, item) => {
           if (!(item[0] & monthMask)) return acc;
           const prev = acc.at(-1)?.at(-1);
-          if (typeof prev === 'undefined' || prev[0] !== item[0] >> 2) acc.push([item]);
+          if (typeof prev === 'undefined' || prev[0] !== item[0] >> 1) acc.push([item]);
           else acc[acc.length - 1].push(item);
           return acc;
         }, [])
