@@ -1,5 +1,5 @@
 import { createSelectSchema } from 'drizzle-zod';
-import type { z } from 'zod';
+import { z } from 'zod';
 
 import { categoryTable, historyTable, itemTable, scheduleTable, unitTable } from '@/lib/drizzle/schema';
 
@@ -83,6 +83,7 @@ export const scheduleUpdateSchema = scheduleSchema
     cycleOnDays: scheduleSchema.shape.cycleOnDays.min(1).max(365),
     restDays: scheduleSchema.shape.restDays.min(0).max(365),
     sort: scheduleSchema.shape.sort.min(0).max(99),
+    time: z.object({ hour: z.int().min(0).max(23), minute: z.int().min(0).max(59) }),
   });
 
 export const scheduleInsertSchema = scheduleUpdateSchema.omit({

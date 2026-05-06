@@ -14,6 +14,13 @@
       "tag": "0001_rapid_talisman",
       "version": "6",
       "when": 1777043468996
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1778072790277,
+      "tag": "0002_glamorous_sentinels",
+      "breakpoints": true
     }
   ],
   "version": "7"

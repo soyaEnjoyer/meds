@@ -3,6 +3,11 @@ import { integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlit
 
 // oxlint-disable eslint/sort-keys
 
+export interface Time {
+  hour: number;
+  minute: number;
+}
+
 export const categoryTable = sqliteTable('category', {
   id: integer().primaryKey({ autoIncrement: true }).notNull(),
   name: text().notNull().unique(),
@@ -66,23 +71,21 @@ export const scheduleTable = sqliteTable(
 
     amount: real().notNull(),
 
-    cycleOffDays: integer().notNull().default(0),
-    cycleOnDays: integer().notNull().default(0),
-    restDays: integer().notNull().default(0),
-    repeatCount: integer().notNull().default(1),
+    cycleOffDays: integer().notNull(),
+    cycleOnDays: integer().notNull(),
+    restDays: integer().notNull(),
+    repeatCount: integer().notNull(),
 
-    dayMask: integer().notNull().default(127),
-    monthMask: integer().notNull().default(4095),
-    hour: integer().notNull().default(7),
-    minute: integer().notNull().default(0),
+    dayMask: integer().notNull(),
+    monthMask: integer().notNull(),
 
-    startAt: integer({ mode: 'timestamp_ms' })
-      .notNull()
-      .default(sql`(unixepoch('now','start of day'))`),
+    time: text({ mode: 'json' }).notNull().$type<Time>(),
+
+    startAt: integer({ mode: 'timestamp_ms' }).notNull(),
     endAt: integer({ mode: 'timestamp_ms' }),
 
-    adHoc: integer({ mode: 'boolean' }).notNull().default(false),
-    sort: integer().default(0).notNull(),
+    adHoc: integer({ mode: 'boolean' }).notNull(),
+    sort: integer().notNull(),
 
     dueAt: integer({ mode: 'timestamp_ms' }),
     completedAt: integer({ mode: 'timestamp_ms' }),
@@ -90,14 +93,14 @@ export const scheduleTable = sqliteTable(
     lastAmount: real(),
 
     createdAt: integer({ mode: 'timestamp_ms' })
-      .default(sql`(unixepoch('subsec') * 1000)`)
-      .notNull(),
+      .notNull()
+      .default(sql`(unixepoch('subsec') * 1000)`),
     updatedAt: integer({ mode: 'timestamp_ms' })
-      .default(sql`(unixepoch('subsec') * 1000)`)
-      .notNull(),
+      .notNull()
+      .$onUpdate(() => sql`(unixepoch('subsec') * 1000)`),
     deletedAt: integer({ mode: 'timestamp_ms' }),
   },
-  (table) => [uniqueIndex('scheduleUnique').on(table.categoryId, table.itemId, table.unitId, table.hour, table.minute)]
+  (table) => [uniqueIndex('scheduleUnique').on(table.categoryId, table.itemId, table.unitId, table.time)]
 );
 
 export const historyTable = sqliteTable('history', {

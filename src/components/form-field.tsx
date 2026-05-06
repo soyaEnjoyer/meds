@@ -31,7 +31,7 @@ export function FormField<Value>({
   const field = useFieldContext<Value>();
 
   return (
-    <div className='contents'>
+    <div className='col-span-2 grid grid-cols-subgrid items-center gap-2'>
       <label className='col-start-1' htmlFor={field.name}>
         {label}
       </label>

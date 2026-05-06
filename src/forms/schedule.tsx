@@ -17,7 +17,7 @@ const editSchema = scheduleInsertSchema.extend({
 const submitSchema = scheduleInsertSchema.transform((value) => {
   // set dueAt time (it's just a date) according to form hour and minute
   const dueAt = value.dueAt ? new Date(value.dueAt) : null;
-  if (dueAt) dueAt.setHours(value.hour, value.minute, 0, 0);
+  if (dueAt) dueAt.setHours(value.time.hour, value.time.minute, 0, 0);
   return {
     ...value,
     dueAt,
@@ -43,15 +43,14 @@ function getDefaults(): EditSchema {
     dayMask: 127,
     dueAt,
     endAt: null,
-    hour,
     itemId: null,
-    minute,
     monthMask: 4095,
     // FIXME: i don't remember how this works. maybe should be nullable?
     repeatCount: 0,
     restDays: 0,
     sort: 49,
     startAt,
+    time: { hour, minute },
     unitId: null,
   };
 }
@@ -137,8 +136,8 @@ export function ScheduleForm(props: { mode: 'add' } | { mode: 'edit'; id: number
           ? 'Add a schedule'
           : `Editing ${itemMap.data.get(defaultValues.itemId ?? -1)?.name ?? 'Unknown'}`}
       </h2>
-      <div className='grid w-full grid-cols-[auto_1fr] items-center gap-y-6'>
-        <fieldset className='col-span-full grid grid-cols-subgrid gap-2'>
+      <div className='grid w-full grid-cols-[auto_1fr] items-center gap-4 gap-y-6 md:grid-cols-[auto_1fr_auto_1fr]'>
+        <fieldset className='contents'>
           <form.AppField name='itemId' listeners={itemIdListeners}>
             {(field) => <FormField component={field.ItemCombobox} label='Item' />}
           </form.AppField>
@@ -153,7 +152,7 @@ export function ScheduleForm(props: { mode: 'add' } | { mode: 'edit'; id: number
           </form.AppField>
         </fieldset>
 
-        <fieldset className='col-span-full grid grid-cols-subgrid gap-2'>
+        <fieldset className='contents'>
           <form.AppField name='cycleOnDays'>
             {(field) => <FormField component={field.NumberPicker} label='Cycle On Days' />}
           </form.AppField>
@@ -172,26 +171,19 @@ export function ScheduleForm(props: { mode: 'add' } | { mode: 'edit'; id: number
           <form.AppField name='monthMask'>
             {(field) => <FormField component={field.MonthPicker} label='Months' />}
           </form.AppField>
-        </fieldset>
-
-        <fieldset className='col-span-full grid grid-cols-subgrid gap-2'>
-          {/* TODO: timepicker */}
-          <form.AppField name='hour'>
-            {(field) => <FormField component={field.NumberPicker} label='Hour' />}
-          </form.AppField>
-          <form.AppField name='minute'>
-            {(field) => <FormField component={field.NumberPicker} label='Minute' />}
+          <form.AppField name='time'>
+            {(field) => <FormField component={field.TimePicker} label='Time' />}
           </form.AppField>
         </fieldset>
 
-        <fieldset className='col-span-full grid grid-cols-subgrid gap-2'>
+        <fieldset className='contents'>
           <form.AppField name='adHoc'>{(field) => <FormField component={field.Switch} label='Ad hoc' />}</form.AppField>
           <form.AppField name='sort'>
             {(field) => <FormField component={field.NumberPicker} label='Sort' />}
           </form.AppField>
         </fieldset>
 
-        <fieldset className='col-span-full grid grid-cols-subgrid gap-2'>
+        <fieldset className='contents'>
           <form.AppField name='startAt'>
             {(field) => <FormField component={field.DatePicker} label='Start' />}
           </form.AppField>

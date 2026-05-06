@@ -109,7 +109,7 @@ const scheduleAction = createServerFn()
                   (schedule.cycleOnDays + schedule.cycleOffDays);
                 if (cycleDay >= schedule.cycleOnDays) continue;
 
-                nextDueAt.setHours(schedule.hour, schedule.minute, 0, 0);
+                nextDueAt.setHours(schedule.time.hour, schedule.time.minute, 0, 0);
                 return nextDueAt;
               }
               throw new Error('could not find next dueAt');

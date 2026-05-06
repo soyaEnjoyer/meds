@@ -7,10 +7,8 @@ function Accordion({ className, ...props }: AccordionPrimitive.Root.Props) {
   return <AccordionPrimitive.Root data-slot='accordion' className={cn('flex w-full flex-col', className)} {...props} />;
 }
 
-function AccordionItem({ className, ...props }: AccordionPrimitive.Item.Props) {
-  return (
-    <AccordionPrimitive.Item data-slot='accordion-item' className={cn('not-last:border-b', className)} {...props} />
-  );
+function AccordionItem(props: AccordionPrimitive.Item.Props) {
+  return <AccordionPrimitive.Item data-slot='accordion-item' {...props} />;
 }
 
 function AccordionTrigger({ className, children, ...props }: AccordionPrimitive.Trigger.Props) {

@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Calendar, Check, Pencil, Pill, RotateCw, X } from 'lucide-react';
+import { Check, Pencil, X } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 
-import { DateText } from '@/components/date';
+import { ScheduleSummary } from '@/components/schedule-summary';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { useScheduleDoneMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
@@ -15,36 +15,7 @@ export const Route = createFileRoute('/(ui)/')({
   component: SchedulePage,
 });
 
-function ScheduleSummary({
-  amount,
-  completedAt,
-  lastAmount,
-  unitName,
-  formattedRepeat,
-}: Pick<ScheduleRowWithNames, 'amount' | 'completedAt' | 'lastAmount' | 'formattedRepeat' | 'unitName'>) {
-  return (
-    <div className='flex flex-wrap justify-end gap-x-2 truncate text-xs **:truncate'>
-      <span className='inline-flex items-center gap-1'>
-        <Calendar className='size-3' />
-        <DateText date={completedAt} as='dist' />
-      </span>
-      <span className='inline-flex items-center gap-1'>
-        <RotateCw className='size-3' />
-        {formattedRepeat}
-      </span>
-      {amount === 1 && (lastAmount ?? 1) === amount ? null : (
-        <span className='inline-flex items-center gap-1'>
-          <Pill className='size-3' />
-          {[amount, (lastAmount ?? amount) === amount ? null : `(${lastAmount})`, unitName || null]
-            .filter((item) => item)
-            .join(' ')}
-        </span>
-      )}
-    </div>
-  );
-}
-
-function ScheuleAccordionItem({
+function ScheduleAccordionItem({
   amount,
   completedAt,
   id,
@@ -107,7 +78,12 @@ function ScheduleAccordionGroup({ dueAtIso, categoryName, items, value }: Schedu
 
   return (
     <AccordionItem value={value}>
-      <AccordionTrigger className='-mx-2 flex items-center gap-4 rounded-lg px-2' style={style} render={<div />}>
+      <AccordionTrigger
+        className='-mx-2 flex items-center gap-4 rounded-lg px-2'
+        style={style}
+        render={<div />}
+        nativeButton={false}
+      >
         <h2 className='me-auto text-base'>{categoryName}</h2>
         <span>{dueAtIso}</span>
         <Button onClick={handleDoneClick}>
@@ -119,7 +95,7 @@ function ScheduleAccordionGroup({ dueAtIso, categoryName, items, value }: Schedu
       </AccordionTrigger>
       <AccordionContent className='flex flex-col gap-2'>
         {items.map((item) => (
-          <ScheuleAccordionItem key={item.id} {...item} />
+          <ScheduleAccordionItem key={item.id} {...item} />
         ))}
       </AccordionContent>
     </AccordionItem>

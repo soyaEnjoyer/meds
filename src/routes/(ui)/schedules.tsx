@@ -2,11 +2,13 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Check, Trash2, X } from 'lucide-react';
 import { useCallback } from 'react';
 
+import { ScheduleSummary } from '@/components/schedule-summary';
 import { Button } from '@/components/ui/button';
 import { ScheduleForm } from '@/forms/schedule';
 import { useScheduleDeleteMutator } from '@/hooks/query/mutators';
 import type { ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { useSchedulesWithNamesQuery } from '@/hooks/query/queries/schedule';
+import { formatTimeIso } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)/schedules')({
   component: SchedulesPage,
@@ -19,13 +21,10 @@ function SchedulesPageListRow({
   categoryName,
   itemName,
   unitName,
-  cycleOffDays,
-  cycleOnDays,
-  dayMask,
-  hour,
-  minute,
-  monthMask,
-  restDays,
+  time,
+  completedAt,
+  formattedRepeat,
+  lastAmount,
 }: ScheduleRowWithNames) {
   const deleteMutator = useScheduleDeleteMutator();
   const handleDeleteClick = useCallback(() => deleteMutator.mutate({ data: id }), [id, deleteMutator]);
@@ -35,15 +34,14 @@ function SchedulesPageListRow({
       {adHoc ? <Check className='text-success' /> : <X />}
       <span>{categoryName}</span>
       <span>{itemName}</span>
-      <span>{unitName}</span>
-      <span>{amount.toLocaleString()}</span>
-      <span>{cycleOnDays}</span>
-      <span>{cycleOffDays}</span>
-      <span>{dayMask}</span>
-      <span>{monthMask}</span>
-      <span>{restDays}</span>
-      <span>{hour}</span>
-      <span>{minute}</span>
+      <span>{formatTimeIso(time)}</span>
+      <ScheduleSummary
+        amount={amount}
+        completedAt={completedAt}
+        formattedRepeat={formattedRepeat}
+        lastAmount={lastAmount}
+        unitName={unitName}
+      />
       <Button onClick={handleDeleteClick}>
         <Trash2 />
       </Button>
@@ -55,21 +53,14 @@ function SchedulesPageList() {
   const query = useSchedulesWithNamesQuery();
 
   return (
-    <div className='schedules-center grid grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto] gap-x-4 gap-y-2'>
+    <div className='schedules-center grid grid-cols-[auto_auto_auto_auto_auto_auto_auto] gap-x-4 gap-y-2'>
       <div className='contents text-xs font-semibold'>
         <span>ID</span>
         <span>Adhoc</span>
         <span>Category</span>
         <span>Item</span>
-        <span>Unit</span>
-        <span>Amount</span>
-        <span>Cycle On</span>
-        <span>Cycle Off</span>
-        <span>Day Mask</span>
-        <span>Month Mask</span>
-        <span>Rest Days</span>
-        <span>Hour</span>
-        <span>Minute</span>
+        <span>Time</span>
+        <span>Schedule</span>
         <span>Actions</span>
       </div>
       {query.data.map((schedule) => (

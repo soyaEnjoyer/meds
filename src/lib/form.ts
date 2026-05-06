@@ -5,6 +5,7 @@ import { DayPicker } from '@/components/day-picker';
 import { MonthPicker } from '@/components/month-picker';
 import { NumberPicker } from '@/components/number-picker';
 import { CategoryCombobox, ItemCombobox, UnitCombobox } from '@/components/query-combobox';
+import { TimePicker } from '@/components/time-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -27,6 +28,7 @@ export const { useAppForm } = createFormHook({
     Select,
     Switch,
     Textarea,
+    TimePicker,
     UnitCombobox,
   },
   fieldContext,

@@ -1,3 +1,5 @@
+import type { Time } from '@/lib/drizzle/schema';
+
 export const MINUTE_MS = 60_000;
 export const HOUR_MS = MINUTE_MS * 60;
 export const DAY_MS = HOUR_MS * 24;
@@ -13,9 +15,11 @@ export function formatDateIso(value: Date | null): string {
   return `${value.getFullYear()}-${(value.getMonth() + 1).toString().padStart(2, '0')}-${value.getDate().toString().padStart(2, '0')}`;
 }
 
-export function formatTimeIso(value: Date | null): string {
+export function formatTimeIso(value: Date | null | Time): string {
   if (!value) return '';
-  return `${value.getHours().toString().padStart(2, '0')}:${value.getMinutes().toString().padStart(2, '0')}`;
+  if (value instanceof Date)
+    return `${value.getHours().toString().padStart(2, '0')}:${value.getMinutes().toString().padStart(2, '0')}`;
+  return `${value.hour.toString().padStart(2, '0')}:${value.minute.toString().padStart(2, '0')}`;
 }
 
 export function formatDateDistance(value: Date | null): string {

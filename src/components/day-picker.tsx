@@ -19,10 +19,10 @@ function DayButton({
     <Button
       onClick={handleClick}
       variant={(value & day[0]) === day[0] ? 'default' : 'secondary'}
-      className={cn('block truncate', value & day[0] || 'text-muted-foreground')}
+      className={cn('block overflow-x-hidden whitespace-nowrap', value & day[0] || 'text-muted-foreground')}
     >
-      <span className='hidden max-md:contents'>{day[1].slice(0, 1)}</span>
-      <span className='hidden md:contents'>{day[1]}</span>
+      <span className='hidden @max-md:contents'>{day[1].slice(0, 1)}</span>
+      <span className='hidden truncate @md:contents'>{day[1]}</span>
     </Button>
   );
 }
@@ -41,7 +41,7 @@ export function DayPicker({
   onBlur?: () => void;
 }) {
   return (
-    <div onBlur={onBlur} className='grid grid-cols-7'>
+    <div onBlur={onBlur} className='@container grid grid-cols-7'>
       <input type='hidden' id={id} name={name} value={value} />
       {weekdays.map((weekday) => (
         <DayButton key={weekday[0]} day={weekday} value={value} onValueChange={onValueChange} />

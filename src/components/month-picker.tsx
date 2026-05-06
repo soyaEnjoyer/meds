@@ -19,10 +19,10 @@ function MonthButton({
     <Button
       onClick={handleClick}
       variant={(value & month[0]) === month[0] ? 'default' : 'secondary'}
-      className={cn('block truncate', value & month[0] || 'text-muted-foreground')}
+      className={cn('block overflow-x-hidden whitespace-nowrap', value & month[0] || 'text-muted-foreground')}
     >
-      <span className='hidden max-md:contents'>{month[1].slice(0, 1)}</span>
-      <span className='hidden md:contents'>{month[1]}</span>
+      <span className='hidden @max-md:contents'>{month[1].slice(0, 1)}</span>
+      <span className='hidden truncate @md:contents'>{month[1]}</span>
     </Button>
   );
 }
@@ -41,11 +41,13 @@ export function MonthPicker({
   onBlur?: () => void;
 }) {
   return (
-    <div onBlur={onBlur} className='grid grid-cols-6 md:grid-cols-12'>
-      <input type='hidden' id={id} name={name} value={value} />
-      {months.map((month) => (
-        <MonthButton key={month[0]} month={month} value={value} onValueChange={onValueChange} />
-      ))}
+    <div className='@container'>
+      <div onBlur={onBlur} className='grid grid-cols-6 @md:grid-cols-12'>
+        <input type='hidden' id={id} name={name} value={value} />
+        {months.map((month) => (
+          <MonthButton key={month[0]} month={month} value={value} onValueChange={onValueChange} />
+        ))}
+      </div>
     </div>
   );
 }
