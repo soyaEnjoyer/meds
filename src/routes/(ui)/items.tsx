@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Trash2 } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { ItemForm } from '@/forms/item';
-import { useItemDeleteMutator } from '@/hooks/query/mutators';
+import { useDialog } from '@/hooks/dialog';
 import { useItemsQuery } from '@/hooks/query/queries/base';
 import type { ItemRow } from '@/lib/drizzle/zod';
 
@@ -13,8 +13,10 @@ export const Route = createFileRoute('/(ui)/items')({
 });
 
 function ItemsPageListRow({ id, name, defaultAmount, defaultCategoryId, defaultUnitId }: ItemRow) {
-  const deleteMutator = useItemDeleteMutator();
-  const handleDeleteClick = useCallback(() => deleteMutator.mutate({ data: id }), [id, deleteMutator]);
+  const openDialog = useDialog((state) => state.actions.open);
+
+  const handleEditClick = useCallback(() => openDialog('item', id), [id, openDialog]);
+
   return (
     <div className='contents'>
       <span>{id}</span>
@@ -22,8 +24,8 @@ function ItemsPageListRow({ id, name, defaultAmount, defaultCategoryId, defaultU
       <span>{defaultAmount}</span>
       <span>{defaultCategoryId}</span>
       <span>{defaultUnitId}</span>
-      <Button onClick={handleDeleteClick}>
-        <Trash2 />
+      <Button onClick={handleEditClick}>
+        <Pencil />
       </Button>
     </div>
   );

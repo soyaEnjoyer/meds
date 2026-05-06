@@ -2,8 +2,9 @@ import type { MouseEvent, SubmitEvent } from 'react';
 import { useCallback, useMemo } from 'react';
 import { z } from 'zod';
 
+import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/components/dialogs/confirm';
 import { FormField } from '@/components/form-field';
-import { useScheduleCreateMutator, useScheduleUpdateMutator } from '@/hooks/query/mutators';
+import { useScheduleCreateMutator, useScheduleDeleteMutator, useScheduleUpdateMutator } from '@/hooks/query/mutators';
 import { useItemsMapQuery, useSchedulesMapQuery } from '@/hooks/query/queries/base';
 import { scheduleInsertSchema } from '@/lib/drizzle/zod';
 import { useAppForm } from '@/lib/form';
@@ -58,9 +59,13 @@ function getDefaults(): EditSchema {
 const submitSelector = (state: { canSubmit: boolean; isSubmitting: boolean }) =>
   [state.canSubmit, state.isSubmitting] as const;
 
-export function ScheduleForm(props: { mode: 'add' } | { mode: 'edit'; id: number }) {
+export function ScheduleForm({
+  closeDialog,
+  ...props
+}: ({ mode: 'add' } | { mode: 'edit'; id: number }) & { closeDialog?: () => void }) {
   const createMutator = useScheduleCreateMutator();
   const updateMutator = useScheduleUpdateMutator();
+  const deleteMutator = useScheduleDeleteMutator();
   const map = useSchedulesMapQuery();
   const itemMap = useItemsMapQuery();
 
@@ -89,6 +94,7 @@ export function ScheduleForm(props: { mode: 'add' } | { mode: 'edit'; id: number
       const typedValue = value as SubmitSchema;
       if (props.mode === 'add') createMutator.mutate({ data: typedValue }, options);
       else updateMutator.mutate({ data: { id: props.id, ...typedValue } }, options);
+      closeDialog?.();
     },
     validators: {
       onSubmit: submitSchema,
@@ -102,6 +108,13 @@ export function ScheduleForm(props: { mode: 'add' } | { mode: 'edit'; id: number
     },
     [form, defaultValues]
   );
+
+  const handleDeleteClick = useCallback(() => {
+    if (!('id' in props && props.id)) return;
+    deleteMutator.mutate({ data: props.id });
+    form.reset({ ...defaultValues });
+    closeDialog?.();
+  }, [deleteMutator, props, form, defaultValues, closeDialog]);
 
   const handleSubmit = useCallback(
     (event: SubmitEvent<HTMLFormElement>) => {
@@ -129,14 +142,16 @@ export function ScheduleForm(props: { mode: 'add' } | { mode: 'edit'; id: number
     [form, itemMap.dataUpdatedAt]
   );
 
+  const itemName = useMemo(
+    () => itemMap.data.get(defaultValues.itemId ?? -1)?.name ?? 'Unknown',
+    // oxlint-disable-next-line eslint-plugin-react-hooks/exhaustive-deps
+    [itemMap.dataUpdatedAt, defaultValues.itemId]
+  );
+
   return (
     <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto font-semibold'>
-        {props.mode === 'add'
-          ? 'Add a schedule'
-          : `Editing ${itemMap.data.get(defaultValues.itemId ?? -1)?.name ?? 'Unknown'}`}
-      </h2>
-      <div className='grid w-full grid-cols-[auto_1fr] items-center gap-4 gap-y-6 md:grid-cols-[auto_1fr_auto_1fr]'>
+      <h2 className='mx-auto font-semibold'>{props.mode === 'add' ? 'Add a schedule' : `Editing ${itemName}`}</h2>
+      <div className='grid w-full grid-cols-[auto_1fr] items-center gap-4 gap-y-6 @md:grid-cols-[auto_1fr_auto_1fr]'>
         <fieldset className='contents'>
           <form.AppField name='itemId' listeners={itemIdListeners}>
             {(field) => <FormField component={field.ItemCombobox} label='Item' />}
@@ -205,9 +220,15 @@ export function ScheduleForm(props: { mode: 'add' } | { mode: 'edit'; id: number
             </form.Button>
           )}
         </form.Subscribe>
-        <form.Button type='reset' variant='destructive' onClick={handleResetClick}>
+        <form.Button type='reset' variant='secondary' onClick={handleResetClick}>
           Reset
         </form.Button>
+        <ConfirmDialog>
+          <ConfirmDialogContent message={`Really delete schedule ${itemName}?`} onConfirm={handleDeleteClick} />
+          <ConfirmDialogTrigger variant='destructive' hidden={props.mode === 'add'} size='lg'>
+            Delete
+          </ConfirmDialogTrigger>
+        </ConfirmDialog>
       </footer>
     </form>
   );

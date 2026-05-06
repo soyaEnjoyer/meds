@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Check, Trash2, X } from 'lucide-react';
+import { Check, Pencil, X } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { ScheduleSummary } from '@/components/schedule-summary';
 import { Button } from '@/components/ui/button';
 import { ScheduleForm } from '@/forms/schedule';
-import { useScheduleDeleteMutator } from '@/hooks/query/mutators';
+import { useDialog } from '@/hooks/dialog';
 import type { ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { useSchedulesWithNamesQuery } from '@/hooks/query/queries/schedule';
 import { formatTimeIso } from '@/lib/date';
@@ -26,8 +26,10 @@ function SchedulesPageListRow({
   formattedRepeat,
   lastAmount,
 }: ScheduleRowWithNames) {
-  const deleteMutator = useScheduleDeleteMutator();
-  const handleDeleteClick = useCallback(() => deleteMutator.mutate({ data: id }), [id, deleteMutator]);
+  const openDialog = useDialog((state) => state.actions.open);
+
+  const handleEditClick = useCallback(() => openDialog('schedule', id), [id, openDialog]);
+
   return (
     <div className='contents'>
       <span>{id}</span>
@@ -42,8 +44,8 @@ function SchedulesPageListRow({
         lastAmount={lastAmount}
         unitName={unitName}
       />
-      <Button onClick={handleDeleteClick}>
-        <Trash2 />
+      <Button onClick={handleEditClick}>
+        <Pencil />
       </Button>
     </div>
   );

@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Trash2 } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { CategoryForm } from '@/forms/category';
-import { useCategoryDeleteMutator } from '@/hooks/query/mutators';
+import { useDialog } from '@/hooks/dialog';
 import { useCategoriesQuery } from '@/hooks/query/queries/base';
 import type { CategoryRow } from '@/lib/drizzle/zod';
 
@@ -13,14 +13,16 @@ export const Route = createFileRoute('/(ui)/categories')({
 });
 
 function CategoriesPageListRow({ id, name }: CategoryRow) {
-  const deleteMutator = useCategoryDeleteMutator();
-  const handleDeleteClick = useCallback(() => deleteMutator.mutate({ data: id }), [id, deleteMutator]);
+  const openDialog = useDialog((state) => state.actions.open);
+
+  const handleEditClick = useCallback(() => openDialog('category', id), [id, openDialog]);
+
   return (
     <div className='contents'>
       <span>{id}</span>
       <span>{name}</span>
-      <Button onClick={handleDeleteClick}>
-        <Trash2 />
+      <Button onClick={handleEditClick}>
+        <Pencil />
       </Button>
     </div>
   );

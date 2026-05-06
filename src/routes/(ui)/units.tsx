@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Trash2 } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { UnitForm } from '@/forms/unit';
-import { useUnitDeleteMutator } from '@/hooks/query/mutators';
+import { useDialog } from '@/hooks/dialog';
 import { useUnitsQuery } from '@/hooks/query/queries/base';
 import type { UnitRow } from '@/lib/drizzle/zod';
 
@@ -13,14 +13,16 @@ export const Route = createFileRoute('/(ui)/units')({
 });
 
 function UnitsPageListRow({ id, name }: UnitRow) {
-  const deleteMutator = useUnitDeleteMutator();
-  const handleDeleteClick = useCallback(() => deleteMutator.mutate({ data: id }), [id, deleteMutator]);
+  const openDialog = useDialog((state) => state.actions.open);
+
+  const handleEditClick = useCallback(() => openDialog('unit', id), [id, openDialog]);
+
   return (
     <div className='contents'>
       <span>{id}</span>
       <span>{name}</span>
-      <Button onClick={handleDeleteClick}>
-        <Trash2 />
+      <Button onClick={handleEditClick}>
+        <Pencil />
       </Button>
     </div>
   );

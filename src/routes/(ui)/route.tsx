@@ -7,6 +7,10 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { LoaderCircle } from 'lucide-react';
 import type { ComponentProps } from 'react';
 
+import { CategoryDialog } from '@/components/dialogs/category';
+import { ItemDialog } from '@/components/dialogs/item';
+import { ScheduleDialog } from '@/components/dialogs/schedule';
+import { UnitDialog } from '@/components/dialogs/unit';
 import { Nav } from '@/components/nav';
 import { SseReloader } from '@/components/sse-reloader';
 import { categoryGet } from '@/functions.server/category';
@@ -83,6 +87,10 @@ function UiLayout() {
           <main className='mx-auto mt-20 mb-2 max-w-2xl px-4'>
             <Outlet />
           </main>
+          <CategoryDialog />
+          <ItemDialog />
+          <ScheduleDialog />
+          <UnitDialog />
         </FilterProvider>
         <SseReloader />
         <TanStackDevtools plugins={plugins} />

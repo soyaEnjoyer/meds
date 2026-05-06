@@ -2,8 +2,9 @@ import type { MouseEvent, SubmitEvent } from 'react';
 import { useCallback, useMemo } from 'react';
 import { z } from 'zod';
 
+import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/components/dialogs/confirm';
 import { FormField } from '@/components/form-field';
-import { useItemCreateMutator, useItemUpdateMutator } from '@/hooks/query/mutators';
+import { useItemCreateMutator, useItemDeleteMutator, useItemUpdateMutator } from '@/hooks/query/mutators';
 import { useItemsMapQuery } from '@/hooks/query/queries/base';
 import type { ItemInsert } from '@/lib/drizzle/zod';
 import { itemInsertSchema } from '@/lib/drizzle/zod';
@@ -29,9 +30,13 @@ const defaults: EditSchema = {
 const submitSelector = (state: { canSubmit: boolean; isSubmitting: boolean }) =>
   [state.canSubmit, state.isSubmitting] as const;
 
-export function ItemForm(props: { mode: 'add' } | { mode: 'edit'; id: number }) {
+export function ItemForm({
+  closeDialog,
+  ...props
+}: ({ mode: 'add' } | { mode: 'edit'; id: number }) & { closeDialog?: () => void }) {
   const createMutator = useItemCreateMutator();
   const updateMutator = useItemUpdateMutator();
+  const deleteMutator = useItemDeleteMutator();
   const map = useItemsMapQuery();
 
   const defaultValues: EditSchema = useMemo(() => {
@@ -59,6 +64,7 @@ export function ItemForm(props: { mode: 'add' } | { mode: 'edit'; id: number }) 
       const typedValue = value as SubmitSchema;
       if (props.mode === 'add') createMutator.mutate({ data: typedValue }, options);
       else updateMutator.mutate({ data: { id: props.id, ...typedValue } }, options);
+      closeDialog?.();
     },
     validators: {
       onSubmit: submitSchema,
@@ -69,9 +75,17 @@ export function ItemForm(props: { mode: 'add' } | { mode: 'edit'; id: number }) 
     (event: MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
       form.reset({ ...defaultValues });
+      form.reset({ ...defaultValues });
     },
     [form, defaultValues]
   );
+
+  const handleDeleteClick = useCallback(() => {
+    if (!('id' in props && props.id)) return;
+    deleteMutator.mutate({ data: props.id });
+    form.reset({ ...defaultValues });
+    closeDialog?.();
+  }, [deleteMutator, props, form, defaultValues, closeDialog]);
 
   const handleSubmit = useCallback(
     (event: SubmitEvent<HTMLFormElement>) => {
@@ -107,9 +121,15 @@ export function ItemForm(props: { mode: 'add' } | { mode: 'edit'; id: number }) 
             </form.Button>
           )}
         </form.Subscribe>
-        <form.Button type='reset' variant='destructive' onClick={handleResetClick}>
+        <form.Button type='reset' variant='secondary' onClick={handleResetClick}>
           Reset
         </form.Button>
+        <ConfirmDialog>
+          <ConfirmDialogContent message={`Really delete item ${defaultValues.name}?`} onConfirm={handleDeleteClick} />
+          <ConfirmDialogTrigger variant='destructive' hidden={props.mode === 'add'} size='lg'>
+            Delete
+          </ConfirmDialogTrigger>
+        </ConfirmDialog>
       </footer>
     </form>
   );

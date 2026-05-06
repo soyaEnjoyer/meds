@@ -1,5 +1,5 @@
 import { displayName } from '@root/package.json';
-import { Outlet, createRootRoute, HeadContent, Scripts } from '@tanstack/react-router';
+import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 
 import appCss from '@/globals.css?url';
 
@@ -28,7 +28,7 @@ function RootLayout() {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className='@container'>
         <Outlet />
         <Scripts />
       </body>

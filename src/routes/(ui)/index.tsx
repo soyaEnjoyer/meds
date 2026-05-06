@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { ScheduleSummary } from '@/components/schedule-summary';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { useDialog } from '@/hooks/dialog';
 import { useScheduleDoneMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
 import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { useScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
@@ -26,6 +27,9 @@ function ScheduleAccordionItem({
 }: ScheduleRowWithNames) {
   const scheduleDoneMutator = useScheduleDoneMutator();
   const scheduleSkipMutator = useScheduleSkipMutator();
+  const openDialog = useDialog((state) => state.actions.open);
+
+  const handleEditClick = useCallback(() => openDialog('schedule', id), [openDialog, id]);
 
   const handleDoneClick = useCallback(() => scheduleDoneMutator.mutate({ data: [{ id }] }), [id, scheduleDoneMutator]);
 
@@ -41,7 +45,7 @@ function ScheduleAccordionItem({
         formattedRepeat={formattedRepeat}
         unitName={unitName}
       />
-      <Button variant='secondary'>
+      <Button variant='secondary' onClick={handleEditClick}>
         <Pencil aria-description='Edit' />
       </Button>
       <Button onClick={handleDoneClick}>
