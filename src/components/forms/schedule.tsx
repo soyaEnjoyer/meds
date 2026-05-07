@@ -142,7 +142,9 @@ export function ScheduleForm({
 
   return (
     <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto font-semibold'>{props.mode === 'add' ? 'Add a schedule' : `Editing ${itemName}`}</h2>
+      <h2 className='mx-auto text-base font-semibold'>
+        {props.mode === 'add' ? 'Add a schedule' : `Editing: ${itemName}`}
+      </h2>
       <div className='grid w-full grid-cols-[auto_1fr] items-center gap-4 gap-y-6 @md:grid-cols-[auto_1fr_auto_1fr]'>
         <fieldset className='contents'>
           <form.AppField name='itemId' listeners={itemIdListeners}>

@@ -1,0 +1,63 @@
+import { Pencil } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
+
+import { DateText } from '@/components/date';
+import { Pager } from '@/components/pager';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { useDialog } from '@/hooks/dialog';
+import { usePager } from '@/hooks/pager';
+import { useItemsMapQuery, useSchedulesMapQuery } from '@/hooks/query/queries/base';
+import { useScheduleHistoryQuery } from '@/hooks/query/queries/history';
+import type { HistoryWithItemCatUnitRow } from '@/lib/drizzle/zod';
+
+function ScheduleHistoryDialogRow({ id, createdAt, amount, unitName }: HistoryWithItemCatUnitRow) {
+  const openDialog = useDialog((state) => state.actions.open);
+
+  const handleEditClick = useCallback(() => openDialog('history', id), [id, openDialog]);
+
+  return (
+    <div className='flex w-full transition-in-up items-center gap-4'>
+      <DateText date={createdAt} as='date' />
+      <DateText date={createdAt} as='dist' className='me-auto' />
+      <span>{`${amount} ${unitName}`}</span>
+      <Button onClick={handleEditClick} aria-description='Edit'>
+        <Pencil />
+      </Button>
+    </div>
+  );
+}
+
+export function ScheduleHistoryDialog() {
+  const setDialog = useDialog((state) => state.actions.set);
+  const dialogState = useDialog((state) => state.scheduleHistory);
+  const query = useScheduleHistoryQuery();
+  const pagerState = usePager((state) => state.scheduleHistory);
+  const scheduleMapQuery = useSchedulesMapQuery();
+  const itemMapQuery = useItemsMapQuery();
+
+  const itemName = useMemo(() => {
+    const schedule = scheduleMapQuery.data.get(dialogState.id ?? -1);
+    const item = itemMapQuery.data.get(schedule?.itemId ?? -1);
+    return item?.name ?? 'Item';
+    // oxlint-disable-next-line eslint-plugin-react-hooks/exhaustive-deps
+  }, [dialogState.id, scheduleMapQuery.dataUpdatedAt, itemMapQuery.dataUpdatedAt]);
+
+  const handleOpenChange = useCallback((open: boolean) => setDialog('scheduleHistory', open), [setDialog]);
+
+  return (
+    <Dialog open={dialogState.open} onOpenChange={handleOpenChange}>
+      <DialogContent className='flex flex-col gap-4'>
+        <DialogHeader className='text-base'>History: {itemName}</DialogHeader>
+        <div className='flex flex-col gap-2'>
+          {!query.data?.length ? (
+            <div className='flex items-center justify-center gap-2 p-4 text-muted-foreground'>No data</div>
+          ) : (
+            query.data.map((item) => <ScheduleHistoryDialogRow key={item.id} {...item} />)
+          )}
+        </div>
+        <Pager name='scheduleHistory' hasNextPage={query.data?.length === pagerState.pageSize} />
+      </DialogContent>
+    </Dialog>
+  );
+}

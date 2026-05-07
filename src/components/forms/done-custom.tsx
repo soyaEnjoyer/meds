@@ -77,7 +77,7 @@ export function DoneCustomForm({ id, closeDialog }: { id: number; closeDialog?: 
 
   return (
     <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto font-semibold'>{`Custom amount: ${itemName}`}</h2>
+      <h2 className='mx-auto text-base font-semibold'>{`Custom amount: ${itemName}`}</h2>
       <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2 @sm:grid-cols-[auto_1fr_auto_1fr]'>
         <form.AppField name='amount'>
           {(field) => <FormField component={field.NumberPicker} label='Amount' />}

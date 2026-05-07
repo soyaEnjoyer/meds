@@ -11,6 +11,7 @@ import { CategoryDialog } from '@/components/dialogs/category';
 import { DoneCustomDialog } from '@/components/dialogs/done-custom';
 import { ItemDialog } from '@/components/dialogs/item';
 import { ScheduleDialog } from '@/components/dialogs/schedule';
+import { ScheduleHistoryDialog } from '@/components/dialogs/schedule-history';
 import { ThemeDialog } from '@/components/dialogs/theme';
 import { UnitDialog } from '@/components/dialogs/unit';
 import { Nav } from '@/components/nav';
@@ -21,6 +22,7 @@ import { scheduleGet } from '@/functions.server/schedule';
 import { unitGet } from '@/functions.server/unit';
 import { DialogProvider } from '@/hooks/dialog';
 import { FilterProvider, ItemState } from '@/hooks/filter';
+import { PagerProvider } from '@/hooks/pager';
 import { HOUR_MS } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)')({
@@ -83,22 +85,25 @@ const plugins: ComponentProps<typeof TanStackDevtools>['plugins'] = [
 function UiLayout() {
   return (
     <DialogProvider>
-      <QueryClientProvider client={queryClient}>
-        <FilterProvider defaultState={ItemState.Active}>
-          <Nav />
-          <main className='mx-auto mt-20 mb-2 max-w-2xl px-4'>
-            <Outlet />
-          </main>
-          <CategoryDialog />
-          <DoneCustomDialog />
-          <ItemDialog />
-          <ScheduleDialog />
-          <UnitDialog />
-          <ThemeDialog />
-        </FilterProvider>
-        <SseReloader />
-        <TanStackDevtools plugins={plugins} />
-      </QueryClientProvider>
+      <PagerProvider>
+        <QueryClientProvider client={queryClient}>
+          <FilterProvider defaultState={ItemState.Active}>
+            <Nav />
+            <main className='mx-auto mt-20 mb-2 max-w-2xl px-4'>
+              <Outlet />
+            </main>
+            <CategoryDialog />
+            <DoneCustomDialog />
+            <ItemDialog />
+            <ScheduleDialog />
+            <UnitDialog />
+            <ThemeDialog />
+            <ScheduleHistoryDialog />
+          </FilterProvider>
+          <SseReloader />
+          <TanStackDevtools plugins={plugins} />
+        </QueryClientProvider>
+      </PagerProvider>
     </DialogProvider>
   );
 }

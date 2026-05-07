@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
-import { and, desc, eq, getTableColumns, isNull, like } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, isNotNull, isNull, like } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { db } from '@/lib/drizzle/db.server';
@@ -12,7 +12,7 @@ const pagerSchema = z.object({
 });
 
 const getSchema = pagerSchema.extend({
-  itemId: z.int(),
+  scheduleId: z.int(),
 });
 
 const getWithItemSchema = pagerSchema.extend({
@@ -22,11 +22,21 @@ const getWithItemSchema = pagerSchema.extend({
 export const historyGet = createServerFn()
   .inputValidator(getSchema)
   .handler(
-    async ({ data: { pageSize, pageNum, itemId } }): Promise<HistoryRow[]> =>
+    async ({ data: { pageSize, pageNum, scheduleId } }): Promise<HistoryWithItemCatUnitRow[]> =>
       await db
-        .select()
+        .select({
+          ...getTableColumns(historyTable),
+          categoryName: categoryTable.name,
+          itemName: itemTable.name,
+          unitName: unitTable.name,
+        })
         .from(historyTable)
-        .where(and(eq(historyTable.itemId, itemId), isNull(historyTable.deletedAt)))
+        .innerJoin(itemTable, eq(itemTable.id, historyTable.itemId))
+        .innerJoin(categoryTable, eq(categoryTable.id, historyTable.categoryId))
+        .innerJoin(unitTable, eq(unitTable.id, historyTable.unitId))
+        .where(
+          and(isNull(historyTable.deletedAt), isNotNull(historyTable.amount), eq(historyTable.scheduleId, scheduleId))
+        )
         .orderBy(desc(historyTable.createdAt))
         .limit(pageSize)
         .offset(pageSize * pageNum)
@@ -60,6 +70,7 @@ export const historyWithItemGet = createServerFn()
         .where(
           and(
             isNull(historyTable.deletedAt),
+            isNotNull(historyTable.amount),
             search ? like(itemTable.name, `%${search.replaceAll('%', String.raw`\%`)}%`) : undefined
           )
         )

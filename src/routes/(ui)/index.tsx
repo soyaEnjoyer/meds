@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Check, EllipsisVertical, Pencil, Settings, X } from 'lucide-react';
+import { Check, EllipsisVertical, Logs, Pencil, Settings, X } from 'lucide-react';
 import type { CSSProperties, MouseEvent } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -31,13 +31,15 @@ function ScheduleAccordionItem({
   const scheduleSkipMutator = useScheduleSkipMutator();
   const openDialog = useDialog((state) => state.actions.open);
 
-  const handleEditClick = useCallback(() => openDialog('schedule', id), [openDialog, id]);
+  const handleEditClick = useCallback(() => openDialog('schedule', id), [id, openDialog]);
 
   const handleDoneClick = useCallback(() => scheduleDoneMutator.mutate({ data: [{ id }] }), [id, scheduleDoneMutator]);
 
   const handleSkipClick = useCallback(() => scheduleSkipMutator.mutate({ data: [{ id }] }), [id, scheduleSkipMutator]);
 
-  const handleCustomClick = useCallback(() => openDialog('done-custom', id), [id, openDialog]);
+  const handleCustomClick = useCallback(() => openDialog('doneCustom', id), [id, openDialog]);
+
+  const handleHistoryClick = useCallback(() => openDialog('scheduleHistory', id), [id, openDialog]);
 
   return (
     <div className='ms-2 flex items-center gap-4'>
@@ -60,7 +62,7 @@ function ScheduleAccordionItem({
             </Button>
           }
         />
-        <PopoverContent className='flex max-w-fit gap-4'>
+        <PopoverContent className='grid max-w-fit grid-cols-2 gap-4'>
           <Button onClick={handleEditClick} variant='secondary'>
             <Settings aria-description='Edit' />
             Edit
@@ -72,6 +74,10 @@ function ScheduleAccordionItem({
           <Button onClick={handleCustomClick}>
             <Pencil aria-description='Custom' />
             Custom
+          </Button>
+          <Button onClick={handleHistoryClick}>
+            <Logs aria-description='History' />
+            History
           </Button>
         </PopoverContent>
       </Popover>

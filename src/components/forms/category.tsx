@@ -90,8 +90,8 @@ export function CategoryForm({
 
   return (
     <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto font-semibold'>
-        {props.mode === 'add' ? 'Add a category' : `Editing ${defaultValues.name}`}
+      <h2 className='mx-auto text-base font-semibold'>
+        {props.mode === 'add' ? 'Add a category' : `Editing: ${defaultValues.name}`}
       </h2>
       <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2'>
         <form.AppField name='name'>{(field) => <FormField component={field.Input} label='Name' />}</form.AppField>
