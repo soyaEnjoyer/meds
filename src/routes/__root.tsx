@@ -1,6 +1,8 @@
 import { displayName } from '@root/package.json';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 
+import { ThemedHtmlElement, ThemeProvider } from '@/hooks/theme';
+
 import appCss from '@/globals.css?url';
 
 // oxlint-disable node/no-process-env
@@ -24,14 +26,16 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   return (
-    <html lang='en'>
-      <head>
-        <HeadContent />
-      </head>
-      <body className='@container'>
-        <Outlet />
-        <Scripts />
-      </body>
-    </html>
+    <ThemeProvider>
+      <ThemedHtmlElement>
+        <head>
+          <HeadContent />
+        </head>
+        <body className='@container'>
+          <Outlet />
+          <Scripts />
+        </body>
+      </ThemedHtmlElement>
+    </ThemeProvider>
   );
 }

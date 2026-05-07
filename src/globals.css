@@ -2,9 +2,10 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource/jetbrains-mono';
+@import '@fontsource/literata';
+@import '@fontsource/figtree';
 
 :root {
-  color-scheme: light dark;
   interpolate-size: allow-keywords;
   --radius: 0.625rem;
 
@@ -88,6 +89,34 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-mono text-[20px] md:text-[16px];
+    @apply font-mono scheme-light-dark [interpolate-size:allow-keywords];
+  }
+
+  /* https://developer.chrome.com/docs/web-platform/view-transitions/same-document */
+  @keyframes view-transtion-in {
+    from {
+      opacity: 0;
+      transform: translateY(10%);
+      scale: 95%;
+    }
+  }
+  @keyframes view-transition-out {
+    to {
+      opacity: 0;
+      transform: translateY(10%);
+      scale: 95%;
+    }
+  }
+  ::view-transition-old(slide) {
+    animation: 150ms ease-in both view-transition-out;
+  }
+  ::view-transition-new(slide) {
+    animation: 150ms ease-out both view-transtion-in;
+  }
+  :root {
+    view-transition-name: none;
+  }
+  main {
+    view-transition-name: slide;
   }
 }

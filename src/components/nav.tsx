@@ -25,11 +25,10 @@ const DEBOUNCE_MS = 300;
 
 const links = [
   { href: '/', name: 'Home' },
-  { href: '/categories', name: 'Categories' },
   { href: '/history', name: 'History' },
-  { href: '/items', name: 'Items' },
-  { href: '/schedules', name: 'Schedules' },
+  { href: '/categories', name: 'Categories' },
   { href: '/units', name: 'Units' },
+  { href: '/items', name: 'Items' },
 ] as const satisfies { href: string; name: string }[];
 
 function NavExtraMenu({
@@ -59,6 +58,15 @@ function NavExtraMenu({
           },
         ],
         [
+          'Add a unit',
+          Plus,
+          'Unit',
+          () => {
+            openDialog('unit', null);
+            setSideBarOpen?.(false);
+          },
+        ],
+        [
           'Add an item',
           Plus,
           'Item',
@@ -73,15 +81,6 @@ function NavExtraMenu({
           'Schedule',
           () => {
             openDialog('schedule', null);
-            setSideBarOpen?.(false);
-          },
-        ],
-        [
-          'Add a unit',
-          Plus,
-          'Unit',
-          () => {
-            openDialog('unit', null);
             setSideBarOpen?.(false);
           },
         ],

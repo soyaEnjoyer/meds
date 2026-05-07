@@ -1,12 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
+import { useRouterState } from '@tanstack/react-router';
 
+import { ItemState, useFilter } from '@/hooks/filter';
 import {
   useCategoriesMapQuery,
   useItemsMapQuery,
   useSchedulesQuery,
   useUnitsMapQuery,
 } from '@/hooks/query/queries/base';
-import { dateAdd, daysDiff, formatDateIso, formatTimeIso } from '@/lib/date';
+import { dateAdd, daysDiff, formatDateIso, formatTimeIso, MINUTE_MS } from '@/lib/date';
 import type { ScheduleRow } from '@/lib/drizzle/zod';
 import type { MonthTuple, WeekdayTuple } from '@/lib/enums';
 import { months, weekdays } from '@/lib/enums';
@@ -29,6 +31,7 @@ export interface ScheduleGroup {
   dueAtLabel: string;
   dueAtIso: string;
   items: ScheduleRowWithNames[];
+  hue: number;
 }
 
 function formatRepeatRules({
@@ -95,24 +98,44 @@ function formatAmount({ amount, lastAmount, unitName }: ScheduleRow & { unitName
   ].join(' ');
 }
 
-export function useSchedulesWithNamesQuery() {
+export function useFilteredSchedulesWithNamesQuery() {
   const schedulesQuery = useSchedulesQuery();
   const categoriesMapQuery = useCategoriesMapQuery();
   const itemsMapQuery = useItemsMapQuery();
   const unitsMapQuery = useUnitsMapQuery();
+  const filterState = useFilter((state) => state.state);
+  const filterSearch = useFilter((state) => state.search).toLocaleLowerCase();
+  const now = new Date();
+  const pathName = useRouterState({ select: (state) => state.location.pathname });
+
   const queryFn = () =>
-    schedulesQuery.data.map((schedule) => {
-      const unitName = unitsMapQuery.data.get(schedule.unitId)?.name;
-      return {
-        ...schedule,
-        categoryName: categoriesMapQuery.data.get(schedule.categoryId)?.name,
-        formattedAmount: formatAmount({ ...schedule, unitName }),
-        formattedRepeat: formatRepeatRules(schedule),
-        itemName: itemsMapQuery.data.get(schedule.itemId)?.name,
-        unitName,
-      };
-    }) satisfies ScheduleRowWithNames[];
+    (
+      schedulesQuery.data.map((schedule) => {
+        const unitName = unitsMapQuery.data.get(schedule.unitId)?.name;
+        return {
+          ...schedule,
+          categoryName: categoriesMapQuery.data.get(schedule.categoryId)?.name,
+          formattedAmount: formatAmount({ ...schedule, unitName }),
+          formattedRepeat: formatRepeatRules(schedule),
+          itemName: itemsMapQuery.data.get(schedule.itemId)?.name,
+          unitName,
+        };
+      }) satisfies ScheduleRowWithNames[]
+    ).filter(
+      (schedule) =>
+        (filterSearch === '' ||
+          schedule.categoryName?.toLocaleLowerCase().includes(filterSearch) ||
+          schedule.itemName?.toLocaleLowerCase().includes(filterSearch)) &&
+        ((filterState === ItemState.Active && schedule.dueAt) ||
+          filterState === ItemState.All ||
+          (filterState === ItemState.Due && schedule.dueAt && schedule.dueAt <= now) ||
+          (filterState === ItemState.Inactive && !schedule.dueAt) ||
+          (filterState === ItemState.AdHoc && schedule.adHoc) ||
+          (filterState === ItemState.NotDue && schedule.dueAt && schedule.dueAt > now))
+    );
   return useQuery({
+    enabled: pathName === '/',
+    gcTime: MINUTE_MS,
     initialData: queryFn(),
     queryFn,
     queryKey: [
@@ -122,14 +145,16 @@ export function useSchedulesWithNamesQuery() {
         cat: categoriesMapQuery.dataUpdatedAt,
         item: itemsMapQuery.dataUpdatedAt,
         sch: schedulesQuery.dataUpdatedAt,
+        search: filterSearch,
+        state: filterState,
         unit: unitsMapQuery.dataUpdatedAt,
       },
     ],
   });
 }
 
-export function useScheduleGroupsQuery() {
-  const schedulesWithNamesQuery = useSchedulesWithNamesQuery();
+export function useFilteredScheduleGroupsQuery() {
+  const schedulesWithNamesQuery = useFilteredSchedulesWithNamesQuery();
   const now = new Date();
   const in24H = dateAdd(now, { hour: 24, ms: -1 });
   const queryFn = () =>
@@ -144,7 +169,7 @@ export function useScheduleGroupsQuery() {
                 ? 'Due'
                 : item.dueAt < in24H
                   ? formatTimeIso(item.dueAt)
-                  : formatDateIso(item.dueAt) || 'Unscheduled'
+                  : formatDateIso(item.dueAt)
           }.${formatDateIso(item.dueAt) || 'Unscheduled'}.${item.categoryId}.${item.categoryName}`
       )
     )
@@ -152,11 +177,17 @@ export function useScheduleGroupsQuery() {
       .map(([key, items]) => {
         const [dueAtLabel, dueAtIso, categoryIdStr, categoryName] = key.split('.');
         const categoryId = Number(categoryIdStr);
+        const hue =
+          // oxlint-disable-next-line typescript/no-misused-spread
+          [...categoryName]
+            .map((char) => char.charCodeAt(0))
+            .reduce((acc, item, i, arr) => acc + (item ^ (arr[(i + 3) % categoryName.length] * 3)), 0) % 360;
         return {
           categoryId,
           categoryName,
           dueAtIso,
           dueAtLabel,
+          hue,
           // oxlint-disable-next-line typescript/no-unsafe-type-assertion already filtered out undefined
           items: items as ScheduleRowWithNames[],
           key,
@@ -171,7 +202,7 @@ export function useScheduleGroupsQuery() {
       'schedule',
       'groups',
       {
-        upd: schedulesWithNamesQuery.dataUpdatedAt,
+        at: schedulesWithNamesQuery.dataUpdatedAt,
       },
     ],
   });

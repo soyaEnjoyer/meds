@@ -2,10 +2,9 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Settings } from 'lucide-react';
 import { useCallback } from 'react';
 
-import { ItemForm } from '@/components/forms/item';
 import { Button } from '@/components/ui/button';
 import { useDialog } from '@/hooks/dialog';
-import { useItemsQuery } from '@/hooks/query/queries/base';
+import { useFilteredItemsQuery } from '@/hooks/query/queries/item';
 import type { ItemRow } from '@/lib/drizzle/zod';
 
 export const Route = createFileRoute('/(ui)/items')({
@@ -31,8 +30,8 @@ function ItemsPageListRow({ id, name, defaultAmount, defaultCategoryId, defaultU
   );
 }
 
-function ItemsPageList() {
-  const query = useItemsQuery();
+function ItemsPage() {
+  const query = useFilteredItemsQuery();
 
   return (
     <div className='grid grid-cols-[auto_1fr_auto_auto_auto_auto] items-center gap-x-4 gap-y-2'>
@@ -47,16 +46,6 @@ function ItemsPageList() {
       {query.data.map((item) => (
         <ItemsPageListRow key={item.id} {...item} />
       ))}
-    </div>
-  );
-}
-
-function ItemsPage() {
-  return (
-    <div className='grid gap-4'>
-      <ItemForm mode='add' />
-      <ItemForm mode='edit' id={1} />
-      <ItemsPageList />
     </div>
   );
 }

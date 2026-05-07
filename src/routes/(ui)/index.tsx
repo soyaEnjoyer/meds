@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useDialog } from '@/hooks/dialog';
 import { useScheduleDoneMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
 import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
-import { useScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
+import { useFilteredScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
 import { dateAdd, formatDateIso } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)/')({
@@ -79,7 +79,7 @@ function ScheduleAccordionItem({
   );
 }
 
-function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: ScheduleGroup & { value: string }) {
+function ScheduleAccordionGroup({ dueAtLabel, categoryName, hue, items, value }: ScheduleGroup & { value: string }) {
   const scheduleDoneMutator = useScheduleDoneMutator();
   const scheduleSkipMutator = useScheduleSkipMutator();
 
@@ -99,19 +99,17 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: Sche
     [items, scheduleSkipMutator]
   );
 
-  const style: CSSProperties = useMemo(() => {
-    // oxlint-disable-next-line typescript/no-misused-spread
-    const hue = [...categoryName].map((char) => char.charCodeAt(0)).reduce((acc, item) => acc + item, 0) % 360;
-    return {
-      // background: `linear-gradient(to right, light-dark(hsl(${hue} 100% 90%), hsl(${hue} 50% 15%)) 50%, var(--color-secondary)) border-box`,
+  const style: CSSProperties = useMemo(
+    () => ({
       backgroundColor: `light-dark(hsl(${hue} 100% 90%), hsl(${hue} 50% 15%))`,
-    };
-  }, [categoryName]);
+    }),
+    [hue]
+  );
 
   return (
     <AccordionItem value={value}>
       <AccordionTrigger
-        className='-mx-2 flex items-center gap-4 truncate rounded-lg px-2'
+        className='-mx-2 flex items-center gap-4 truncate px-2'
         style={style}
         render={<div />}
         nativeButton={false}
@@ -136,7 +134,7 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: Sche
 }
 
 function SchedulePage() {
-  const scheduleGroups = useScheduleGroupsQuery();
+  const scheduleGroups = useFilteredScheduleGroupsQuery();
   const [accordionValue, setAccordionValue] = useState<string[]>(
     scheduleGroups.data
       .filter((item) => item.dueAtIso <= formatDateIso(dateAdd(new Date(), { hour: 12 })))

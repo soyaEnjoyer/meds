@@ -11,6 +11,7 @@ export enum ItemState {
   NotDue,
   Inactive,
   All,
+  AdHoc,
 }
 
 export const itemStates = [
@@ -18,6 +19,7 @@ export const itemStates = [
   ItemState.Due,
   ItemState.NotDue,
   ItemState.Inactive,
+  ItemState.AdHoc,
   ItemState.All,
 ] as const satisfies ItemState[];
 
@@ -26,6 +28,7 @@ export const itemStateNames = {
   [ItemState.Due]: 'Due',
   [ItemState.NotDue]: 'Not due',
   [ItemState.Inactive]: 'Inactive',
+  [ItemState.AdHoc]: 'Ad Hoc',
   [ItemState.All]: 'All',
 } as const satisfies Record<ItemState, string>;
 

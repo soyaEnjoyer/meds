@@ -12,10 +12,12 @@ export function ScheduleSummary({
 }: Pick<ScheduleRowWithNames, 'amount' | 'completedAt' | 'lastAmount' | 'formattedRepeat' | 'unitName'>) {
   return (
     <div className='flex flex-wrap justify-end gap-x-2 truncate text-xs **:truncate'>
-      <span className='inline-flex items-center gap-1'>
-        <Calendar className='size-3' />
-        <DateText date={completedAt} as='dist' />
-      </span>
+      {completedAt && (
+        <span className='inline-flex items-center gap-1'>
+          <Calendar className='size-3' />
+          <DateText date={completedAt} as='dist' />
+        </span>
+      )}
       <span className='inline-flex items-center gap-1'>
         <RotateCw className='size-3' />
         {formattedRepeat}

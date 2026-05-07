@@ -2,10 +2,9 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Settings } from 'lucide-react';
 import { useCallback } from 'react';
 
-import { CategoryForm } from '@/components/forms/category';
 import { Button } from '@/components/ui/button';
 import { useDialog } from '@/hooks/dialog';
-import { useCategoriesQuery } from '@/hooks/query/queries/base';
+import { useFilteredCategoriesQuery } from '@/hooks/query/queries/category';
 import type { CategoryRow } from '@/lib/drizzle/zod';
 
 export const Route = createFileRoute('/(ui)/categories')({
@@ -28,8 +27,8 @@ function CategoriesPageListRow({ id, name }: CategoryRow) {
   );
 }
 
-function CategoriesPageList() {
-  const query = useCategoriesQuery();
+function CategoriesPage() {
+  const query = useFilteredCategoriesQuery();
 
   return (
     <div className='grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-2'>
@@ -41,16 +40,6 @@ function CategoriesPageList() {
       {query.data.map((item) => (
         <CategoriesPageListRow key={item.id} {...item} />
       ))}
-    </div>
-  );
-}
-
-function CategoriesPage() {
-  return (
-    <div className='grid gap-4'>
-      <CategoryForm mode='add' />
-      <CategoryForm mode='edit' id={1} />
-      <CategoriesPageList />
     </div>
   );
 }

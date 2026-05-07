@@ -1,5 +1,6 @@
 'use client';
 
+import { X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,8 @@ export function DatePicker({
     [onValueChange]
   );
 
+  const handleClearClick = useCallback(() => onValueChange(null), [onValueChange]);
+
   useEffect(() => {
     if (!open) onBlur?.();
   }, [open, onBlur]);
@@ -37,13 +40,18 @@ export function DatePicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <input type='hidden' name={name} id={id} value={value ? value.toISOString() : ''} />
-      <PopoverTrigger
-        render={
-          <Button variant='outline' className='justify-start font-normal'>
-            {value ? formatDateIso(value) : 'Select date'}
-          </Button>
-        }
-      />
+      <div className='flex items-center border border-input'>
+        <PopoverTrigger
+          render={
+            <Button variant='ghost' className='grow justify-start'>
+              {value ? formatDateIso(value) : 'Select date'}
+            </Button>
+          }
+        />
+        <Button onClick={handleClearClick} variant='ghost' size='sm' className='px-1.5 text-muted-foreground'>
+          <X />
+        </Button>
+      </div>
       <PopoverContent className='w-auto overflow-hidden p-0' align='start'>
         <Calendar
           mode='single'

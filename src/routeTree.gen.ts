@@ -15,7 +15,6 @@ import { Route as uiIndexRouteImport } from './routes/(ui)/index'
 import { Route as ApiSseRouteImport } from './routes/api/sse'
 import { Route as ApiPingRouteImport } from './routes/api/ping'
 import { Route as uiUnitsRouteImport } from './routes/(ui)/units'
-import { Route as uiSchedulesRouteImport } from './routes/(ui)/schedules'
 import { Route as uiItemsRouteImport } from './routes/(ui)/items'
 import { Route as uiHistoryRouteImport } from './routes/(ui)/history'
 import { Route as uiCategoriesRouteImport } from './routes/(ui)/categories'
@@ -50,11 +49,6 @@ const uiUnitsRoute = uiUnitsRouteImport.update({
   path: '/units',
   getParentRoute: () => uiRouteRoute,
 } as any)
-const uiSchedulesRoute = uiSchedulesRouteImport.update({
-  id: '/schedules',
-  path: '/schedules',
-  getParentRoute: () => uiRouteRoute,
-} as any)
 const uiItemsRoute = uiItemsRouteImport.update({
   id: '/items',
   path: '/items',
@@ -76,7 +70,6 @@ export interface FileRoutesByFullPath {
   '/categories': typeof uiCategoriesRoute
   '/history': typeof uiHistoryRoute
   '/items': typeof uiItemsRoute
-  '/schedules': typeof uiSchedulesRoute
   '/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
@@ -87,7 +80,6 @@ export interface FileRoutesByTo {
   '/categories': typeof uiCategoriesRoute
   '/history': typeof uiHistoryRoute
   '/items': typeof uiItemsRoute
-  '/schedules': typeof uiSchedulesRoute
   '/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
@@ -100,7 +92,6 @@ export interface FileRoutesById {
   '/(ui)/categories': typeof uiCategoriesRoute
   '/(ui)/history': typeof uiHistoryRoute
   '/(ui)/items': typeof uiItemsRoute
-  '/(ui)/schedules': typeof uiSchedulesRoute
   '/(ui)/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
@@ -113,7 +104,6 @@ export interface FileRouteTypes {
     | '/categories'
     | '/history'
     | '/items'
-    | '/schedules'
     | '/units'
     | '/api/ping'
     | '/api/sse'
@@ -124,7 +114,6 @@ export interface FileRouteTypes {
     | '/categories'
     | '/history'
     | '/items'
-    | '/schedules'
     | '/units'
     | '/api/ping'
     | '/api/sse'
@@ -136,7 +125,6 @@ export interface FileRouteTypes {
     | '/(ui)/categories'
     | '/(ui)/history'
     | '/(ui)/items'
-    | '/(ui)/schedules'
     | '/(ui)/units'
     | '/api/ping'
     | '/api/sse'
@@ -194,13 +182,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof uiUnitsRouteImport
       parentRoute: typeof uiRouteRoute
     }
-    '/(ui)/schedules': {
-      id: '/(ui)/schedules'
-      path: '/schedules'
-      fullPath: '/schedules'
-      preLoaderRoute: typeof uiSchedulesRouteImport
-      parentRoute: typeof uiRouteRoute
-    }
     '/(ui)/items': {
       id: '/(ui)/items'
       path: '/items'
@@ -229,7 +210,6 @@ interface uiRouteRouteChildren {
   uiCategoriesRoute: typeof uiCategoriesRoute
   uiHistoryRoute: typeof uiHistoryRoute
   uiItemsRoute: typeof uiItemsRoute
-  uiSchedulesRoute: typeof uiSchedulesRoute
   uiUnitsRoute: typeof uiUnitsRoute
   uiIndexRoute: typeof uiIndexRoute
 }
@@ -238,7 +218,6 @@ const uiRouteRouteChildren: uiRouteRouteChildren = {
   uiCategoriesRoute: uiCategoriesRoute,
   uiHistoryRoute: uiHistoryRoute,
   uiItemsRoute: uiItemsRoute,
-  uiSchedulesRoute: uiSchedulesRoute,
   uiUnitsRoute: uiUnitsRoute,
   uiIndexRoute: uiIndexRoute,
 }

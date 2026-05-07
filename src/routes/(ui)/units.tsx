@@ -2,10 +2,9 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Settings } from 'lucide-react';
 import { useCallback } from 'react';
 
-import { UnitForm } from '@/components/forms/unit';
 import { Button } from '@/components/ui/button';
 import { useDialog } from '@/hooks/dialog';
-import { useUnitsQuery } from '@/hooks/query/queries/base';
+import { useFilteredUnitsQuery } from '@/hooks/query/queries/unit';
 import type { UnitRow } from '@/lib/drizzle/zod';
 
 export const Route = createFileRoute('/(ui)/units')({
@@ -28,8 +27,8 @@ function UnitsPageListRow({ id, name }: UnitRow) {
   );
 }
 
-function UnitsPageList() {
-  const query = useUnitsQuery();
+function UnitsPage() {
+  const query = useFilteredUnitsQuery();
 
   return (
     <div className='grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-2'>
@@ -41,16 +40,6 @@ function UnitsPageList() {
       {query.data.map((item) => (
         <UnitsPageListRow key={item.id} {...item} />
       ))}
-    </div>
-  );
-}
-
-function UnitsPage() {
-  return (
-    <div className='grid gap-4'>
-      <UnitForm mode='add' />
-      <UnitForm mode='edit' id={1} />
-      <UnitsPageList />
     </div>
   );
 }
