@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Pencil } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { useCallback } from 'react';
 
+import { CategoryForm } from '@/components/forms/category';
 import { Button } from '@/components/ui/button';
-import { CategoryForm } from '@/forms/category';
 import { useDialog } from '@/hooks/dialog';
 import { useCategoriesQuery } from '@/hooks/query/queries/base';
 import type { CategoryRow } from '@/lib/drizzle/zod';
@@ -22,7 +22,7 @@ function CategoriesPageListRow({ id, name }: CategoryRow) {
       <span>{id}</span>
       <span>{name}</span>
       <Button onClick={handleEditClick}>
-        <Pencil />
+        <Settings />
       </Button>
     </div>
   );

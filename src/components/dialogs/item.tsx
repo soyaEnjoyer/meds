@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
+import { ItemForm } from '@/components/forms/item';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { ItemForm } from '@/forms/item';
 import { useDialog } from '@/hooks/dialog';
 
 export function ItemDialog() {

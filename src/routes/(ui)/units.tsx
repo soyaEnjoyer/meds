@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Pencil } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { useCallback } from 'react';
 
+import { UnitForm } from '@/components/forms/unit';
 import { Button } from '@/components/ui/button';
-import { UnitForm } from '@/forms/unit';
 import { useDialog } from '@/hooks/dialog';
 import { useUnitsQuery } from '@/hooks/query/queries/base';
 import type { UnitRow } from '@/lib/drizzle/zod';
@@ -22,7 +22,7 @@ function UnitsPageListRow({ id, name }: UnitRow) {
       <span>{id}</span>
       <span>{name}</span>
       <Button onClick={handleEditClick}>
-        <Pencil />
+        <Settings />
       </Button>
     </div>
   );

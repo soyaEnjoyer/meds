@@ -8,6 +8,7 @@ import { LoaderCircle } from 'lucide-react';
 import type { ComponentProps } from 'react';
 
 import { CategoryDialog } from '@/components/dialogs/category';
+import { DoneCustomDialog } from '@/components/dialogs/done-custom';
 import { ItemDialog } from '@/components/dialogs/item';
 import { ScheduleDialog } from '@/components/dialogs/schedule';
 import { UnitDialog } from '@/components/dialogs/unit';
@@ -19,6 +20,7 @@ import { scheduleGet } from '@/functions.server/schedule';
 import { unitGet } from '@/functions.server/unit';
 import { DialogProvider } from '@/hooks/dialog';
 import { FilterProvider } from '@/hooks/filter';
+import { HOUR_MS } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)')({
   component: UiLayout,
@@ -46,8 +48,7 @@ const queryClient = new QueryClient({
       refetchOnMount: true,
       refetchOnReconnect: 'always',
       refetchOnWindowFocus: true,
-      // don't mark stale after some timeout
-      staleTime: Infinity,
+      staleTime: HOUR_MS,
       // make sure errors actually get logged
       throwOnError: (error, query) => {
         console.error('query error', query.queryKey, query, error);
@@ -88,6 +89,7 @@ function UiLayout() {
             <Outlet />
           </main>
           <CategoryDialog />
+          <DoneCustomDialog />
           <ItemDialog />
           <ScheduleDialog />
           <UnitDialog />

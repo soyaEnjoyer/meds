@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Check, Pencil, X } from 'lucide-react';
+import { Check, Settings, X } from 'lucide-react';
 import { useCallback } from 'react';
 
+import { ScheduleForm } from '@/components/forms/schedule';
 import { ScheduleSummary } from '@/components/schedule-summary';
 import { Button } from '@/components/ui/button';
-import { ScheduleForm } from '@/forms/schedule';
 import { useDialog } from '@/hooks/dialog';
 import type { ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { useSchedulesWithNamesQuery } from '@/hooks/query/queries/schedule';
@@ -45,7 +45,7 @@ function SchedulesPageListRow({
         unitName={unitName}
       />
       <Button onClick={handleEditClick}>
-        <Pencil />
+        <Settings />
       </Button>
     </div>
   );

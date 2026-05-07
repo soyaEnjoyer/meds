@@ -1,45 +1,35 @@
 import type { MouseEvent, SubmitEvent } from 'react';
 import { useCallback, useMemo } from 'react';
-import { z } from 'zod';
 
 import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/components/dialogs/confirm';
 import { FormField } from '@/components/form-field';
-import { useItemCreateMutator, useItemDeleteMutator, useItemUpdateMutator } from '@/hooks/query/mutators';
-import { useItemsMapQuery } from '@/hooks/query/queries/base';
-import type { ItemInsert } from '@/lib/drizzle/zod';
-import { itemInsertSchema } from '@/lib/drizzle/zod';
+import { useUnitCreateMutator, useUnitDeleteMutator, useUnitUpdateMutator } from '@/hooks/query/mutators';
+import { useUnitsMapQuery } from '@/hooks/query/queries/base';
+import type { UnitInsert } from '@/lib/drizzle/zod';
+import { unitInsertSchema } from '@/lib/drizzle/zod';
 import { useAppForm } from '@/lib/form';
 
-const editSchema = itemInsertSchema.extend({
-  defaultCategoryId: z.nullable(itemInsertSchema.shape.defaultCategoryId),
-  defaultUnitId: z.nullable(itemInsertSchema.shape.defaultUnitId),
-});
+const schema = unitInsertSchema;
 
-const submitSchema = itemInsertSchema;
+type Schema = UnitInsert;
 
-type EditSchema = z.infer<typeof editSchema>;
-type SubmitSchema = ItemInsert;
-
-const defaults: EditSchema = {
-  defaultAmount: 1,
-  defaultCategoryId: null,
-  defaultUnitId: null,
+const defaults: Schema = {
   name: '',
 } as const;
 
 const submitSelector = (state: { canSubmit: boolean; isSubmitting: boolean }) =>
   [state.canSubmit, state.isSubmitting] as const;
 
-export function ItemForm({
+export function UnitForm({
   closeDialog,
   ...props
 }: ({ mode: 'add' } | { mode: 'edit'; id: number }) & { closeDialog?: () => void }) {
-  const createMutator = useItemCreateMutator();
-  const updateMutator = useItemUpdateMutator();
-  const deleteMutator = useItemDeleteMutator();
-  const map = useItemsMapQuery();
+  const createMutator = useUnitCreateMutator();
+  const updateMutator = useUnitUpdateMutator();
+  const deleteMutator = useUnitDeleteMutator();
+  const map = useUnitsMapQuery();
 
-  const defaultValues: EditSchema = useMemo(() => {
+  const defaultValues: Schema = useMemo(() => {
     if (props.mode === 'edit') {
       const item = map.data.get(props.id);
       if (item) return item;
@@ -60,21 +50,18 @@ export function ItemForm({
           formApi.reset({ ...defaults });
         },
       } as const;
-      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-      const typedValue = value as SubmitSchema;
-      if (props.mode === 'add') createMutator.mutate({ data: typedValue }, options);
-      else updateMutator.mutate({ data: { id: props.id, ...typedValue } }, options);
+      if (props.mode === 'add') createMutator.mutate({ data: value }, options);
+      else updateMutator.mutate({ data: { id: props.id, ...value } }, options);
       closeDialog?.();
     },
     validators: {
-      onSubmit: submitSchema,
+      onSubmit: schema,
     },
   });
 
   const handleResetClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
-      form.reset({ ...defaultValues });
       form.reset({ ...defaultValues });
     },
     [form, defaultValues]
@@ -98,26 +85,15 @@ export function ItemForm({
 
   return (
     <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto font-semibold'>
-        {props.mode === 'add' ? 'Add an item' : `Editing ${defaultValues.name}`}
-      </h2>
+      <h2 className='mx-auto font-semibold'>{props.mode === 'add' ? 'Add a unit' : `Editing ${defaultValues.name}`}</h2>
       <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2'>
         <form.AppField name='name'>{(field) => <FormField component={field.Input} label='Name' />}</form.AppField>
-        <form.AppField name='defaultCategoryId'>
-          {(field) => <FormField component={field.CategoryCombobox} label='Default category' />}
-        </form.AppField>
-        <form.AppField name='defaultUnitId'>
-          {(field) => <FormField component={field.UnitCombobox} label='Default unit' />}
-        </form.AppField>
-        <form.AppField name='defaultAmount'>
-          {(field) => <FormField component={field.NumberPicker} label='Default amount' />}
-        </form.AppField>
       </fieldset>
       <footer className='flex items-center justify-around'>
         <form.Subscribe selector={submitSelector}>
           {([canSubmit, isSubmitting]) => (
             <form.Button type='submit' disabled={!canSubmit}>
-              {isSubmitting ? '...' : props.mode === 'add' ? 'Add' : 'Edit'}
+              {isSubmitting ? '...' : props.mode === 'add' ? 'Add' : 'Save'}
             </form.Button>
           )}
         </form.Subscribe>
@@ -125,7 +101,7 @@ export function ItemForm({
           Reset
         </form.Button>
         <ConfirmDialog>
-          <ConfirmDialogContent message={`Really delete item ${defaultValues.name}?`} onConfirm={handleDeleteClick} />
+          <ConfirmDialogContent message={`Really delete unit ${defaultValues.name}?`} onConfirm={handleDeleteClick} />
           <ConfirmDialogTrigger variant='destructive' hidden={props.mode === 'add'} size='lg'>
             Delete
           </ConfirmDialogTrigger>

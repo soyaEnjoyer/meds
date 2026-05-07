@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Pencil } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { useCallback } from 'react';
 
+import { ItemForm } from '@/components/forms/item';
 import { Button } from '@/components/ui/button';
-import { ItemForm } from '@/forms/item';
 import { useDialog } from '@/hooks/dialog';
 import { useItemsQuery } from '@/hooks/query/queries/base';
 import type { ItemRow } from '@/lib/drizzle/zod';
@@ -25,7 +25,7 @@ function ItemsPageListRow({ id, name, defaultAmount, defaultCategoryId, defaultU
       <span>{defaultCategoryId}</span>
       <span>{defaultUnitId}</span>
       <Button onClick={handleEditClick}>
-        <Pencil />
+        <Settings />
       </Button>
     </div>
   );

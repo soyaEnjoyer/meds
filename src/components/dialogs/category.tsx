@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
+import { CategoryForm } from '@/components/forms/category';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { CategoryForm } from '@/forms/category';
 import { useDialog } from '@/hooks/dialog';
 
 export function CategoryDialog() {

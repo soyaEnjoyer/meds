@@ -6,7 +6,7 @@ import {
   useSchedulesQuery,
   useUnitsMapQuery,
 } from '@/hooks/query/queries/base';
-import { daysDiff, formatDatetimeIso } from '@/lib/date';
+import { dateAdd, daysDiff, formatDateIso, formatTimeIso } from '@/lib/date';
 import type { ScheduleRow } from '@/lib/drizzle/zod';
 import type { MonthTuple, WeekdayTuple } from '@/lib/enums';
 import { months, weekdays } from '@/lib/enums';
@@ -26,6 +26,7 @@ export interface ScheduleGroup {
   key: string;
   categoryId: number;
   categoryName: string;
+  dueAtLabel: string;
   dueAtIso: string;
   items: ScheduleRowWithNames[];
 }
@@ -129,21 +130,33 @@ export function useSchedulesWithNamesQuery() {
 
 export function useScheduleGroupsQuery() {
   const schedulesWithNamesQuery = useSchedulesWithNamesQuery();
+  const now = new Date();
+  const in24H = dateAdd(now, { hour: 24, ms: -1 });
   const queryFn = () =>
     Object.entries(
       Object.groupBy(
         schedulesWithNamesQuery.data,
-        (item) => `${formatDatetimeIso(item.dueAt) || 'Unscheduled'}.${item.categoryId}.${item.categoryName}`
+        (item) =>
+          `${
+            item.dueAt === null
+              ? 'Unscheduled'
+              : item.dueAt < now
+                ? 'Due'
+                : item.dueAt < in24H
+                  ? formatTimeIso(item.dueAt)
+                  : formatDateIso(item.dueAt) || 'Unscheduled'
+          }.${formatDateIso(item.dueAt) || 'Unscheduled'}.${item.categoryId}.${item.categoryName}`
       )
     )
       .filter((item): item is Required<typeof item> => Boolean(item[1]?.length))
       .map(([key, items]) => {
-        const [dueAtIso, categoryIdStr, categoryName] = key.split('.');
+        const [dueAtLabel, dueAtIso, categoryIdStr, categoryName] = key.split('.');
         const categoryId = Number(categoryIdStr);
         return {
           categoryId,
           categoryName,
           dueAtIso,
+          dueAtLabel,
           // oxlint-disable-next-line typescript/no-unsafe-type-assertion already filtered out undefined
           items: items as ScheduleRowWithNames[],
           key,

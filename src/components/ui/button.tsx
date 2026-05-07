@@ -22,9 +22,13 @@ const buttonVariants = cva(
         xs: "h-6 gap-1 rounded-none px-2 text-xs has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
       },
       variant: {
+        background:
+          'bg-background text-primary hover:bg-background/80 aria-expanded:bg-background aria-expanded:text-primary',
         default: 'bg-primary text-primary-foreground [a]:hover:bg-primary/80',
         destructive:
           'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
+        'destructive-opaque':
+          'bg-[color-mix(var(--danger)_10%,var(--background))] text-destructive hover:bg-[color-mix(var(--danger)_20%,var(--background))] focus-visible:border-[color-mix(var(--danger)_40%,var(--background))] focus-visible:ring-[color-mix(var(--danger)_20%,var(--background))] dark:bg-[color-mix(var(--danger)_20%,var(--background))] dark:hover:bg-[color-mix(var(--danger)_30%,var(--background))] dark:focus-visible:ring-[color-mix(var(--danger)_40%,var(--background))]',
         ghost:
           'hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
         link: 'text-primary underline-offset-4',

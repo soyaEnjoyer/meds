@@ -15,15 +15,7 @@ const editSchema = scheduleInsertSchema.extend({
   unitId: z.nullable(scheduleInsertSchema.shape.unitId),
 });
 
-const submitSchema = scheduleInsertSchema.transform((value) => {
-  // set dueAt time (it's just a date) according to form hour and minute
-  const dueAt = value.dueAt ? new Date(value.dueAt) : null;
-  if (dueAt) dueAt.setHours(value.time.hour, value.time.minute, 0, 0);
-  return {
-    ...value,
-    dueAt,
-  };
-});
+const submitSchema = scheduleInsertSchema;
 
 type EditSchema = z.infer<typeof editSchema>;
 type SubmitSchema = z.infer<typeof submitSchema>;
@@ -216,7 +208,7 @@ export function ScheduleForm({
         <form.Subscribe selector={submitSelector}>
           {([canSubmit, isSubmitting]) => (
             <form.Button type='submit' disabled={!canSubmit}>
-              {isSubmitting ? '...' : props.mode === 'add' ? 'Add' : 'Edit'}
+              {isSubmitting ? '...' : props.mode === 'add' ? 'Add' : 'Save'}
             </form.Button>
           )}
         </form.Subscribe>

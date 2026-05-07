@@ -9,7 +9,7 @@ interface DialogState {
   open: boolean;
 }
 
-export type DialogName = 'category' | 'history' | 'item' | 'schedule' | 'theme' | 'unit';
+export type DialogName = 'category' | 'done-custom' | 'history' | 'item' | 'schedule' | 'theme' | 'unit';
 
 interface DialogStore extends Record<DialogName, DialogState> {
   actions: {
@@ -35,6 +35,7 @@ const store = createStore<DialogStore>((set) => ({
     },
   },
   category: dialogDefault,
+  'done-custom': dialogDefault,
   history: dialogDefault,
   item: dialogDefault,
   schedule: dialogDefault,

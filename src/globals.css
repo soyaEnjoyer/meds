@@ -7,6 +7,10 @@
   color-scheme: light dark;
   interpolate-size: allow-keywords;
   --radius: 0.625rem;
+
+  /* defined here so i can access them directly from css */
+  --background: light-dark(oklch(1 0 0), oklch(0.145 0 0));
+  --danger: light-dark(var(--color-rose-600), var(--color-rose-400));
 }
 
 @theme inline {
@@ -16,7 +20,7 @@
   --color-theme: light-dark(var(--color-purple-600), var(--color-purple-400));
   --color-success: light-dark(var(--color-emerald-600), var(--color-emerald-400));
   --color-warning: light-dark(var(--color-amber-600), var(--color-amber-400));
-  --color-danger: light-dark(var(--color-rose-600), var(--color-rose-400));
+  --color-danger: var(--danger);
 
   --color-sidebar-ring: light-dark(oklch(0.708 0 0), oklch(0.556 0 0));
   --color-sidebar-border: light-dark(oklch(0.922 0 0), oklch(1 0 0 / 10%));
@@ -49,7 +53,7 @@
   --color-card-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
   --color-card: light-dark(oklch(1 0 0), oklch(0.205 0 0));
   --color-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
-  --color-background: light-dark(oklch(1 0 0), oklch(0.145 0 0));
+  --color-background: var(--background);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);

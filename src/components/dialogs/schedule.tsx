@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
+import { ScheduleForm } from '@/components/forms/schedule';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { ScheduleForm } from '@/forms/schedule';
 import { useDialog } from '@/hooks/dialog';
 
 export function ScheduleDialog() {
