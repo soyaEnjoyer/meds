@@ -1,11 +1,11 @@
 import { createFormHook, createFormHookContexts } from '@tanstack/react-form';
 
-import { DatePicker } from '@/components/date-picker';
-import { DayPicker } from '@/components/day-picker';
-import { MonthPicker } from '@/components/month-picker';
-import { NumberPicker } from '@/components/number-picker';
-import { CategoryCombobox, ItemCombobox, UnitCombobox } from '@/components/query-combobox';
-import { TimePicker } from '@/components/time-picker';
+import { DatePicker } from '@/components/inputs/date-picker';
+import { DayPicker } from '@/components/inputs/day-picker';
+import { MonthPicker } from '@/components/inputs/month-picker';
+import { NumberPicker } from '@/components/inputs/number-picker';
+import { CategoryCombobox, ItemCombobox, UnitCombobox } from '@/components/inputs/query-combobox';
+import { TimePicker } from '@/components/inputs/time-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';

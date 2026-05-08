@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
-import { DoneCustomForm } from '@/components/forms/done-custom';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { DoneCustomForm } from '@/forms/done-custom';
 import { useDialog } from '@/hooks/dialog';
 
 export function DoneCustomDialog() {

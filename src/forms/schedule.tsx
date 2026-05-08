@@ -2,8 +2,8 @@ import type { MouseEvent, SubmitEvent } from 'react';
 import { useCallback, useMemo } from 'react';
 import { z } from 'zod';
 
-import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/components/dialogs/confirm';
 import { FormField } from '@/components/form-field';
+import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/dialogs/confirm';
 import { useScheduleCreateMutator, useScheduleDeleteMutator, useScheduleUpdateMutator } from '@/hooks/query/mutators';
 import { useItemsMapQuery, useSchedulesMapQuery } from '@/hooks/query/queries/base';
 import { scheduleInsertSchema } from '@/lib/drizzle/zod';

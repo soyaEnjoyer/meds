@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IconDotChar123extChar125RouteImport } from './routes/icon[.]{$ext}'
 import { Route as uiRouteRouteImport } from './routes/(ui)/route'
 import { Route as uiIndexRouteImport } from './routes/(ui)/index'
+import { Route as ApiStatusRouteImport } from './routes/api/status'
 import { Route as ApiSseRouteImport } from './routes/api/sse'
 import { Route as ApiPingRouteImport } from './routes/api/ping'
 import { Route as uiUnitsRouteImport } from './routes/(ui)/units'
@@ -33,6 +34,11 @@ const uiIndexRoute = uiIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => uiRouteRoute,
+} as any)
+const ApiStatusRoute = ApiStatusRouteImport.update({
+  id: '/api/status',
+  path: '/api/status',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSseRoute = ApiSseRouteImport.update({
   id: '/api/sse',
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
+  '/api/status': typeof ApiStatusRoute
   '/': typeof uiIndexRoute
 }
 export interface FileRoutesByTo {
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
+  '/api/status': typeof ApiStatusRoute
   '/': typeof uiIndexRoute
 }
 export interface FileRoutesById {
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/(ui)/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
+  '/api/status': typeof ApiStatusRoute
   '/(ui)/': typeof uiIndexRoute
 }
 export interface FileRouteTypes {
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/units'
     | '/api/ping'
     | '/api/sse'
+    | '/api/status'
     | '/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/units'
     | '/api/ping'
     | '/api/sse'
+    | '/api/status'
     | '/'
   id:
     | '__root__'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/(ui)/units'
     | '/api/ping'
     | '/api/sse'
+    | '/api/status'
     | '/(ui)/'
   fileRoutesById: FileRoutesById
 }
@@ -136,6 +148,7 @@ export interface RootRouteChildren {
   IconDotChar123extChar125Route: typeof IconDotChar123extChar125Route
   ApiPingRoute: typeof ApiPingRoute
   ApiSseRoute: typeof ApiSseRoute
+  ApiStatusRoute: typeof ApiStatusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -160,6 +173,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof uiIndexRouteImport
       parentRoute: typeof uiRouteRoute
+    }
+    '/api/status': {
+      id: '/api/status'
+      path: '/api/status'
+      fullPath: '/api/status'
+      preLoaderRoute: typeof ApiStatusRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/sse': {
       id: '/api/sse'
@@ -230,6 +250,7 @@ const rootRouteChildren: RootRouteChildren = {
   IconDotChar123extChar125Route: IconDotChar123extChar125Route,
   ApiPingRoute: ApiPingRoute,
   ApiSseRoute: ApiSseRoute,
+  ApiStatusRoute: ApiStatusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -2,8 +2,8 @@ import { useServerFn } from '@tanstack/react-start';
 import type { MouseEvent, SubmitEvent } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/components/dialogs/confirm';
 import { FormField } from '@/components/form-field';
+import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/dialogs/confirm';
 import { historyGetOne } from '@/functions.server/history';
 import { useHistoryDeleteMutator, useHistoryUpdateMutator } from '@/hooks/query/mutators';
 import { formatDatetimeIso } from '@/lib/date';

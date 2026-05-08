@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
-import { HistoryForm } from '@/components/forms/history';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { HistoryForm } from '@/forms/history';
 import { useDialog } from '@/hooks/dialog';
 
 export function HistoryDialog() {

@@ -1,8 +1,8 @@
 import type { MouseEvent, SubmitEvent } from 'react';
 import { useCallback, useMemo } from 'react';
 
-import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/components/dialogs/confirm';
 import { FormField } from '@/components/form-field';
+import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/dialogs/confirm';
 import { useUnitCreateMutator, useUnitDeleteMutator, useUnitUpdateMutator } from '@/hooks/query/mutators';
 import { useUnitsMapQuery } from '@/hooks/query/queries/base';
 import type { UnitInsert } from '@/lib/drizzle/zod';

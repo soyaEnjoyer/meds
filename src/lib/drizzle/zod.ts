@@ -108,7 +108,11 @@ export const historyUpdateSchema = historySchema
     updatedAt: true,
   })
   .extend({
-    amount: historySchema.shape.amount.transform((value) => (value && value > 0 ? value : null)),
+    amount: z
+      .int()
+      .min(0)
+      .nullable()
+      .transform((value) => value || null),
   });
 
 export type HistoryRow = z.infer<typeof historySchema>;
