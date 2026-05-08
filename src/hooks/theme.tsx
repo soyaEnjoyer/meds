@@ -29,7 +29,7 @@ interface ThemeStore extends ThemeState {
   };
 }
 
-export const themeDefault: ThemeState = { font: 'mono', scale: 1, scheme: 'auto' } as const;
+export const themeDefault: ThemeState = { font: 'sans', scale: 1, scheme: 'auto' } as const;
 export const themeCookieName = `${name}.theme`;
 
 const store = createStore(

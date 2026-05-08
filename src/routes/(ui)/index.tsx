@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/dialogs/confirm';
 import { useDialog } from '@/hooks/dialog';
 import { useScheduleDoneMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
 import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
@@ -98,44 +99,46 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, hue, items, value }:
   );
 
   const handleSkipClick = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      event.stopPropagation();
-      scheduleSkipMutator.mutate({ data: items.map(({ id }) => ({ id })) });
-    },
+    () => scheduleSkipMutator.mutate({ data: items.map(({ id }) => ({ id })) }),
     [items, scheduleSkipMutator]
   );
 
+  const handleConfirmClick = useCallback((event: MouseEvent<HTMLButtonElement>) => event.stopPropagation(), []);
+
   const style: CSSProperties = useMemo(
     () => ({
-      backgroundColor: `light-dark(hsl(${hue} 100% 90%), hsl(${hue} 50% 15%))`,
+      backgroundColor: `light-dark(hsl(${hue} 80% 70%), hsl(${hue} 40% 50%))`,
     }),
     [hue]
   );
 
   return (
-    <AccordionItem value={value}>
-      <AccordionTrigger
-        className='-mx-2 flex items-center gap-4 truncate px-2'
-        style={style}
-        render={<div />}
-        nativeButton={false}
-      >
-        <h2 className='me-auto truncate text-base'>{categoryName}</h2>
-        <Badge variant='background'>{dueAtLabel}</Badge>
-        <Badge variant='background'>{items.length.toLocaleString()}</Badge>
-        <Button onClick={handleDoneClick}>
-          <Check aria-description='Done' />
-        </Button>
-        <Button onClick={handleSkipClick} variant='destructive-opaque'>
-          <X aria-description='Skip' />
-        </Button>
-      </AccordionTrigger>
-      <AccordionContent className='flex flex-col gap-2'>
-        {items.map((item) => (
-          <ScheduleAccordionItem key={item.id} {...item} />
-        ))}
-      </AccordionContent>
-    </AccordionItem>
+    <ConfirmDialog>
+      <ConfirmDialogContent message={`Really skip ${items.length} items?`} onConfirm={handleSkipClick} />
+      <AccordionItem value={value}>
+        <AccordionTrigger
+          className='-mx-2 flex items-center gap-4 truncate px-2'
+          style={style}
+          render={<div />}
+          nativeButton={false}
+        >
+          <h2 className='me-auto truncate text-base'>{categoryName}</h2>
+          <Badge variant='background'>{dueAtLabel}</Badge>
+          <Badge variant='background'>{items.length.toLocaleString()}</Badge>
+          <Button onClick={handleDoneClick}>
+            <Check aria-description='Done' />
+          </Button>
+          <ConfirmDialogTrigger variant='destructive-opaque' onClick={handleConfirmClick}>
+            <X aria-description='Skip' />
+          </ConfirmDialogTrigger>
+        </AccordionTrigger>
+        <AccordionContent className='flex flex-col gap-2'>
+          {items.map((item) => (
+            <ScheduleAccordionItem key={item.id} {...item} />
+          ))}
+        </AccordionContent>
+      </AccordionItem>
+    </ConfirmDialog>
   );
 }
 
