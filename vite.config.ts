@@ -1,5 +1,6 @@
 import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
+import { devtools } from '@tanstack/devtools-vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import { nitro } from 'nitro/vite';
@@ -7,8 +8,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [
-    tailwindcss({ optimize: { minify: true } }),
     tanstackStart({ importProtection: { behavior: 'error', client: { excludeFiles: [/(^|\b)server(\b|$)/] } } }),
+    devtools(),
+    tailwindcss({ optimize: { minify: true } }),
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     nitro({ minify: true }),

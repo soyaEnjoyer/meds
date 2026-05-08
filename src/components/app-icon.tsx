@@ -2,14 +2,25 @@ import type { ComponentProps } from 'react';
 
 export function AppIcon({
   fill = 'currentColor',
-  backgroundFill,
-  viewBox = '0.5 1.5 16 16',
+  stroke = 'currentColor',
+  backgroundFill = 'none',
+  viewBox = '0 0 24 24',
   ...props
 }: ComponentProps<'svg'> & { backgroundFill?: string }) {
   return (
-    <svg xmlns='http://www.w3.org/2000/svg' fill={fill} viewBox={viewBox} {...props}>
-      {backgroundFill ? <circle cx={8.5} cy={9.5} r={7.5} fill={backgroundFill} strokeWidth={0} /> : null}
-      <path d='M16.417 9.579A7.917 7.917 0 1 1 8.5 1.662a7.917 7.917 0 0 1 7.917 7.917zm-3.34-2.323a.63.63 0 0 0-.628-.628H5.892l-.436-1a.384.384 0 0 0-.351-.23H3.68a.384.384 0 1 0 0 .768h1.173l1.785 4.096a.37.37 0 0 0-.087-.01 1.161 1.161 0 1 0 0 2.322h.042a.792.792 0 1 0 .864 0h3.452a.792.792 0 1 0 .864 0h.565a.384.384 0 1 0 0-.767H6.55a.393.393 0 0 1 0-.787.38.38 0 0 0 .098-.013l5.803-.602a.714.714 0 0 0 .625-.694z' />
+    <svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='none' viewBox={viewBox} {...props}>
+      <path
+        d='m 15.5,15.5 -7,-7 -5,5 c -4.761662,4.666424 2.333576,11.761662 7,7 z'
+        fill={fill}
+        strokeWidth='1'
+        stroke={stroke}
+      />
+      <path
+        d='M 16.761719,1.9277344 C 15.65803,1.9841417 14.52078,2.4583864 13.5,3.5 l -5,5 7,7 5,-5 C 24.220048,6.8543563 20.703466,1.7262797 16.761719,1.9277344 Z'
+        fill={backgroundFill}
+        strokeWidth='1'
+        stroke={stroke}
+      />
     </svg>
   );
 }

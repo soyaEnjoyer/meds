@@ -5,7 +5,6 @@ import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
 import { Outlet, createFileRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { LoaderCircle } from 'lucide-react';
-import type { ComponentProps } from 'react';
 
 import { Nav } from '@/components/nav';
 import { SseReloader } from '@/components/sse-reloader';
@@ -71,18 +70,6 @@ function Pending() {
   );
 }
 
-const plugins: ComponentProps<typeof TanStackDevtools>['plugins'] = [
-  formDevtoolsPlugin(),
-  {
-    name: 'Tanstack Query',
-    render: <ReactQueryDevtoolsPanel />,
-  },
-  {
-    name: 'Tanstack Router',
-    render: <TanStackRouterDevtoolsPanel />,
-  },
-];
-
 function UiLayout() {
   return (
     <DialogProvider>
@@ -103,7 +90,20 @@ function UiLayout() {
             <HistoryDialog />
           </FilterProvider>
           <SseReloader />
-          <TanStackDevtools plugins={plugins} />
+          <TanStackDevtools
+            // oxlint-disable-next-line react_perf/jsx-no-new-array-as-prop
+            plugins={[
+              formDevtoolsPlugin(),
+              {
+                name: 'Tanstack Query',
+                render: <ReactQueryDevtoolsPanel />,
+              },
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+            ]}
+          />
         </QueryClientProvider>
       </PagerProvider>
     </DialogProvider>

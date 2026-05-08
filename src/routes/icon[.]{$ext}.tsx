@@ -27,7 +27,7 @@ export const Route = createFileRoute('/icon.{$ext}')({
         let response = cache.get(format);
         if (!response) {
           const svg = renderToStaticMarkup(
-            <AppIcon width='256px' height='256px' fill='#9810fa' backgroundFill='#f5f5f5' />
+            <AppIcon width='256px' height='256px' fill='#9810fa' stroke='#9810fa' backgroundFill='#f5f5f5' />
           );
           // oxlint-disable-next-line eslint/no-unsafe-type-assertion
           response = (await sharp(Buffer.from(svg)).toFormat(format, { quality: 95 }).toBuffer()).buffer as ArrayBuffer;

@@ -31,7 +31,7 @@ function RootLayout() {
         <head>
           <HeadContent />
         </head>
-        <body className='@container'>
+        <body className='@container min-h-dvh'>
           <Outlet />
           <Scripts />
         </body>

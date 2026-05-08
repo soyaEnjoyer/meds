@@ -1,13 +1,31 @@
-// oxlint-disable-next-line import/no-nodejs-modules
-import { env } from 'node:process';
+// oxlint-disable import/no-nodejs-modules
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { cwd, env } from 'node:process';
+import { parseEnv } from 'node:util';
 
 import { getTextStatus } from '@/functions.server/status';
 import { HOUR_MS } from '@/lib/date';
 
 const INTERVAL_MS = HOUR_MS / 4;
+const MAX_ENV_TRAVERSALS = 2;
 
 let timeout: NodeJS.Timeout | null = null;
 let interval: NodeJS.Timeout | null = null;
+
+// vite processes .env files in the project root, but nitro builds to a subdirectory
+function loadEnv(): void {
+  let dirPath = cwd();
+  for (let i = 0; i < MAX_ENV_TRAVERSALS; ++i) {
+    const envPath = join(dirPath, '.env');
+    if (existsSync(envPath)) {
+      const parsed = parseEnv(readFileSync(envPath, { encoding: 'utf8' }));
+      for (const [key, val] of Object.entries(parsed)) env[key] = val;
+      return;
+    }
+    dirPath = dirname(dirPath);
+  }
+}
 
 function envOrThrow(key: string): string {
   const value = env[key];
@@ -16,9 +34,21 @@ function envOrThrow(key: string): string {
 }
 
 function start(): void {
-  const gotifyUrl = envOrThrow('GOTIFY_URL');
-  const token = envOrThrow('GOTIFY_APP_TOKEN');
-  const appUrl = envOrThrow('APP_URL');
+  loadEnv();
+
+  // oxlint-disable init-declarations
+  let gotifyUrl: string;
+  let token: string;
+  let appUrl: string;
+  // oxlint-enable init-declarations
+  try {
+    gotifyUrl = envOrThrow('GOTIFY_URL');
+    token = envOrThrow('GOTIFY_APP_TOKEN');
+    appUrl = envOrThrow('APP_URL');
+  } catch (error) {
+    console.error('gotify:', String(error));
+    return;
+  }
 
   let prevMessage: string | undefined = undefined;
   let prevTitle: string | undefined = undefined;
