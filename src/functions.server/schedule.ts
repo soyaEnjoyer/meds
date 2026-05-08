@@ -36,6 +36,13 @@ export const scheduleGet = createServerFn().handler(
       .orderBy(isNull(scheduleTable.dueAt), scheduleTable.dueAt)
 );
 
+export const scheduleGetOne = createServerFn()
+  .inputValidator((id: number) => id)
+  .handler(async ({ data: id }): Promise<ScheduleRow> => {
+    const [result] = await db.select().from(scheduleTable).where(eq(scheduleTable.id, id));
+    return result;
+  });
+
 export const scheduleCreate = createServerFn()
   .inputValidator(scheduleInsertSchema)
   .handler(async ({ data: { dueAt: dueAtDate, ...rest } }): Promise<ScheduleRow> => {

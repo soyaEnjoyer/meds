@@ -22,3 +22,16 @@ export const numberArrayMapper = {
     return value.split(',').map(Number);
   },
 };
+
+export const nullableDateMapper = {
+  mapFromDriverValue(value: string | number | null): Date | null {
+    if (!value) return null;
+    return new Date(value);
+  },
+};
+
+export const booleanMapper = {
+  mapFromDriverValue(value: number): boolean {
+    return value === 1;
+  },
+};

@@ -9,6 +9,7 @@ import type { ComponentProps } from 'react';
 
 import { CategoryDialog } from '@/components/dialogs/category';
 import { DoneCustomDialog } from '@/components/dialogs/done-custom';
+import { HistoryDialog } from '@/components/dialogs/history';
 import { ItemDialog } from '@/components/dialogs/item';
 import { ScheduleDialog } from '@/components/dialogs/schedule';
 import { ScheduleHistoryDialog } from '@/components/dialogs/schedule-history';
@@ -99,6 +100,7 @@ function UiLayout() {
             <UnitDialog />
             <ThemeDialog />
             <ScheduleHistoryDialog />
+            <HistoryDialog />
           </FilterProvider>
           <SseReloader />
           <TanStackDevtools plugins={plugins} />

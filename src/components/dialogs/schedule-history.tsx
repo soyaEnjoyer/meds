@@ -1,7 +1,7 @@
 import { Pencil } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 
-import { DateText } from '@/components/date';
+import { DateText } from '@/components/date-text';
 import { Pager } from '@/components/pager';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
@@ -17,10 +17,10 @@ function ScheduleHistoryDialogRow({ id, createdAt, amount, unitName }: HistoryWi
   const handleEditClick = useCallback(() => openDialog('history', id), [id, openDialog]);
 
   return (
-    <div className='flex w-full transition-in-up items-center gap-4'>
+    <div className='contents transition-in-up'>
       <DateText date={createdAt} as='date' />
       <DateText date={createdAt} as='dist' className='me-auto' />
-      <span>{`${amount} ${unitName}`}</span>
+      <span className='text-xs'>{(amount && `${amount} ${unitName}`) || 'Skipped'}</span>
       <Button onClick={handleEditClick} aria-description='Edit'>
         <Pencil />
       </Button>
@@ -46,12 +46,14 @@ export function ScheduleHistoryDialog() {
   const handleOpenChange = useCallback((open: boolean) => setDialog('scheduleHistory', open), [setDialog]);
 
   return (
-    <Dialog open={dialogState.open} onOpenChange={handleOpenChange}>
+    <Dialog open={dialogState.open} onOpenChange={handleOpenChange} disablePointerDismissal>
       <DialogContent className='flex flex-col gap-4'>
         <DialogHeader className='text-base'>History: {itemName}</DialogHeader>
-        <div className='flex flex-col gap-2'>
+        <div className='grid grid-cols-[auto_1fr_auto_auto] items-center gap-x-4 gap-y-2'>
           {!query.data?.length ? (
-            <div className='flex items-center justify-center gap-2 p-4 text-muted-foreground'>No data</div>
+            <div className='col-span-full flex items-center justify-center gap-2 p-4 text-muted-foreground'>
+              No data
+            </div>
           ) : (
             query.data.map((item) => <ScheduleHistoryDialogRow key={item.id} {...item} />)
           )}

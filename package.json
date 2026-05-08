@@ -16,10 +16,12 @@
     "docker:build": "docker build --tag meds:latest --progress plain .",
     "docker:run": "docker run --name meds -h meds -it --rm -p 3000:3000 -v ./.local/:/config/ meds:latest",
     "format": "oxfmt",
+    "hello": "$(which rg) -g '!package.json' -F 'return <div>Hello ' && exit  1 || exit 0",
+    "hooks": "find ./.hooks -type f -executable -exec cp --link --update=all {} .git/hooks/ \\; -print",
     "lint": "oxlint --config=./oxlint-full.config.ts --fix",
     "lint:fix": "oxlint --config=./oxlint-full.config.ts --fix --fix-suggestions",
     "local": "pnpm build && pnpm start",
-    "pre": "oxfmt --check && oxlint --config=./oxlint-full.config.ts --deny-warnings",
+    "pre": "pnpm hello && oxfmt --check && oxlint --config=./oxlint-full.config.ts --deny-warnings && pnpm hello",
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {

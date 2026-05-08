@@ -1,6 +1,6 @@
 import { Calendar, Pill, RotateCw } from 'lucide-react';
 
-import { DateText } from '@/components/date';
+import { DateText } from '@/components/date-text';
 import type { ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 
 export function ScheduleSummary({

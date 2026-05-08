@@ -97,16 +97,19 @@ export type ScheduleInsert = z.infer<typeof scheduleInsertSchema>;
 // History
 export const historySchema = createSelectSchema(historyTable);
 
-export const historyUpdateSchema = historySchema.omit({
-  categoryId: true,
-  deletedAt: true,
-  itemId: true,
-  scheduleId: true,
-  scheduledAmount: true,
-  scheduledAt: true,
-  unitId: true,
-  updatedAt: true,
-});
+export const historyUpdateSchema = historySchema
+  .omit({
+    categoryId: true,
+    deletedAt: true,
+    itemId: true,
+    scheduleId: true,
+    scheduledAmount: true,
+    scheduledAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    amount: historySchema.shape.amount.transform((value) => (value && value > 0 ? value : null)),
+  });
 
 export type HistoryRow = z.infer<typeof historySchema>;
 export type HistoryUpdate = z.infer<typeof historyUpdateSchema>;

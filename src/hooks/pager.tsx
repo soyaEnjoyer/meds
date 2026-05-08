@@ -59,7 +59,7 @@ function ResetHistoryPagerOnNavigate() {
 }
 
 function ResetScheduleHistoryPagerOnDialogOpenChange() {
-  const itemDialogOpen = useDialog((state) => state.item.open);
+  const itemDialogOpen = useDialog((state) => state.scheduleHistory.open);
   const reset = usePager((state) => state.actions.reset);
   useEffect(() => reset('scheduleHistory'), [itemDialogOpen, reset]);
   return null;

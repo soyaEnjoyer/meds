@@ -59,13 +59,13 @@ export function dateAdd(value: Date, { year, month, day, hour, minute, second, m
 
 export function dateSet(value: Date, { year, month, day, hour, minute, second, ms }: OptionalDateParts): Date {
   const date = new Date(value);
-  if (year) date.setFullYear(year);
-  if (month) date.setMonth(month);
-  if (day) date.setDate(day);
-  if (hour) date.setHours(hour);
-  if (minute) date.setMinutes(minute);
-  if (second) date.setSeconds(second);
-  if (ms) date.setMilliseconds(ms);
+  if (typeof year === 'number') date.setFullYear(year);
+  if (typeof month === 'number') date.setMonth(month);
+  if (typeof day === 'number') date.setDate(day);
+  if (typeof hour === 'number') date.setHours(hour);
+  if (typeof minute === 'number') date.setMinutes(minute);
+  if (typeof second === 'number') date.setSeconds(second);
+  if (typeof ms === 'number') date.setMilliseconds(ms);
   return date;
 }
 

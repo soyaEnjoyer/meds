@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 
 import { categoryCreate, categoryDelete, categoryUpdate } from '@/functions.server/category';
+import { historyDelete, historyUpdate } from '@/functions.server/history';
 import { itemCreate, itemDelete, itemUpdate } from '@/functions.server/item';
 import {
   scheduleCreate,
@@ -186,6 +187,28 @@ export function useUnitDeleteMutator() {
   return useMutation({
     mutationFn,
     onSuccess: async (_data, vars) => updateUnitQueryData(queryClient, vars.data, null),
+  });
+}
+//#endregion
+
+//#region history
+export function useHistoryDeleteMutator() {
+  // useScheduleHistoryQuery.updatedAt is part of the queryKey so we don't need to invalidate anything
+  const queryClient = useQueryClient();
+  const mutationFn = useServerFn(historyDelete);
+  return useMutation({
+    mutationFn,
+    onSuccess: async (data) => await updateScheduleQueryData(queryClient, [data.id], [data]),
+  });
+}
+
+export function useHistoryUpdateMutator() {
+  // schedule.updatedAt is part of the queryKey so we don't need to invalidate anything
+  const queryClient = useQueryClient();
+  const mutationFn = useServerFn(historyUpdate);
+  return useMutation({
+    mutationFn,
+    onSuccess: async (data) => await updateScheduleQueryData(queryClient, [data.id], [data]),
   });
 }
 //#endregion

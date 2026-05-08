@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Pencil } from 'lucide-react';
 import { useCallback } from 'react';
 
-import { DateText } from '@/components/date';
+import { DateText } from '@/components/date-text';
 import { Pager } from '@/components/pager';
 import { Button } from '@/components/ui/button';
 import { useDialog } from '@/hooks/dialog';
@@ -20,11 +20,11 @@ function HistoryPageRow({ id, amount, unitName, createdAt, itemName, categoryNam
   const handleEditClick = useCallback(() => openDialog('history', id), [id, openDialog]);
 
   return (
-    <div className='flex items-center gap-4'>
+    <div className='contents'>
       <span>{categoryName}</span>
-      <span className='me-auto'>{itemName}</span>
-      <span className='text-xs'>{`${amount} ${unitName}`}</span>
-      <DateText date={createdAt} as='dist' />
+      <span>{itemName}</span>
+      <span className='text-xs'>{(amount && `${amount} ${unitName}`) || 'Skipped'}</span>
+      <DateText date={createdAt} as='date' />
       <Button onClick={handleEditClick} aria-description='Edit'>
         <Pencil />
       </Button>
@@ -38,7 +38,7 @@ function HistoryPage() {
 
   return (
     <>
-      <div className='flex flex-col gap-2'>
+      <div className='grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-x-4 gap-y-2'>
         {historyQuery.data?.map((item) => (
           <HistoryPageRow key={item.id} {...item} />
         ))}
