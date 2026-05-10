@@ -123,12 +123,16 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, hue, items, value }:
           nativeButton={false}
         >
           <h2 className='me-auto truncate text-base'>{categoryName}</h2>
-          <Badge variant='background'>{dueAtLabel}</Badge>
-          <Badge variant='background'>{items.length.toLocaleString()}</Badge>
-          <Button onClick={handleDoneClick}>
+          <Badge variant='background' className='shadow-sm'>
+            {dueAtLabel}
+          </Badge>
+          <Badge variant='background' className='shadow-sm'>
+            {items.length.toLocaleString()}
+          </Badge>
+          <Button onClick={handleDoneClick} className='shadow-sm'>
             <Check aria-description='Done' />
           </Button>
-          <ConfirmDialogTrigger variant='destructive-opaque' onClick={handleConfirmClick}>
+          <ConfirmDialogTrigger variant='destructive-opaque' onClick={handleConfirmClick} className='shadow-sm'>
             <X aria-description='Skip' />
           </ConfirmDialogTrigger>
         </AccordionTrigger>

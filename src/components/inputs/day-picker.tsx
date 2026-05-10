@@ -18,7 +18,7 @@ function DayButton({
   return (
     <Button
       onClick={handleClick}
-      variant={(value & day[0]) === day[0] ? 'default' : 'secondary'}
+      variant={(value & day[0]) === day[0] ? 'default' : 'ghost'}
       className={cn(
         'block overflow-x-hidden whitespace-nowrap @max-md:px-0',
         value & day[0] || 'text-muted-foreground'

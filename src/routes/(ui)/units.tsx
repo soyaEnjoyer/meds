@@ -35,7 +35,7 @@ function UnitsPage() {
       <div className='contents text-xs font-semibold'>
         <span>ID</span>
         <span>Name</span>
-        <span>Actions</span>
+        <span />
       </div>
       {query.data.map((item) => (
         <UnitsPageListRow key={item.id} {...item} />

@@ -17,15 +17,17 @@ function AccordionTrigger({ className, children, ...props }: AccordionPrimitive.
       <AccordionPrimitive.Trigger
         data-slot='accordion-trigger'
         className={cn(
-          'group/accordion-trigger relative flex flex-1 items-center justify-between rounded-lg border border-transparent py-2 text-left text-sm font-medium transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring aria-disabled:pointer-events-none aria-disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground',
+          'group/accordion-trigger relative flex flex-1 items-center justify-between rounded-lg border border-transparent py-2 text-left text-sm font-medium transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring aria-disabled:pointer-events-none aria-disabled:opacity-50 shadow-md',
           className
         )}
         {...props}
       >
-        <ChevronDownIcon
-          data-slot='accordion-trigger-icon'
-          className='pointer-events-none shrink-0 transition-[rotate] duration-300 group-aria-expanded/accordion-trigger:-rotate-180'
-        />
+        <span className='-me-2 shrink-0 rounded-full shadow-sm'>
+          <ChevronDownIcon
+            data-slot='accordion-trigger-icon'
+            className='pointer-events-none size-6 transition-[rotate] duration-300 group-aria-expanded/accordion-trigger:-rotate-180'
+          />
+        </span>
         {children}
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>

@@ -7,6 +7,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { LoaderCircle } from 'lucide-react';
 
 import { Nav } from '@/components/nav';
+import { ScrollTopButton } from '@/components/scroll-top-button';
 import { SseReloader } from '@/components/sse-reloader';
 import { BasicFormDialog, MultimodeFormDialog } from '@/dialogs/form';
 import { ScheduleHistoryDialog } from '@/dialogs/schedule-history';
@@ -89,6 +90,7 @@ function UiLayout() {
             <BasicFormDialog dialogName='history' form={HistoryForm} />
             <ThemeDialog />
             <ScheduleHistoryDialog />
+            <ScrollTopButton />
           </FilterProvider>
           <SseReloader />
           <TanStackDevtools

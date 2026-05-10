@@ -14,7 +14,8 @@ import type { MonthTuple, WeekdayTuple } from '@/lib/enums';
 import { months, weekdays } from '@/lib/enums';
 
 // oxlint-disable oxc/no-map-spread
-const REPEAT_RULE_NAME_LENGTH = 2;
+const REPEAT_RULE_DAY_LENGTH = 2;
+const REPEAT_RULE_MONTH_LENGTH = 3;
 
 export type ScheduleRowWithNames = ReturnType<typeof useSchedulesQuery>['data'][number] & {
   itemName: string | undefined;
@@ -63,8 +64,8 @@ function formatRepeatRules({
         }, [])
         .map((group) =>
           group.length === 1
-            ? group[0][1].slice(0, REPEAT_RULE_NAME_LENGTH)
-            : `${group[0][1].slice(0, REPEAT_RULE_NAME_LENGTH)}-${group[group.length - 1][1].slice(0, REPEAT_RULE_NAME_LENGTH)}`
+            ? group[0][1].slice(0, REPEAT_RULE_DAY_LENGTH)
+            : `${group[0][1].slice(0, REPEAT_RULE_DAY_LENGTH)}-${group[group.length - 1][1].slice(0, REPEAT_RULE_DAY_LENGTH)}`
         )
         .join(', ')
     );
@@ -80,8 +81,8 @@ function formatRepeatRules({
         }, [])
         .map((group) =>
           group.length === 1
-            ? group[0][1].slice(0, REPEAT_RULE_NAME_LENGTH)
-            : `${group[0][1].slice(0, REPEAT_RULE_NAME_LENGTH)}-${group[group.length - 1][1].slice(0, REPEAT_RULE_NAME_LENGTH)}`
+            ? group[0][1].slice(0, REPEAT_RULE_MONTH_LENGTH)
+            : `${group[0][1].slice(0, REPEAT_RULE_MONTH_LENGTH)}-${group[group.length - 1][1].slice(0, REPEAT_RULE_MONTH_LENGTH)}`
         )
         .join(', ')
     );

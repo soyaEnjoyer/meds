@@ -6,7 +6,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { formatDateIso } from '@/lib/date';
+import { dateAdd, dateSet, formatDateIso } from '@/lib/date';
+
+// default is unix epoch 0 to end of current year
+const startMonth = dateAdd(dateSet(new Date(), { day: 1, hour: 0, minute: 0, month: 0, second: 0 }), {
+  year: -5,
+});
+const endMonth = dateAdd(startMonth, { day: -1, year: 10 });
 
 export function DatePicker({
   id,
@@ -60,6 +66,8 @@ export function DatePicker({
           captionLayout='dropdown'
           onSelect={handleSelect}
           weekStartsOn={1}
+          startMonth={startMonth}
+          endMonth={endMonth}
         />
       </PopoverContent>
     </Popover>

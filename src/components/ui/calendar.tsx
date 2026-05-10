@@ -105,11 +105,11 @@ function Calendar({
     () => ({
       Chevron: ({ className: innerClassName, orientation, ...rest }) => {
         if (orientation === 'left') {
-          return <ChevronLeftIcon className={cn('size-4', innerClassName)} {...rest} />;
+          return <ChevronLeftIcon className={cn('size-8 p-2', innerClassName)} {...rest} />;
         }
 
         if (orientation === 'right') {
-          return <ChevronRightIcon className={cn('size-4', innerClassName)} {...rest} />;
+          return <ChevronRightIcon className={cn('size-8 p-2', innerClassName)} {...rest} />;
         }
 
         return <ChevronDownIcon className={cn('size-4', innerClassName)} {...rest} />;
@@ -164,7 +164,7 @@ function CalendarDayButton({
   return (
     <Button
       variant='ghost'
-      size='icon'
+      size='default'
       data-day={day.date.toLocaleDateString(locale?.code)}
       data-selected-single={
         modifiers.selected && !modifiers.range_start && !modifiers.range_end && !modifiers.range_middle

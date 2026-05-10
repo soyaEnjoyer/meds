@@ -200,7 +200,6 @@ export function ScheduleForm({
             {(field) => <FormField component={field.DatePicker} label='End' />}
           </form.AppField>
           <form.AppField name='dueAt'>
-            {/* TODO: onSubmit, set the hours and minutes according to form data */}
             {(field) => <FormField component={field.DatePicker} label='Due' />}
           </form.AppField>
         </fieldset>

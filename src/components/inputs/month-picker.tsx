@@ -18,7 +18,7 @@ function MonthButton({
   return (
     <Button
       onClick={handleClick}
-      variant={(value & month[0]) === month[0] ? 'default' : 'secondary'}
+      variant={(value & month[0]) === month[0] ? 'default' : 'ghost'}
       className={cn(
         'block overflow-x-hidden whitespace-nowrap @max-md:px-0',
         value & month[0] || 'text-muted-foreground'

@@ -22,7 +22,7 @@ function HourButton({
   }, [hour, value, onValueChange]);
 
   return (
-    <Button variant={hour === value?.hour ? 'default' : 'secondary'} onClick={handleClick}>
+    <Button variant={hour === value?.hour ? 'default' : 'ghost'} onClick={handleClick}>
       {hour.toString().padStart(2, '0')}
     </Button>
   );
@@ -45,7 +45,7 @@ function MinuteButton({
   }, [minute, value, onValueChange, handleOpenChange]);
 
   return (
-    <Button variant={minute === value?.minute ? 'default' : 'secondary'} onClick={handleClick}>
+    <Button variant={minute === value?.minute ? 'default' : 'ghost'} onClick={handleClick}>
       {minute.toString().padStart(2, '0')}
     </Button>
   );
@@ -86,7 +86,11 @@ export function TimePicker({
           </Button>
         }
       />
-      <PopoverContent className='grid w-auto grid-cols-[2fr_1fr] items-center gap-4' align='start'>
+      <PopoverContent className='grid w-auto grid-cols-[2fr_1fr] items-center gap-x-4' align='start'>
+        <div className='contents text-center'>
+          <h4>Hour</h4>
+          <h4>Minute</h4>
+        </div>
         <div className='grid grid-cols-6'>
           {hours.map((hour) => (
             <HourButton key={hour} hour={hour} onValueChange={onValueChange} value={value} />
