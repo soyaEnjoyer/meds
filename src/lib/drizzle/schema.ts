@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { index, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 // oxlint-disable eslint/sort-keys
 
@@ -103,32 +103,42 @@ export const scheduleTable = sqliteTable(
   (table) => [uniqueIndex('scheduleUnique').on(table.categoryId, table.itemId, table.unitId, table.time)]
 );
 
-export const historyTable = sqliteTable('history', {
-  id: integer().primaryKey({ autoIncrement: true }).notNull(),
-  scheduleId: integer()
-    .notNull()
-    .references(() => scheduleTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+export const historyTable = sqliteTable(
+  'history',
+  {
+    id: integer().primaryKey({ autoIncrement: true }).notNull(),
+    scheduleId: integer()
+      .notNull()
+      .references(() => scheduleTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
 
-  categoryId: integer()
-    .notNull()
-    .references(() => categoryTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-  itemId: integer()
-    .notNull()
-    .references(() => itemTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-  unitId: integer()
-    .notNull()
-    .references(() => unitTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    categoryId: integer()
+      .notNull()
+      .references(() => categoryTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    itemId: integer()
+      .notNull()
+      .references(() => itemTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    unitId: integer()
+      .notNull()
+      .references(() => unitTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
 
-  scheduledAt: integer({ mode: 'timestamp_ms' }),
-  scheduledAmount: real(),
+    scheduledAt: integer({ mode: 'timestamp_ms' }),
+    scheduledAmount: real(),
 
-  amount: real(),
+    amount: real(),
+    at: integer({ mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(unixepoch('subsec') * 1000)`),
 
-  createdAt: integer({ mode: 'timestamp_ms' })
-    .notNull()
-    .default(sql`(unixepoch('subsec') * 1000)`),
-  updatedAt: integer({ mode: 'timestamp_ms' })
-    .notNull()
-    .$onUpdate(() => sql`(unixepoch('subsec') * 1000)`),
-  deletedAt: integer({ mode: 'timestamp_ms' }),
-});
+    createdAt: integer({ mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(unixepoch('subsec') * 1000)`),
+    updatedAt: integer({ mode: 'timestamp_ms' })
+      .notNull()
+      .$onUpdate(() => sql`(unixepoch('subsec') * 1000)`),
+    deletedAt: integer({ mode: 'timestamp_ms' }),
+  },
+  (table) => [
+    index('ix_history_deletedAt').on(table.deletedAt),
+    index('ix_history_scheduleId_deletedAt').on(table.scheduleId, table.deletedAt),
+  ]
+);

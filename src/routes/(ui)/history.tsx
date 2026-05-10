@@ -14,7 +14,7 @@ export const Route = createFileRoute('/(ui)/history')({
   component: HistoryPage,
 });
 
-function HistoryPageRow({ id, amount, unitName, createdAt, itemName, categoryName }: HistoryWithItemCatUnitRow) {
+function HistoryPageRow({ id, amount, unitName, at, itemName, categoryName }: HistoryWithItemCatUnitRow) {
   const openDialog = useDialog((state) => state.actions.open);
 
   const handleEditClick = useCallback(() => openDialog('history', id), [id, openDialog]);
@@ -24,7 +24,7 @@ function HistoryPageRow({ id, amount, unitName, createdAt, itemName, categoryNam
       <span>{categoryName}</span>
       <span>{itemName}</span>
       <span className='text-xs'>{(amount && `${amount} ${unitName}`) || 'Skipped'}</span>
-      <DateText date={createdAt} as='date' />
+      <DateText date={at} as='date' />
       <Button onClick={handleEditClick} aria-description='Edit'>
         <Pencil />
       </Button>

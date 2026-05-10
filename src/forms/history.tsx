@@ -17,7 +17,7 @@ type Schema = HistoryUpdate;
 
 const defaults: Schema = {
   amount: null,
-  createdAt: new Date(),
+  at: new Date(),
   id: -1,
   unitId: -1,
 } as const;
@@ -91,7 +91,7 @@ export function HistoryForm({ id, closeDialog }: { id: number; closeDialog?: () 
 
   return (
     <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto text-base font-semibold'>{`Editing: ${formatDatetimeIso(defaultValuesRef.current.createdAt)}`}</h2>
+      <h2 className='mx-auto text-base font-semibold'>{`Editing: ${formatDatetimeIso(defaultValuesRef.current.at)}`}</h2>
       <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2 @sm:grid-cols-[auto_1fr_auto_1fr]'>
         <form.AppField name='amount'>
           {(field) => <FormField component={field.NumberPicker} label='Amount' />}
@@ -99,9 +99,7 @@ export function HistoryForm({ id, closeDialog }: { id: number; closeDialog?: () 
         <form.AppField name='unitId'>
           {(field) => <FormField component={field.UnitCombobox} label='Unit' />}
         </form.AppField>
-        <form.AppField name='createdAt'>
-          {(field) => <FormField component={field.DatePicker} label='At' />}
-        </form.AppField>
+        <form.AppField name='at'>{(field) => <FormField component={field.DatePicker} label='At' />}</form.AppField>
       </fieldset>
       <footer className='flex items-center justify-around'>
         <form.Subscribe selector={submitSelector}>
@@ -116,7 +114,7 @@ export function HistoryForm({ id, closeDialog }: { id: number; closeDialog?: () 
         </form.Button>
         <ConfirmDialog>
           <ConfirmDialogContent
-            message={`Really delete history ${formatDatetimeIso(defaultValuesRef.current.createdAt)}?`}
+            message={`Really delete history ${formatDatetimeIso(defaultValuesRef.current.at)}?`}
             onConfirm={handleDeleteClick}
           />
           <ConfirmDialogTrigger variant='destructive' size='lg'>

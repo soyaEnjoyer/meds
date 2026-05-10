@@ -8,14 +8,15 @@ import { LoaderCircle } from 'lucide-react';
 
 import { Nav } from '@/components/nav';
 import { SseReloader } from '@/components/sse-reloader';
-import { CategoryDialog } from '@/dialogs/category';
-import { DoneCustomDialog } from '@/dialogs/done-custom';
-import { HistoryDialog } from '@/dialogs/history';
-import { ItemDialog } from '@/dialogs/item';
-import { ScheduleDialog } from '@/dialogs/schedule';
+import { BasicFormDialog, MultimodeFormDialog } from '@/dialogs/form';
 import { ScheduleHistoryDialog } from '@/dialogs/schedule-history';
 import { ThemeDialog } from '@/dialogs/theme';
-import { UnitDialog } from '@/dialogs/unit';
+import { CategoryForm } from '@/forms/category';
+import { DoneCustomForm } from '@/forms/done-custom';
+import { HistoryForm } from '@/forms/history';
+import { ItemForm } from '@/forms/item';
+import { ScheduleForm } from '@/forms/schedule';
+import { UnitForm } from '@/forms/unit';
 import { categoryGet } from '@/functions.server/category';
 import { itemGet } from '@/functions.server/item';
 import { scheduleGet } from '@/functions.server/schedule';
@@ -80,14 +81,14 @@ function UiLayout() {
             <main className='mx-auto mt-20 mb-2 max-w-2xl px-4'>
               <Outlet />
             </main>
-            <CategoryDialog />
-            <DoneCustomDialog />
-            <ItemDialog />
-            <ScheduleDialog />
-            <UnitDialog />
+            <MultimodeFormDialog dialogName='category' form={CategoryForm} />
+            <MultimodeFormDialog dialogName='item' form={ItemForm} />
+            <MultimodeFormDialog dialogName='unit' form={UnitForm} />
+            <MultimodeFormDialog dialogName='schedule' form={ScheduleForm} className='xl:max-w-xl' />
+            <BasicFormDialog dialogName='doneCustom' form={DoneCustomForm} className='xl:max-w-xl' />
+            <BasicFormDialog dialogName='history' form={HistoryForm} />
             <ThemeDialog />
             <ScheduleHistoryDialog />
-            <HistoryDialog />
           </FilterProvider>
           <SseReloader />
           <TanStackDevtools

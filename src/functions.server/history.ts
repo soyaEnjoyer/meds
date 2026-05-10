@@ -41,7 +41,7 @@ export const historyScheduleGet = createServerFn()
         .innerJoin(categoryTable, eq(categoryTable.id, historyTable.categoryId))
         .innerJoin(unitTable, eq(unitTable.id, historyTable.unitId))
         .where(and(isNull(historyTable.deletedAt), eq(historyTable.scheduleId, scheduleId)))
-        .orderBy(desc(historyTable.createdAt))
+        .orderBy(desc(historyTable.at))
         .limit(pageSize)
         .offset(pageSize * pageNum)
   );
@@ -77,7 +77,7 @@ export const historyAllGet = createServerFn()
             search ? like(itemTable.name, `%${search.replaceAll('%', String.raw`\%`)}%`) : undefined
           )
         )
-        .orderBy(desc(historyTable.createdAt))
+        .orderBy(desc(historyTable.at))
         .limit(pageSize)
         .offset(pageSize * pageNum)
   );
@@ -86,23 +86,21 @@ export const historyDelete = createServerFn()
   .inputValidator((historyId: number) => historyId)
   .handler(async ({ data: historyId }): Promise<ScheduleRow> => {
     const data = await db.transaction(async (tx) => {
-      const [{ scheduleId, scheduledAt: dueAt, createdAt }] = await tx
+      const [{ scheduleId, scheduledAt: dueAt, at }] = await tx
         .update(historyTable)
         .set({ deletedAt: new Date() })
         .where(eq(historyTable.id, historyId))
         .returning();
       const [{ completedAt, skippedAt }] = await tx
         .select({
-          completedAt: sql`max(${historyTable.createdAt}) filter (where amount is not null)`.mapWith(
-            nullableDateMapper
-          ),
-          skippedAt: sql`max(${historyTable.createdAt}) filter (where amount is null)`.mapWith(nullableDateMapper),
+          completedAt: sql`max(${historyTable.at}) filter (where amount is not null)`.mapWith(nullableDateMapper),
+          skippedAt: sql`max(${historyTable.at}) filter (where amount is null)`.mapWith(nullableDateMapper),
         })
         .from(historyTable)
         .where(and(eq(historyTable.scheduleId, scheduleId), isNull(historyTable.deletedAt)));
       const old = new Date(0);
       // revert dueAt if we deleted the latest history entry
-      const isLatest = createdAt > (completedAt ?? old) && createdAt > (skippedAt ?? old);
+      const isLatest = at > (completedAt ?? old) && at > (skippedAt ?? old);
       await tx
         .update(scheduleTable)
         .set({ completedAt, skippedAt, ...(isLatest ? { dueAt } : {}) })
@@ -123,10 +121,8 @@ export const historyUpdate = createServerFn()
         .returning();
       const [{ completedAt, skippedAt }] = await tx
         .select({
-          completedAt: sql`max(${historyTable.createdAt}) filter (where amount is not null)`.mapWith(
-            nullableDateMapper
-          ),
-          skippedAt: sql`max(${historyTable.createdAt}) filter (where amount is null)`.mapWith(nullableDateMapper),
+          completedAt: sql`max(${historyTable.at}) filter (where amount is not null)`.mapWith(nullableDateMapper),
+          skippedAt: sql`max(${historyTable.at}) filter (where amount is null)`.mapWith(nullableDateMapper),
         })
         .from(historyTable)
         .where(and(eq(historyTable.scheduleId, scheduleId), isNull(historyTable.deletedAt)));

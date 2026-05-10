@@ -49,7 +49,7 @@ function NavExtraMenu({
     () =>
       [
         [
-          'Add a category',
+          'New category',
           Plus,
           'Category',
           () => {
@@ -58,7 +58,7 @@ function NavExtraMenu({
           },
         ],
         [
-          'Add a unit',
+          'New unit',
           Plus,
           'Unit',
           () => {
@@ -67,7 +67,7 @@ function NavExtraMenu({
           },
         ],
         [
-          'Add an item',
+          'Newn item',
           Plus,
           'Item',
           () => {
@@ -76,7 +76,7 @@ function NavExtraMenu({
           },
         ],
         [
-          'Add a schedule',
+          'New schedule',
           Plus,
           'Schedule',
           () => {
@@ -244,7 +244,7 @@ function NavSearch() {
         autoCapitalize='none'
         autoCorrect='off'
         autoComplete='off'
-        className='border bg-background'
+        className='rounded-s-lg'
       />
       <InputGroupButton onClick={handleInputClear} disabled={filterSearch === ''} aria-description='Clear input'>
         <X />

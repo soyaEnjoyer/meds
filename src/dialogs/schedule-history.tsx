@@ -11,15 +11,15 @@ import { useItemsMapQuery, useSchedulesMapQuery } from '@/hooks/query/queries/ba
 import { useScheduleHistoryQuery } from '@/hooks/query/queries/history';
 import type { HistoryWithItemCatUnitRow } from '@/lib/drizzle/zod';
 
-function ScheduleHistoryDialogRow({ id, createdAt, amount, unitName }: HistoryWithItemCatUnitRow) {
+function ScheduleHistoryDialogRow({ id, at, amount, unitName }: HistoryWithItemCatUnitRow) {
   const openDialog = useDialog((state) => state.actions.open);
 
   const handleEditClick = useCallback(() => openDialog('history', id), [id, openDialog]);
 
   return (
     <div className='contents transition-in-up'>
-      <DateText date={createdAt} as='date' />
-      <DateText date={createdAt} as='dist' className='me-auto' />
+      <DateText date={at} as='date' />
+      <DateText date={at} as='dist' className='me-auto' />
       <span className='text-xs'>{(amount && `${amount} ${unitName}`) || 'Skipped'}</span>
       <Button onClick={handleEditClick} aria-description='Edit'>
         <Pencil />

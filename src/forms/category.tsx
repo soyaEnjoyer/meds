@@ -23,7 +23,7 @@ const submitSelector = (state: { canSubmit: boolean; isSubmitting: boolean }) =>
 export function CategoryForm({
   closeDialog,
   ...props
-}: ({ mode: 'add' } | { mode: 'edit'; id: number }) & { closeDialog?: () => void }) {
+}: ({ mode: 'new' } | { mode: 'edit'; id: number }) & { closeDialog?: () => void }) {
   const createMutator = useCategoryCreateMutator();
   const updateMutator = useCategoryUpdateMutator();
   const deleteMutator = useCategoryDeleteMutator();
@@ -51,7 +51,7 @@ export function CategoryForm({
           formApi.reset({ ...defaults });
         },
       } as const;
-      if (props.mode === 'add') createMutator.mutate({ data: value }, options);
+      if (props.mode === 'new') createMutator.mutate({ data: value }, options);
       else updateMutator.mutate({ data: { id: props.id, ...value } }, options);
       closeDialog?.();
     },
@@ -91,7 +91,7 @@ export function CategoryForm({
   return (
     <form className='grid items-center gap-4' onSubmit={handleSubmit}>
       <h2 className='mx-auto text-base font-semibold'>
-        {props.mode === 'add' ? 'Add a category' : `Editing: ${defaultValues.name}`}
+        {props.mode === 'new' ? 'New category' : `Editing: ${defaultValues.name}`}
       </h2>
       <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2'>
         <form.AppField name='name'>{(field) => <FormField component={field.Input} label='Name' />}</form.AppField>
@@ -100,7 +100,7 @@ export function CategoryForm({
         <form.Subscribe selector={submitSelector}>
           {([canSubmit, isSubmitting]) => (
             <form.Button type='submit' disabled={!canSubmit}>
-              {isSubmitting ? '...' : props.mode === 'add' ? 'Add' : 'Save'}
+              {isSubmitting ? '...' : props.mode === 'new' ? 'Create' : 'Save'}
             </form.Button>
           )}
         </form.Subscribe>
@@ -112,7 +112,7 @@ export function CategoryForm({
             message={`Really delete category ${defaultValues.name}?`}
             onConfirm={handleDeleteClick}
           />
-          <ConfirmDialogTrigger variant='destructive' hidden={props.mode === 'add'} size='lg'>
+          <ConfirmDialogTrigger variant='destructive' hidden={props.mode === 'new'} size='lg'>
             Delete
           </ConfirmDialogTrigger>
         </ConfirmDialog>

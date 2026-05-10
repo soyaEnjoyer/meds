@@ -74,7 +74,7 @@ function QueryCombobox({
     [onValueChange]
   );
 
-  const handleAddClick = useCallback(() => openDialog(dialogName, null), [openDialog, dialogName]);
+  const handleNewClick = useCallback(() => openDialog(dialogName, null), [openDialog, dialogName]);
 
   return (
     <Combobox
@@ -95,9 +95,8 @@ function QueryCombobox({
             </ComboboxItem>
           )}
         </ComboboxList>
-        <Button className='w-full font-semibold text-muted-foreground' variant='ghost' onClick={handleAddClick}>
-          <Plus />
-          {`Create new ${placeholder?.toLocaleLowerCase()}`}
+        <Button className='w-full font-semibold text-muted-foreground' variant='ghost' onClick={handleNewClick}>
+          <Plus /> New
         </Button>
       </ComboboxContent>
     </Combobox>

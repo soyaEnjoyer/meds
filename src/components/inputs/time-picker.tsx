@@ -86,7 +86,7 @@ export function TimePicker({
           </Button>
         }
       />
-      <PopoverContent className='grid w-auto grid-cols-[2fr_1fr] gap-4' align='start'>
+      <PopoverContent className='grid w-auto grid-cols-[2fr_1fr] items-center gap-4' align='start'>
         <div className='grid grid-cols-6'>
           {hours.map((hour) => (
             <HourButton key={hour} hour={hour} onValueChange={onValueChange} value={value} />

@@ -113,7 +113,7 @@ const scheduleAction = createServerOnlyFn(
         // oxlint-disable-next-line no-await-in-loop sqlite does not support multiple simultaneous transactions
         await db.transaction(async (tx) => {
           const [schedule] = await tx.select().from(scheduleTable).where(eq(scheduleTable.id, scheduleId));
-          const [{ createdAt }] = await tx
+          const [{ at }] = await tx
             .insert(historyTable)
             .values({
               amount: amount === null ? null : (amount ?? schedule.amount),
@@ -130,7 +130,7 @@ const scheduleAction = createServerOnlyFn(
             .update(scheduleTable)
             .set({
               dueAt: nextDueAt,
-              ...(amount === null ? { skippedAt: createdAt } : { completedAt: createdAt, lastAmount: amount }),
+              ...(amount === null ? { skippedAt: at } : { completedAt: at, lastAmount: amount }),
               ...(update ? { amount: amount ?? undefined, unitId } : {}),
             })
             .where(eq(scheduleTable.id, scheduleId))

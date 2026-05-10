@@ -40,7 +40,7 @@ export function DatePicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <input type='hidden' name={name} id={id} value={value ? value.toISOString() : ''} />
-      <div className='flex items-center border border-input'>
+      <div className='flex items-center rounded-lg border border-input'>
         <PopoverTrigger
           render={
             <Button variant='ghost' className='grow justify-start'>

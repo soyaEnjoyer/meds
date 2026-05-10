@@ -19,7 +19,10 @@ function DayButton({
     <Button
       onClick={handleClick}
       variant={(value & day[0]) === day[0] ? 'default' : 'secondary'}
-      className={cn('block overflow-x-hidden whitespace-nowrap', value & day[0] || 'text-muted-foreground')}
+      className={cn(
+        'block overflow-x-hidden whitespace-nowrap @max-md:px-0',
+        value & day[0] || 'text-muted-foreground'
+      )}
     >
       <span className='hidden @max-md:contents'>{day[1].slice(0, 1)}</span>
       <span className='hidden truncate @md:contents'>{day[1]}</span>

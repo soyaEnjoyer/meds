@@ -100,6 +100,7 @@ export const historySchema = createSelectSchema(historyTable);
 export const historyUpdateSchema = historySchema
   .omit({
     categoryId: true,
+    createdAt: true,
     deletedAt: true,
     itemId: true,
     scheduleId: true,
