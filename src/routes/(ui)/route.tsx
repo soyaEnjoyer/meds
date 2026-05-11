@@ -7,6 +7,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { LoaderCircle } from 'lucide-react';
 
 import { Nav } from '@/components/nav';
+import { Notifier } from '@/components/notifier';
 import { ScrollTopButton } from '@/components/scroll-top-button';
 import { SseReloader } from '@/components/sse-reloader';
 import { BasicFormDialog, MultimodeFormDialog } from '@/dialogs/form';
@@ -25,7 +26,6 @@ import { unitGet } from '@/functions.server/unit';
 import { DialogProvider } from '@/hooks/dialog';
 import { FilterProvider, ItemState } from '@/hooks/filter';
 import { PagerProvider } from '@/hooks/pager';
-import { HOUR_MS } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)')({
   component: UiLayout,
@@ -53,7 +53,8 @@ const queryClient = new QueryClient({
       refetchOnMount: true,
       refetchOnReconnect: 'always',
       refetchOnWindowFocus: true,
-      staleTime: HOUR_MS,
+      // don't mark stale unless key changes or manually invalidated (base queries have an override)
+      staleTime: Infinity,
       // make sure errors actually get logged
       throwOnError: (error, query) => {
         console.error('query error', query.queryKey, query, error);
@@ -79,18 +80,19 @@ function UiLayout() {
         <QueryClientProvider client={queryClient}>
           <FilterProvider defaultState={ItemState.Active}>
             <Nav />
-            <main className='mx-auto mt-20 mb-2 max-w-2xl px-4'>
+            <main className='mx-auto mt-16 mb-2 max-w-2xl px-4'>
               <Outlet />
             </main>
             <MultimodeFormDialog dialogName='category' form={CategoryForm} />
             <MultimodeFormDialog dialogName='item' form={ItemForm} />
             <MultimodeFormDialog dialogName='unit' form={UnitForm} />
             <MultimodeFormDialog dialogName='schedule' form={ScheduleForm} className='xl:max-w-xl' />
-            <BasicFormDialog dialogName='doneCustom' form={DoneCustomForm} className='xl:max-w-xl' />
+            <BasicFormDialog dialogName='doneCustom' form={DoneCustomForm} />
             <BasicFormDialog dialogName='history' form={HistoryForm} />
             <ThemeDialog />
             <ScheduleHistoryDialog />
             <ScrollTopButton />
+            <Notifier />
           </FilterProvider>
           <SseReloader />
           <TanStackDevtools

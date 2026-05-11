@@ -15,12 +15,6 @@ export function ScrollTopButton({ threshold = 0.5 }: { threshold?: number }) {
       'scrollend',
       () => {
         const nextVisible = window.scrollY > window.innerHeight * threshold;
-        console.log({
-          innerHeight: window.innerHeight,
-          nextVisible,
-          scrollY: window.scrollY,
-          visible: visibleRef.current,
-        });
         if (visibleRef.current !== nextVisible) {
           setVisible(nextVisible);
           visibleRef.current = nextVisible;

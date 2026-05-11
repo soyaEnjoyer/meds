@@ -8,29 +8,29 @@ import { worker as gotifyWorker } from '@/workers/gotify';
 const workers: { start: () => void; stop: () => void }[] = [gotifyWorker];
 const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];
 
-function startWorkers(): void {
-  for (const worker of workers) worker.start();
-}
-
-function stopWorkers(): void {
-  for (const worker of workers) worker.stop();
+function setWorkers(method: 'start' | 'stop'): void {
+  for (const worker of workers) worker[method]();
 }
 
 function shutdown(): void {
-  stopWorkers();
+  setWorkers('stop');
   process.exit(0);
 }
 
-startWorkers();
+function hmrCleanup(event: unknown): void {
+  console.log('server hmr cleanup', event);
+  for (const signal of signals) process.removeListener(signal, shutdown);
+  setWorkers('stop');
+}
+
+setWorkers('start');
 for (const signal of signals) process.addListener(signal, shutdown);
 
 // cleanup old instance during hmr in dev
 if (import.meta.hot) {
-  import.meta.hot.on('vite:beforeFullReload', () => {
-    console.log('server hmr stop workers');
-    for (const signal of signals) process.removeListener(signal, shutdown);
-    stopWorkers();
-  });
+  import.meta.hot.on('vite:beforeFullReload', hmrCleanup);
+  import.meta.hot.on('vite:beforePrune', hmrCleanup);
+  import.meta.hot.on('vite:beforeUpdate', hmrCleanup);
 }
 
 // export the default server unchanged

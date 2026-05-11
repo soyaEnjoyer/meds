@@ -13,6 +13,7 @@ import {
   scheduleUpdate,
 } from '@/functions.server/schedule';
 import { unitCreate, unitDelete, unitUpdate } from '@/functions.server/unit';
+import { useSchedulesMapQuery } from '@/hooks/query/queries/base';
 import type { CategoryRow, ItemRow, ScheduleRow, UnitRow } from '@/lib/drizzle/zod';
 
 //#region schedule
@@ -54,8 +55,31 @@ export function useScheduleDeleteMutator() {
 export function useScheduleDoneMutator() {
   const mutationFn = useServerFn(scheduleSetDone);
   const queryClient = useQueryClient();
+  const schedulesMapQuery = useSchedulesMapQuery();
+  // oxlint-disable-next-line sort-keys tanstack requires a specific order
   return useMutation({
     mutationFn,
+    onMutate: async ({ data }) => {
+      const previous = data
+        .map(({ id }) => schedulesMapQuery.data.get(id))
+        .filter((item) => typeof item !== 'undefined');
+      await updateScheduleQueryData(
+        queryClient,
+        data.map(({ id }) => id),
+        null
+      );
+      return previous;
+    },
+    onError: async (_error, { data }, prev: ScheduleRow[] | undefined) => {
+      if (Array.isArray(prev))
+        return await updateScheduleQueryData(
+          queryClient,
+          data.map(({ id }) => id),
+          prev
+        );
+      // this can't actually happen - it exists to satisfy typescript since prev is typed as optional
+      return await queryClient.invalidateQueries({ exact: true, queryKey: ['schedule'] });
+    },
     onSuccess: async (data) =>
       updateScheduleQueryData(
         queryClient,
@@ -68,8 +92,32 @@ export function useScheduleDoneMutator() {
 export function useScheduleSkipMutator() {
   const mutationFn = useServerFn(scheduleSetSkipped);
   const queryClient = useQueryClient();
+  const schedulesMapQuery = useSchedulesMapQuery();
+
+  // oxlint-disable-next-line sort-keys tanstack requires a specific order
   return useMutation({
     mutationFn,
+    onMutate: async ({ data }) => {
+      const previous = data
+        .map(({ id }) => schedulesMapQuery.data.get(id))
+        .filter((item) => typeof item !== 'undefined');
+      await updateScheduleQueryData(
+        queryClient,
+        data.map(({ id }) => id),
+        null
+      );
+      return previous;
+    },
+    onError: async (_error, { data }, prev: ScheduleRow[] | undefined) => {
+      if (Array.isArray(prev))
+        return await updateScheduleQueryData(
+          queryClient,
+          data.map(({ id }) => id),
+          prev
+        );
+      // this can't actually happen - it exists to satisfy typescript since prev is typed as optional
+      return await queryClient.invalidateQueries({ exact: true, queryKey: ['schedule'] });
+    },
     onSuccess: async (data) =>
       updateScheduleQueryData(
         queryClient,

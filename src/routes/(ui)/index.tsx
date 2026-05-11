@@ -13,7 +13,7 @@ import { useDialog } from '@/hooks/dialog';
 import { useScheduleDoneMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
 import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { useFilteredScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
-import { dateAdd, formatDateIso } from '@/lib/date';
+import { dateAdd, formatDatetimeIso } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)/')({
   component: SchedulePage,
@@ -43,7 +43,7 @@ function ScheduleAccordionItem({
   const handleHistoryClick = useCallback(() => openDialog('scheduleHistory', id), [id, openDialog]);
 
   return (
-    <div className='ms-2 flex items-center gap-4'>
+    <div className='flex items-center gap-4'>
       <h3 className='me-auto text-sm wrap-anywhere'>{itemName}</h3>
       <ScheduleSummary
         amount={amount}
@@ -91,33 +91,32 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, hue, items, value }:
   const scheduleSkipMutator = useScheduleSkipMutator();
 
   const handleDoneClick = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
+    async (event: MouseEvent<HTMLButtonElement>) => {
       event.stopPropagation();
       scheduleDoneMutator.mutate({ data: items.map(({ id }) => ({ id })) });
     },
     [items, scheduleDoneMutator]
   );
 
-  const handleSkipClick = useCallback(
-    () => scheduleSkipMutator.mutate({ data: items.map(({ id }) => ({ id })) }),
-    [items, scheduleSkipMutator]
-  );
+  const handleSkipConfirm = useCallback(() => {
+    scheduleSkipMutator.mutate({ data: items.map(({ id }) => ({ id })) });
+  }, [items, scheduleSkipMutator]);
 
-  const handleConfirmClick = useCallback((event: MouseEvent<HTMLButtonElement>) => event.stopPropagation(), []);
+  const handleConfirmTriggerClick = useCallback((event: MouseEvent<HTMLButtonElement>) => event.stopPropagation(), []);
 
   const style: CSSProperties = useMemo(
     () => ({
-      backgroundColor: `light-dark(hsl(${hue} 80% 70%), hsl(${hue} 40% 50%))`,
+      backgroundColor: `light-dark(hsl(${hue} 65% 70%), hsl(${hue} 50% 40%))`,
     }),
     [hue]
   );
 
   return (
     <ConfirmDialog>
-      <ConfirmDialogContent message={`Really skip ${items.length} items?`} onConfirm={handleSkipClick} />
+      <ConfirmDialogContent message={`Really skip ${items.length} items?`} onConfirm={handleSkipConfirm} />
       <AccordionItem value={value}>
         <AccordionTrigger
-          className='-mx-2 flex items-center gap-4 truncate px-2'
+          className='-mx-4 flex items-center gap-4 truncate px-2'
           style={style}
           render={<div />}
           nativeButton={false}
@@ -129,14 +128,14 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, hue, items, value }:
           <Badge variant='background' className='shadow-sm'>
             {items.length.toLocaleString()}
           </Badge>
-          <Button onClick={handleDoneClick} className='shadow-sm'>
+          <Button onClick={handleDoneClick} className='shadow-sm' variant='background'>
             <Check aria-description='Done' />
           </Button>
-          <ConfirmDialogTrigger variant='destructive-opaque' onClick={handleConfirmClick} className='shadow-sm'>
+          <ConfirmDialogTrigger variant='destructive-opaque' className='shadow-sm' onClick={handleConfirmTriggerClick}>
             <X aria-description='Skip' />
           </ConfirmDialogTrigger>
         </AccordionTrigger>
-        <AccordionContent className='flex flex-col gap-2'>
+        <AccordionContent className='flex flex-col gap-2' panelClassName='-me-2'>
           {items.map((item) => (
             <ScheduleAccordionItem key={item.id} {...item} />
           ))}
@@ -150,8 +149,8 @@ function SchedulePage() {
   const scheduleGroups = useFilteredScheduleGroupsQuery();
   const [accordionValue, setAccordionValue] = useState<string[]>(
     scheduleGroups.data
-      .filter((item) => item.dueAtIso <= formatDateIso(dateAdd(new Date(), { hour: 12 })))
-      .map((item) => item.key) ?? []
+      .filter((item) => item.dueAtIso <= formatDatetimeIso(dateAdd(new Date(), { hour: 6 })))
+      .map((item) => item.key)
   );
 
   return (

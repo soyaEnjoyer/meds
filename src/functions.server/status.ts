@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import { displayName } from '@root/package.json';
 import { createServerOnlyFn } from '@tanstack/react-start';
 import { and, eq, gte, isNotNull, lte, sql } from 'drizzle-orm';
@@ -5,6 +7,8 @@ import { and, eq, gte, isNotNull, lte, sql } from 'drizzle-orm';
 import { dateSet } from '@/lib/date';
 import { db } from '@/lib/drizzle/db.server';
 import { categoryTable, itemTable, scheduleTable } from '@/lib/drizzle/schema';
+
+const HASH_LENGTH = 8;
 
 const getGroupedStatus = createServerOnlyFn(async () => {
   const now = new Date();
@@ -65,7 +69,7 @@ export const getTextStatus = createServerOnlyFn(async () => {
       .map(([category, items]) => `${getStatusBlob(status)} ${category}: ${items.join(', ')}`)
       .join(' ')
   );
-  const title = Object.entries(grouped)
+  const summary = Object.entries(grouped)
     .map(
       ([status, categoryGroups]) =>
         `${getStatusBlob(status)} ${status} [${Object.values(categoryGroups).reduce(
@@ -74,13 +78,21 @@ export const getTextStatus = createServerOnlyFn(async () => {
         )}]`
     )
     .join(' ');
-  if (rows.length)
-    return {
-      message: rows.join('\n'),
-      title: `${displayName}: ${title}`,
-    };
-  return {
-    message: '🟢 All done!',
-    title: displayName,
+  const status = {
+    ...(rows.length
+      ? {
+          message: rows.join('\n'),
+          title: `${displayName}: ${summary}`,
+        }
+      : {
+          message: '🟢 All done!',
+          title: displayName,
+        }),
+    due: 'Due' in grouped ? Object.values(grouped.Due).reduce((acc, item) => acc + item.length, 0) : 0,
   };
+  const hash = createHash('sha256', { encoding: 'utf8' })
+    .update(JSON.stringify(status))
+    .digest('base64url')
+    .slice(-HASH_LENGTH);
+  return { ...status, hash };
 });

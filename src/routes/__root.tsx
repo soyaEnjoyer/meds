@@ -29,7 +29,13 @@ function RootLayout() {
     <ThemeProvider>
       <ThemedHtmlElement>
         <head>
-          <HeadContent />
+          <HeadContent
+            // oxlint-disable-next-line react_perf/jsx-no-new-object-as-prop
+            assetCrossOrigin={{
+              modulepreload: 'anonymous',
+              stylesheet: 'anonymous',
+            }}
+          />
         </head>
         <body className='@container min-h-dvh'>
           <Outlet />

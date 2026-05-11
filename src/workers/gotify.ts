@@ -50,21 +50,14 @@ function start(): void {
     return;
   }
 
-  let prevMessage: string | undefined = undefined;
-  let prevTitle: string | undefined = undefined;
+  let prevHash: string | null = null;
 
   async function send(): Promise<void> {
-    const { message, title } = await getTextStatus();
-    if (message === prevMessage && title === prevTitle) {
-      console.debug('gotify: title and message are unchanged');
-      return;
-    }
+    const { hash, message, title } = await getTextStatus();
+    if (hash === prevHash) return;
     const response = await fetch(new URL('/message', gotifyUrl), {
       body: JSON.stringify({
         extras: {
-          // 'client::display': {
-          //   contentType: 'text/markdown',
-          // },
           'client::notification': {
             click: {
               url: appUrl,
@@ -83,8 +76,7 @@ function start(): void {
     });
     if (response.ok) {
       console.debug('gotify: sent', title);
-      prevMessage = message;
-      prevTitle = title;
+      prevHash = hash;
     } else console.error('gotify: error sending', await response.text());
   }
 

@@ -6,8 +6,13 @@ import { categoryGet } from '@/functions.server/category';
 import { itemGet } from '@/functions.server/item';
 import { scheduleGet } from '@/functions.server/schedule';
 import { unitGet } from '@/functions.server/unit';
+import { HOUR_MS } from '@/lib/date';
 
 // oxlint-disable oxc/no-map-spread
+
+// base queries have a defined staleTime so that they'll periodically refetch
+// all other queries are derived so use the default value of Infinity defined in `route.ts`
+const staleTime = HOUR_MS;
 
 //#region base
 export function useCategoriesQuery() {
@@ -21,6 +26,7 @@ export function useCategoriesQuery() {
     initialData,
     queryFn,
     queryKey: ['category'],
+    staleTime,
   });
 }
 
@@ -35,6 +41,7 @@ export function useItemsQuery() {
     initialData,
     queryFn,
     queryKey: ['item'],
+    staleTime,
   });
 }
 
@@ -49,6 +56,7 @@ export function useSchedulesQuery() {
     initialData,
     queryFn,
     queryKey: ['schedule'],
+    staleTime,
   });
 }
 
@@ -63,6 +71,7 @@ export function useUnitsQuery() {
     initialData,
     queryFn,
     queryKey: ['unit'],
+    staleTime,
   });
 }
 //#endregion

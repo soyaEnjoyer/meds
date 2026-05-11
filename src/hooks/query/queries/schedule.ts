@@ -8,14 +8,18 @@ import {
   useSchedulesQuery,
   useUnitsMapQuery,
 } from '@/hooks/query/queries/base';
-import { dateAdd, daysDiff, formatDateIso, formatTimeIso, MINUTE_MS } from '@/lib/date';
+import { dateAdd, daysDiff, formatDateIso, formatDatetimeIso, formatTimeIso, MINUTE_MS } from '@/lib/date';
 import type { ScheduleRow } from '@/lib/drizzle/zod';
 import type { MonthTuple, WeekdayTuple } from '@/lib/enums';
 import { months, weekdays } from '@/lib/enums';
 
 // oxlint-disable oxc/no-map-spread
+
 const REPEAT_RULE_DAY_LENGTH = 2;
 const REPEAT_RULE_MONTH_LENGTH = 3;
+
+const HUE_MIN = 150;
+const HUE_MAX = 280;
 
 export type ScheduleRowWithNames = ReturnType<typeof useSchedulesQuery>['data'][number] & {
   itemName: string | undefined;
@@ -31,6 +35,7 @@ export interface ScheduleGroup {
   categoryName: string;
   dueAtLabel: string;
   dueAtIso: string;
+  dueAtTs: number;
   items: ScheduleRowWithNames[];
   hue: number;
 }
@@ -122,18 +127,26 @@ export function useFilteredSchedulesWithNamesQuery() {
           unitName,
         };
       }) satisfies ScheduleRowWithNames[]
-    ).filter(
-      (schedule) =>
-        (filterSearch === '' ||
-          schedule.categoryName?.toLocaleLowerCase().includes(filterSearch) ||
-          schedule.itemName?.toLocaleLowerCase().includes(filterSearch)) &&
-        ((filterState === ItemState.Active && schedule.dueAt) ||
-          filterState === ItemState.All ||
-          (filterState === ItemState.Due && schedule.dueAt && schedule.dueAt <= now) ||
-          (filterState === ItemState.Inactive && !schedule.dueAt) ||
-          (filterState === ItemState.AdHoc && schedule.adHoc) ||
-          (filterState === ItemState.NotDue && schedule.dueAt && schedule.dueAt > now))
-    );
+    )
+      .filter(
+        (schedule) =>
+          (filterSearch === '' ||
+            schedule.categoryName?.toLocaleLowerCase().includes(filterSearch) ||
+            schedule.itemName?.toLocaleLowerCase().includes(filterSearch)) &&
+          ((filterState === ItemState.Active && schedule.dueAt) ||
+            filterState === ItemState.All ||
+            (filterState === ItemState.Due && schedule.dueAt && schedule.dueAt <= now) ||
+            (filterState === ItemState.Inactive && !schedule.dueAt) ||
+            (filterState === ItemState.AdHoc && schedule.adHoc) ||
+            (filterState === ItemState.NotDue && schedule.dueAt && schedule.dueAt > now))
+      )
+      .toSorted(
+        (a, b) =>
+          (a.dueAt?.getTime() ?? Infinity) - (b.dueAt?.getTime() ?? Infinity) ||
+          (a.categoryName ?? '').localeCompare(b.categoryName ?? '', undefined, { sensitivity: 'base' }) ||
+          a.sort - b.sort ||
+          (a.itemName ?? '').localeCompare(b.itemName ?? '', undefined, { sensitivity: 'base' })
+      );
   return useQuery({
     enabled: pathName === '/',
     gcTime: MINUTE_MS,
@@ -171,26 +184,33 @@ export function useFilteredScheduleGroupsQuery() {
                 : item.dueAt < in24H
                   ? formatTimeIso(item.dueAt)
                   : formatDateIso(item.dueAt)
-          }.${formatDateIso(item.dueAt) || 'Unscheduled'}.${item.categoryId}.${item.categoryName}`
+          }.${item.categoryId}.${item.categoryName}`
       )
     )
-      .filter((item): item is Required<typeof item> => Boolean(item[1]?.length))
+      .filter(
+        (item): item is [string, ScheduleRowWithNames[]] =>
+          typeof item[1] !== 'undefined' && Array.isArray(item[1]) && item[1].length > 0
+      )
       .map(([key, items]) => {
-        const [dueAtLabel, dueAtIso, categoryIdStr, categoryName] = key.split('.');
+        const [dueAtLabel, categoryIdStr, categoryName] = key.split('.');
         const categoryId = Number(categoryIdStr);
+        const dueAtTs = items.reduce((acc, item) => Math.min(acc, item.dueAt?.getTime() ?? Infinity), Infinity);
+        const dueAtIso = dueAtTs === Infinity ? 'Unscheduled' : formatDatetimeIso(new Date(dueAtTs));
         const hue =
           // oxlint-disable-next-line typescript/no-misused-spread
-          [...categoryName]
+          ([...categoryName]
             .map((char) => char.charCodeAt(0))
-            .reduce((acc, item, i, arr) => acc + (item ^ (arr[(i + 3) % categoryName.length] * 3)), 0) % 360;
+            .reduce((acc, item, i, arr) => acc + (item ^ (arr[(i + 3) % categoryName.length] * 3)), 0) %
+            (HUE_MAX - HUE_MIN)) +
+          HUE_MIN;
         return {
           categoryId,
           categoryName,
           dueAtIso,
           dueAtLabel,
+          dueAtTs,
           hue,
-          // oxlint-disable-next-line typescript/no-unsafe-type-assertion already filtered out undefined
-          items: items as ScheduleRowWithNames[],
+          items,
           key,
         };
       }) satisfies ScheduleGroup[];
@@ -206,5 +226,15 @@ export function useFilteredScheduleGroupsQuery() {
         at: schedulesWithNamesQuery.dataUpdatedAt,
       },
     ],
+    staleTime: ({ state }) => {
+      // mark stale when the next schedule item is due, or never (infinity)
+      // this will force a group key recalc
+      const nowTs = now.getTime();
+      const nextDueAtTs =
+        state.data?.reduce((acc, item) => (item.dueAtTs > nowTs ? Math.min(item.dueAtTs, acc) : acc), Infinity) ??
+        Infinity;
+      // infinity - n === infinity
+      return nextDueAtTs - nowTs;
+    },
   });
 }
