@@ -1,5 +1,4 @@
 import { Accordion as AccordionPrimitive } from '@base-ui/react/accordion';
-import { ChevronDownIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -22,12 +21,6 @@ function AccordionTrigger({ className, children, ...props }: AccordionPrimitive.
         )}
         {...props}
       >
-        <span className='-me-2 shrink-0 rounded-full shadow-sm'>
-          <ChevronDownIcon
-            data-slot='accordion-trigger-icon'
-            className='pointer-events-none size-6 transition-[rotate] duration-300 group-aria-expanded/accordion-trigger:-rotate-180'
-          />
-        </span>
         {children}
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
@@ -50,10 +43,7 @@ function AccordionContent({
       {...props}
     >
       <div
-        className={cn(
-          'h-(--accordion-panel-height) py-2.5 data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4',
-          className
-        )}
+        className={cn('h-(--accordion-panel-height) py-2.5 data-ending-style:h-0 data-starting-style:h-0', className)}
       >
         {children}
       </div>

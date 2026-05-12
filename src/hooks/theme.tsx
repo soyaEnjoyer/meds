@@ -2,7 +2,7 @@
 import { name } from '@root/package.json';
 import { createIsomorphicFn } from '@tanstack/react-start';
 import { getCookie } from '@tanstack/react-start/server';
-import type { ComponentProps, CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { createContext, useContext, useMemo } from 'react';
 import type { ExtractState } from 'zustand';
 import { createStore, useStore } from 'zustand';
@@ -100,44 +100,29 @@ const getServerThemeCookieFn = createIsomorphicFn().server(() => {
   return state;
 });
 
-/** applies theme according to client-provided cookie in ssr and reactive zustand value on client */
-export function ThemedHtmlElement({
-  children,
-  className,
-  style,
-  ...props
-}: { children: ReactNode } & ComponentProps<'html'>) {
+export function useThemeResult() {
   const serverTheme = getServerThemeCookieFn();
   const reactiveTheme = useTheme((state) => ({
     font: state.font,
     scale: state.scale,
     scheme: state.scheme,
   }));
-
-  const { mergedClassName, mergedStyle } = useMemo(() => {
+  const { className, style } = useMemo(() => {
     // reactiveTheme is invalid on the server, serverTheme is undefined on client
     const { font, scale, scheme } = { ...reactiveTheme, ...serverTheme };
-    const result: { mergedClassName: string; mergedStyle: CSSProperties } = {
-      mergedClassName: cn(
+    return {
+      className: cn(
         font === 'sans' ? 'font-sans' : font === 'serif' ? 'font-serif' : 'font-mono',
-        scheme === 'dark' ? 'scheme-dark' : scheme === 'light' ? 'scheme-light' : 'scheme-light-dark',
-        className
+        scheme === 'dark' ? 'scheme-dark' : scheme === 'light' ? 'scheme-light' : 'scheme-light-dark'
       ),
-      mergedStyle: {
+      style: {
         fontSize: `${Math.round(16 * scale)}px`,
-        ...style,
       },
-    };
-    // console.log(reactiveTheme, serverTheme, { font, scale, scheme }, result);
-    return result;
-  }, [reactiveTheme, serverTheme, className, style]);
+    } satisfies { className: string; style: CSSProperties };
+  }, [reactiveTheme, serverTheme]);
 
   // using suppressHydrationWarning because the server is actually adding className and style attribs twice - looks like a bug in tanstack router
-  return (
-    <html lang='en' className={mergedClassName} style={mergedStyle} {...props} suppressHydrationWarning>
-      {children}
-    </html>
-  );
+  return { className, style };
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

@@ -5,8 +5,10 @@ export function AppIcon({
   stroke = 'currentColor',
   backgroundFill = 'none',
   viewBox = '0 0 24 24',
+  withBadge = false,
+  badgeFill = 'currentColor',
   ...props
-}: ComponentProps<'svg'> & { backgroundFill?: string }) {
+}: ComponentProps<'svg'> & { backgroundFill?: string; withBadge?: boolean; badgeFill?: string }) {
   return (
     <svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='none' viewBox={viewBox} {...props}>
       <path
@@ -21,6 +23,7 @@ export function AppIcon({
         strokeWidth='1'
         stroke={stroke}
       />
+      {withBadge && <circle stroke='none' fill={badgeFill} cx={20} cy={20} r={4} />}
     </svg>
   );
 }

@@ -119,4 +119,19 @@
   main {
     view-transition-name: slide;
   }
+  @keyframes toast {
+    0% {
+      opacity: 100%;
+      scale: 10%;
+      translate: 0 100%;
+    }
+    50% {
+      opacity: 100%;
+    }
+    100% {
+      opacity: 0;
+      scale: 100%;
+      translate: 0 -75dvh;
+    }
+  }
 }

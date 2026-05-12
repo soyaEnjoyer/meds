@@ -9,9 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IconDotChar123extChar125RouteImport } from './routes/icon[.]{$ext}'
 import { Route as uiRouteRouteImport } from './routes/(ui)/route'
 import { Route as uiIndexRouteImport } from './routes/(ui)/index'
+import { Route as IconSplatRouteImport } from './routes/icon/$'
 import { Route as ApiSseRouteImport } from './routes/api/sse'
 import { Route as ApiPingRouteImport } from './routes/api/ping'
 import { Route as uiUnitsRouteImport } from './routes/(ui)/units'
@@ -20,12 +20,6 @@ import { Route as uiHistoryRouteImport } from './routes/(ui)/history'
 import { Route as uiCategoriesRouteImport } from './routes/(ui)/categories'
 import { Route as ApiStatusChar123HashChar125RouteImport } from './routes/api/status/{-$hash}'
 
-const IconDotChar123extChar125Route =
-  IconDotChar123extChar125RouteImport.update({
-    id: '/icon.{$ext}',
-    path: '/icon.{$ext}',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const uiRouteRoute = uiRouteRouteImport.update({
   id: '/(ui)',
   getParentRoute: () => rootRouteImport,
@@ -34,6 +28,11 @@ const uiIndexRoute = uiIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => uiRouteRoute,
+} as any)
+const IconSplatRoute = IconSplatRouteImport.update({
+  id: '/icon/$',
+  path: '/icon/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSseRoute = ApiSseRouteImport.update({
   id: '/api/sse',
@@ -73,94 +72,87 @@ const ApiStatusChar123HashChar125Route =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/icon.{$ext}': typeof IconDotChar123extChar125Route
   '/categories': typeof uiCategoriesRoute
   '/history': typeof uiHistoryRoute
   '/items': typeof uiItemsRoute
   '/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
+  '/icon/$': typeof IconSplatRoute
   '/': typeof uiIndexRoute
   '/api/status/{-$hash}': typeof ApiStatusChar123HashChar125Route
 }
 export interface FileRoutesByTo {
-  '/icon.{$ext}': typeof IconDotChar123extChar125Route
   '/categories': typeof uiCategoriesRoute
   '/history': typeof uiHistoryRoute
   '/items': typeof uiItemsRoute
   '/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
+  '/icon/$': typeof IconSplatRoute
   '/': typeof uiIndexRoute
   '/api/status/{-$hash}': typeof ApiStatusChar123HashChar125Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(ui)': typeof uiRouteRouteWithChildren
-  '/icon.{$ext}': typeof IconDotChar123extChar125Route
   '/(ui)/categories': typeof uiCategoriesRoute
   '/(ui)/history': typeof uiHistoryRoute
   '/(ui)/items': typeof uiItemsRoute
   '/(ui)/units': typeof uiUnitsRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
+  '/icon/$': typeof IconSplatRoute
   '/(ui)/': typeof uiIndexRoute
   '/api/status/{-$hash}': typeof ApiStatusChar123HashChar125Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/icon.{$ext}'
     | '/categories'
     | '/history'
     | '/items'
     | '/units'
     | '/api/ping'
     | '/api/sse'
+    | '/icon/$'
     | '/'
     | '/api/status/{-$hash}'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/icon.{$ext}'
     | '/categories'
     | '/history'
     | '/items'
     | '/units'
     | '/api/ping'
     | '/api/sse'
+    | '/icon/$'
     | '/'
     | '/api/status/{-$hash}'
   id:
     | '__root__'
     | '/(ui)'
-    | '/icon.{$ext}'
     | '/(ui)/categories'
     | '/(ui)/history'
     | '/(ui)/items'
     | '/(ui)/units'
     | '/api/ping'
     | '/api/sse'
+    | '/icon/$'
     | '/(ui)/'
     | '/api/status/{-$hash}'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   uiRouteRoute: typeof uiRouteRouteWithChildren
-  IconDotChar123extChar125Route: typeof IconDotChar123extChar125Route
   ApiPingRoute: typeof ApiPingRoute
   ApiSseRoute: typeof ApiSseRoute
+  IconSplatRoute: typeof IconSplatRoute
   ApiStatusChar123HashChar125Route: typeof ApiStatusChar123HashChar125Route
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/icon.{$ext}': {
-      id: '/icon.{$ext}'
-      path: '/icon.{$ext}'
-      fullPath: '/icon.{$ext}'
-      preLoaderRoute: typeof IconDotChar123extChar125RouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(ui)': {
       id: '/(ui)'
       path: ''
@@ -174,6 +166,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof uiIndexRouteImport
       parentRoute: typeof uiRouteRoute
+    }
+    '/icon/$': {
+      id: '/icon/$'
+      path: '/icon/$'
+      fullPath: '/icon/$'
+      preLoaderRoute: typeof IconSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/sse': {
       id: '/api/sse'
@@ -248,9 +247,9 @@ const uiRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   uiRouteRoute: uiRouteRouteWithChildren,
-  IconDotChar123extChar125Route: IconDotChar123extChar125Route,
   ApiPingRoute: ApiPingRoute,
   ApiSseRoute: ApiSseRoute,
+  IconSplatRoute: IconSplatRoute,
   ApiStatusChar123HashChar125Route: ApiStatusChar123HashChar125Route,
 }
 export const routeTree = rootRouteImport

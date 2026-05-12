@@ -2,7 +2,7 @@ import { createServerFn, createServerOnlyFn } from '@tanstack/react-start';
 import { eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { dateSet } from '@/lib/date';
+import { dateAdd, dateSet } from '@/lib/date';
 import { db } from '@/lib/drizzle/db.server';
 import { historyTable, scheduleTable } from '@/lib/drizzle/schema';
 import type { ScheduleRow } from '@/lib/drizzle/zod';
@@ -79,13 +79,18 @@ const scheduleAction = createServerOnlyFn(
     // FIXME: needs optimisation
     function getNextDueAt(schedule: ScheduleRow, amount: number | null): Date | null {
       if (!schedule.dueAt) return null;
-      const step = amount ? schedule.restDays + 1 : 1;
       const now = new Date();
-      const nextDueAt = schedule.dueAt && schedule.dueAt > now ? new Date(schedule.dueAt) : now;
+      const intermediate = dateAdd(schedule.dueAt ?? now, {
+        day: typeof amount === 'undefined' ? 1 : schedule.restDays + 1,
+      });
+      const tomorrow = dateAdd(now, { day: 1 });
+      const nextDueAt = intermediate < tomorrow ? tomorrow : intermediate;
+      // console.log('scheduleAction getNextDueAt init', { amount, intermediate, nextDueAt });
       nextDueAt.setHours(0, 0, 0, 0);
 
       for (let i = 0; i < MAX_SEARCH_ITERATIONS; ++i) {
-        nextDueAt.setDate(nextDueAt.getDate() + step);
+        // console.log('scheduleAction getNextDueAt loop', { dueAt: schedule.dueAt, i, nextDueAt });
+        if (i) nextDueAt.setDate(nextDueAt.getDate() + 1);
         if (schedule.endAt && nextDueAt >= schedule.endAt) return null;
 
         // convert from amerikkkan to normal
@@ -102,6 +107,7 @@ const scheduleAction = createServerOnlyFn(
         if (cycleDay >= schedule.cycleOnDays) continue;
 
         nextDueAt.setHours(schedule.time.hour, schedule.time.minute, 0, 0);
+        // console.log('scheduleAction getNextDueAt found:', nextDueAt, 'prev:', schedule.dueAt);
         return nextDueAt;
       }
       throw new Error('could not find next dueAt');

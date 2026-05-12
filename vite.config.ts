@@ -11,10 +11,15 @@ export default defineConfig({
   plugins: [
     tanstackStart({ importProtection: { behavior: 'error', client: { excludeFiles: [/(^|\b)server(\b|$)/] } } }),
     devtools(),
-    tailwindcss({ optimize: { minify: true } }),
+    // lightningcss polyfills light-dark badly and breaks it
+    // https://stackoverflow.com/questions/79739829/how-can-i-safely-introduce-the-use-of-light-dark-without-increasing-the-mini
+    // https://github.com/tailwindlabs/tailwindcss/issues/15438
+    tailwindcss({ optimize: false }),
     react(),
     babel({ presets: [reactCompilerPreset()] }),
-    basicSsl(),
+    basicSsl({
+      domains: ['localhost', '*.lan'],
+    }),
     nitro({ minify: true }),
   ],
   resolve: { tsconfigPaths: true },

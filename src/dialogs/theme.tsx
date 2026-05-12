@@ -77,7 +77,7 @@ export function ThemeDialog() {
                 value={scale}
                 min={0.75}
                 max={1.5}
-                step={0.25}
+                step={0.125}
                 onChange={handleScaleChange}
                 required
               />

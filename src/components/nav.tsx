@@ -1,7 +1,8 @@
 import { displayName } from '@root/package.json';
 import { Link, useRouterState } from '@tanstack/react-router';
+import { createIsomorphicFn } from '@tanstack/react-start';
 import type { LucideProps } from 'lucide-react';
-import { Contrast, EllipsisVertical, Menu, Plus, X } from 'lucide-react';
+import { Contrast, EllipsisVertical, Menu, MessageCircle, Plus, X } from 'lucide-react';
 import type { Dispatch, ForwardRefExoticComponent, KeyboardEvent, RefAttributes, SetStateAction } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -253,14 +254,31 @@ function NavSearch() {
   );
 }
 
-// FIXME: do the notification button properly if i can send background notifications on mobile
+const shouldShowNotificationButton = createIsomorphicFn()
+  .client(() => Notification.permission === 'default')
+  .server(() => false);
+
+function NavNotificationPermissionButton() {
+  const [show, setShow] = useState(shouldShowNotificationButton());
+
+  const handleNotifyClick = useCallback(async () => {
+    const permission = await Notification.requestPermission();
+    setShow(permission === 'default');
+  }, []);
+
+  if (!show) return null;
+  return (
+    <Button onClick={handleNotifyClick} variant='outline' className='transition-transform starting:scale-0'>
+      <MessageCircle />
+    </Button>
+  );
+}
+
 export function Nav() {
   const [sideBarOpen, setSideBarOpen] = useState(false);
 
-  const handleNotifyClick = useCallback(() => void Notification.requestPermission(), []);
-
   return (
-    <header className='fixed top-0 z-10 flex min-h-14 w-full items-center justify-center bg-sidebar/50 p-2 text-sidebar-foreground shadow-xl backdrop-blur-sm transition-colors focus-within:bg-sidebar/75'>
+    <header className='fixed top-0 z-10 flex min-h-14 w-full items-center justify-center bg-sidebar/50 p-2 text-sidebar-foreground shadow-xl backdrop-blur-xs transition-colors focus-within:bg-sidebar/75'>
       <nav className='flex w-full max-w-6xl items-center gap-4'>
         <span className='hidden items-center gap-1 md:flex'>
           <AppIcon className='size-8 text-theme' />
@@ -276,7 +294,11 @@ export function Nav() {
               </Button>
             }
           />
-          <SheetContent className='flex max-w-fit flex-col gap-4 p-4' side='left' showCloseButton={false}>
+          <SheetContent
+            className='flex max-w-fit flex-col gap-4 bg-sidebar/50 p-4 backdrop-blur-xs focus-within:bg-sidebar/75'
+            side='left'
+            showCloseButton={false}
+          >
             <SheetClose className='flex items-center justify-center gap-1'>
               <AppIcon className='size-8 text-theme' />
               <h1 className='text-lg'>{displayName}</h1>
@@ -294,7 +316,7 @@ export function Nav() {
 
         <NavStateDropdown />
 
-        <Button onClick={handleNotifyClick}>Notify</Button>
+        <NavNotificationPermissionButton />
 
         <NavSearch />
 

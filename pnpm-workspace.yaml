@@ -6,4 +6,6 @@ allowBuilds:
   msw: true
   sharp: true
   unrs-resolver: true
-minimumReleaseAge: 1440
+# pnpm bug ERR_PNPM_MISSING_TIME https://github.com/pnpm/pnpm/issues/11597
+# minimumReleaseAge: 1440
+resolutionMode: lowest-direct

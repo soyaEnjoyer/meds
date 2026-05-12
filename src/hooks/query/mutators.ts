@@ -14,6 +14,7 @@ import {
 } from '@/functions.server/schedule';
 import { unitCreate, unitDelete, unitUpdate } from '@/functions.server/unit';
 import { useSchedulesMapQuery } from '@/hooks/query/queries/base';
+import { useToast } from '@/hooks/toast';
 import type { CategoryRow, ItemRow, ScheduleRow, UnitRow } from '@/lib/drizzle/zod';
 
 //#region schedule
@@ -56,10 +57,13 @@ export function useScheduleDoneMutator() {
   const mutationFn = useServerFn(scheduleSetDone);
   const queryClient = useQueryClient();
   const schedulesMapQuery = useSchedulesMapQuery();
+  const showToast = useToast((state) => state.actions.show);
+
   // oxlint-disable-next-line sort-keys tanstack requires a specific order
   return useMutation({
     mutationFn,
     onMutate: async ({ data }) => {
+      showToast('check');
       const previous = data
         .map(({ id }) => schedulesMapQuery.data.get(id))
         .filter((item) => typeof item !== 'undefined');
@@ -93,11 +97,13 @@ export function useScheduleSkipMutator() {
   const mutationFn = useServerFn(scheduleSetSkipped);
   const queryClient = useQueryClient();
   const schedulesMapQuery = useSchedulesMapQuery();
+  const showToast = useToast((state) => state.actions.show);
 
   // oxlint-disable-next-line sort-keys tanstack requires a specific order
   return useMutation({
     mutationFn,
     onMutate: async ({ data }) => {
+      showToast('x');
       const previous = data
         .map(({ id }) => schedulesMapQuery.data.get(id))
         .filter((item) => typeof item !== 'undefined');

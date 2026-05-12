@@ -1,7 +1,9 @@
 import { displayName } from '@root/package.json';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
+import type { ComponentProps } from 'react';
 
-import { ThemedHtmlElement, ThemeProvider } from '@/hooks/theme';
+import { ThemeProvider, useThemeResult } from '@/hooks/theme';
+import { cn } from '@/lib/utils';
 
 import appCss from '@/globals.css?url';
 
@@ -16,32 +18,41 @@ export const Route = createRootRoute({
   component: RootLayout,
   head: () => ({
     links: [
-      { href: 'icon.png', rel: 'icon', type: 'image/png' },
-      { href: 'icon.webp', rel: 'icon', type: 'image/webp' },
+      { href: 'icon/default.png', rel: 'icon', type: 'image/png' },
+      { href: 'icon/default.webp', rel: 'icon', type: 'image/webp' },
       { href: appCss, rel: 'stylesheet' },
     ],
     meta: [{ charSet: 'utf8' }, { content: 'width=device-width, initial-scale=1', name: 'viewport' }, { title }],
   }),
 });
 
+const headProps: ComponentProps<typeof HeadContent> = {
+  assetCrossOrigin: {
+    modulepreload: 'anonymous',
+    stylesheet: 'anonymous',
+  },
+};
+
+function RootLayoutThemed() {
+  const { className, style } = useThemeResult();
+
+  return (
+    <html lang='en' style={style} suppressHydrationWarning>
+      <head>
+        <HeadContent {...headProps} />
+      </head>
+      <body className={cn('@container h-dvh overflow-y-auto', className)}>
+        <Outlet />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
 function RootLayout() {
   return (
     <ThemeProvider>
-      <ThemedHtmlElement>
-        <head>
-          <HeadContent
-            // oxlint-disable-next-line react_perf/jsx-no-new-object-as-prop
-            assetCrossOrigin={{
-              modulepreload: 'anonymous',
-              stylesheet: 'anonymous',
-            }}
-          />
-        </head>
-        <body className='@container min-h-dvh'>
-          <Outlet />
-          <Scripts />
-        </body>
-      </ThemedHtmlElement>
+      <RootLayoutThemed />
     </ThemeProvider>
   );
 }

@@ -9,7 +9,7 @@ import { LoaderCircle } from 'lucide-react';
 import { Nav } from '@/components/nav';
 import { Notifier } from '@/components/notifier';
 import { ScrollTopButton } from '@/components/scroll-top-button';
-import { SseReloader } from '@/components/sse-reloader';
+import { SseClient } from '@/components/sse-client';
 import { BasicFormDialog, MultimodeFormDialog } from '@/dialogs/form';
 import { ScheduleHistoryDialog } from '@/dialogs/schedule-history';
 import { ThemeDialog } from '@/dialogs/theme';
@@ -26,6 +26,7 @@ import { unitGet } from '@/functions.server/unit';
 import { DialogProvider } from '@/hooks/dialog';
 import { FilterProvider, ItemState } from '@/hooks/filter';
 import { PagerProvider } from '@/hooks/pager';
+import { ToastProvider } from '@/hooks/toast';
 
 export const Route = createFileRoute('/(ui)')({
   component: UiLayout,
@@ -75,42 +76,45 @@ function Pending() {
 
 function UiLayout() {
   return (
-    <DialogProvider>
-      <PagerProvider>
-        <QueryClientProvider client={queryClient}>
-          <FilterProvider defaultState={ItemState.Active}>
-            <Nav />
-            <main className='mx-auto mt-16 mb-2 max-w-2xl px-4'>
-              <Outlet />
-            </main>
-            <MultimodeFormDialog dialogName='category' form={CategoryForm} />
-            <MultimodeFormDialog dialogName='item' form={ItemForm} />
-            <MultimodeFormDialog dialogName='unit' form={UnitForm} />
-            <MultimodeFormDialog dialogName='schedule' form={ScheduleForm} className='xl:max-w-xl' />
-            <BasicFormDialog dialogName='doneCustom' form={DoneCustomForm} />
-            <BasicFormDialog dialogName='history' form={HistoryForm} />
-            <ThemeDialog />
-            <ScheduleHistoryDialog />
-            <ScrollTopButton />
-            <Notifier />
-          </FilterProvider>
-          <SseReloader />
-          <TanStackDevtools
-            // oxlint-disable-next-line react_perf/jsx-no-new-array-as-prop
-            plugins={[
-              formDevtoolsPlugin(),
-              {
-                name: 'Tanstack Query',
-                render: <ReactQueryDevtoolsPanel />,
-              },
-              {
-                name: 'Tanstack Router',
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-            ]}
-          />
-        </QueryClientProvider>
-      </PagerProvider>
-    </DialogProvider>
+    <ToastProvider>
+      <DialogProvider>
+        <PagerProvider>
+          <QueryClientProvider client={queryClient}>
+            <FilterProvider defaultState={ItemState.Active}>
+              <Nav />
+              <main className='mx-auto mt-16 mb-2 max-w-2xl px-4'>
+                <Outlet />
+              </main>
+              <MultimodeFormDialog dialogName='category' form={CategoryForm} />
+              <MultimodeFormDialog dialogName='item' form={ItemForm} />
+              <MultimodeFormDialog dialogName='unit' form={UnitForm} />
+              <MultimodeFormDialog dialogName='schedule' form={ScheduleForm} className='xl:max-w-xl' />
+              <BasicFormDialog dialogName='doneCustom' form={DoneCustomForm} />
+              <BasicFormDialog dialogName='history' form={HistoryForm} />
+              <ThemeDialog />
+              <ScheduleHistoryDialog />
+              <ScrollTopButton />
+              <Notifier />
+            </FilterProvider>
+            <SseClient />
+            <TanStackDevtools
+              // defining this anywhere else breaks the build
+              // oxlint-disable-next-line react_perf/jsx-no-new-array-as-prop
+              plugins={[
+                formDevtoolsPlugin(),
+                {
+                  name: 'Tanstack Query',
+                  render: <ReactQueryDevtoolsPanel />,
+                },
+                {
+                  name: 'Tanstack Router',
+                  render: <TanStackRouterDevtoolsPanel />,
+                },
+              ]}
+            />
+          </QueryClientProvider>
+        </PagerProvider>
+      </DialogProvider>
+    </ToastProvider>
   );
 }
