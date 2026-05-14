@@ -36,7 +36,6 @@ export const Route = createFileRoute('/icon/$')({
         // oxlint-disable-next-line eslint/no-unsafe-type-assertion
         const format = ext in formats ? formats[ext as keyof typeof formats] : formats.png;
         const cacheKey: CacheKey = `${format}.${due}`;
-        console.log('icon route', { cacheKey, due, ext, format });
         let buffer = cache.get(cacheKey);
         if (!buffer) {
           const svg = renderToStaticMarkup(
