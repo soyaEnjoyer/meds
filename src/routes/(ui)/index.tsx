@@ -1,8 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Check, ChevronDownIcon, EllipsisVertical, Logs, Pencil, Settings, X } from 'lucide-react';
+import { Check, ChevronDownIcon, EllipsisVertical, Info, Logs, Pencil, Settings, X } from 'lucide-react';
 import type { ComponentProps, CSSProperties, MouseEvent } from 'react';
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
+import { Linkify } from '@/components/linkify';
 import { ScheduleSummary } from '@/components/schedule-summary';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
@@ -23,10 +24,11 @@ const HUE_MIN = 150;
 const HUE_MAX = 280;
 
 function ScheduleAccordionItem({
+  description,
   id,
   itemName,
   ...props
-}: Pick<ScheduleRowWithNames, 'id' | 'itemName'> & ComponentProps<typeof ScheduleSummary>) {
+}: Pick<ScheduleRowWithNames, 'description' | 'id' | 'itemName'> & ComponentProps<typeof ScheduleSummary>) {
   const scheduleDoneMutator = useScheduleDoneMutator();
   const scheduleSkipMutator = useScheduleSkipMutator();
   const openDialog = useDialog((state) => state.actions.open);
@@ -43,7 +45,24 @@ function ScheduleAccordionItem({
 
   return (
     <div className='flex items-center gap-4'>
-      <h3 className='ms-2 me-auto text-base wrap-anywhere'>{itemName}</h3>
+      {description ? (
+        <Popover>
+          <PopoverTrigger
+            render={
+              <h3 className='group ms-2 me-auto flex items-center gap-1 text-base wrap-anywhere'>
+                <Info className='size-4 text-muted-foreground transition-colors group-hover:text-foreground' />
+                {itemName}
+              </h3>
+            }
+            nativeButton={false}
+          />
+          <PopoverContent className='whitespace-pre-wrap'>
+            <Linkify>{description}</Linkify>
+          </PopoverContent>
+        </Popover>
+      ) : (
+        <h3 className='ms-2 me-auto text-base wrap-anywhere'>{itemName}</h3>
+      )}
       <ScheduleSummary {...props} />
       <Button onClick={handleDoneClick}>
         <Check aria-description='Done' />
@@ -107,7 +126,7 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: Sche
       HUE_MIN;
 
     return {
-      backgroundColor: `light-dark(hsl(${hue} 65% 70%), hsl(${hue} 50% 40%))`,
+      backgroundColor: `light-dark(hsl(${hue} 65% 70%), hsl(${hue} 65% 40%))`,
     };
   }, [categoryName]);
 
@@ -116,7 +135,7 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: Sche
       <ConfirmDialogContent message={`Really skip ${items.length} items?`} onConfirm={handleSkipConfirm} />
       <AccordionItem value={value}>
         <AccordionTrigger
-          className='-mx-4 flex items-center gap-4 truncate p-2 scheme-only-light select-none'
+          className='-mx-4 flex items-center gap-4 truncate p-2 select-none *:scheme-only-light'
           style={style}
           render={<div />}
           nativeButton={false}

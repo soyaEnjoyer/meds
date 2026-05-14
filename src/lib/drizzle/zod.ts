@@ -81,6 +81,7 @@ export const scheduleUpdateSchema = scheduleSchema
   .extend({
     cycleOffDays: scheduleSchema.shape.cycleOffDays.min(0).max(365),
     cycleOnDays: scheduleSchema.shape.cycleOnDays.min(1).max(365),
+    description: scheduleSchema.shape.description.transform((value) => value || null),
     restDays: scheduleSchema.shape.restDays.min(0).max(365),
     sort: scheduleSchema.shape.sort.min(0).max(99),
     time: z.object({ hour: z.int().min(0).max(23), minute: z.int().min(0).max(59) }),

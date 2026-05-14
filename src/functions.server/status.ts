@@ -8,6 +8,8 @@ import { dateSet } from '@/lib/date';
 import { db } from '@/lib/drizzle/db.server';
 import { categoryTable, itemTable, scheduleTable } from '@/lib/drizzle/schema';
 
+// oxlint-disable node/no-process-env
+
 const HASH_LENGTH = 8;
 
 const getGroupedStatus = createServerOnlyFn(async () => {
@@ -63,6 +65,10 @@ const getStatusBlob = createServerOnlyFn((status: string) => {
 });
 
 export const getTextStatus = createServerOnlyFn(async () => {
+  const title =
+    process.env.NODE_ENV === 'production'
+      ? displayName
+      : `[${process.env.NODE_ENV?.slice(0, 3).toLocaleUpperCase()}] ${displayName}`;
   const grouped = await getGroupedStatus();
   const rows = Object.entries(grouped).map(([status, categoryGroups]) =>
     Object.entries(categoryGroups)
@@ -82,11 +88,11 @@ export const getTextStatus = createServerOnlyFn(async () => {
     ...(rows.length
       ? {
           message: rows.join('\n'),
-          title: `${displayName}: ${summary}`,
+          title: `${title}: ${summary}`,
         }
       : {
           message: '🟢 All done!',
-          title: displayName,
+          title,
         }),
     due: 'Due' in grouped ? Object.values(grouped.Due).reduce((acc, item) => acc + item.length, 0) : 0,
   };
@@ -96,3 +102,5 @@ export const getTextStatus = createServerOnlyFn(async () => {
     .slice(-HASH_LENGTH);
   return { ...status, hash };
 });
+
+export type Status = Awaited<ReturnType<typeof getTextStatus>>;

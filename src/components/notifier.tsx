@@ -1,6 +1,7 @@
 import { displayName } from '@root/package.json';
 import { useCallback, useEffect, useRef } from 'react';
 
+import type { Status } from '@/functions.server/status';
 import { useSchedulesQuery } from '@/hooks/query/queries/base';
 import { MINUTE_MS } from '@/lib/date';
 
@@ -8,13 +9,7 @@ import { MINUTE_MS } from '@/lib/date';
 
 const HASH_KEY = `${displayName}.notificationHash`;
 const INTERVAL_MS = MINUTE_MS * 15;
-
-interface Status {
-  due: number;
-  hash: string;
-  message: string;
-  title: string;
-}
+const ENABLE_NOTIFICATIONS = false;
 
 export function Notifier() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -39,7 +34,7 @@ export function Notifier() {
     const response = await fetch('/api/status');
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     statusRef.current = (await response.json()) as Status;
-    if (statusRef.current.hash !== prevHash) {
+    if (statusRef.current.hash !== prevHash && ENABLE_NOTIFICATIONS) {
       // this requires a secure context - i.e. localhost or https
       void new Notification(statusRef.current.title, {
         body: statusRef.current.message,

@@ -80,7 +80,7 @@ function UiLayout() {
       <DialogProvider>
         <PagerProvider>
           <QueryClientProvider client={queryClient}>
-            <FilterProvider defaultState={ItemState.Active}>
+            <FilterProvider defaultState={ItemState.Scheduled}>
               <Nav />
               <main className='mx-auto mt-16 mb-2 max-w-2xl px-4'>
                 <Outlet />

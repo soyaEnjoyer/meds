@@ -40,25 +40,22 @@ export function useFilteredSchedulesWithNamesQuery() {
 
   const queryFn = () =>
     (
-      schedulesQuery.data.map((schedule) => {
-        const unitName = unitsMapQuery.data.get(schedule.unitId)?.name;
-        return {
-          ...schedule,
-          categoryName: categoriesMapQuery.data.get(schedule.categoryId)?.name,
-          itemName: itemsMapQuery.data.get(schedule.itemId)?.name,
-          unitName,
-        };
-      }) satisfies ScheduleRowWithNames[]
+      schedulesQuery.data.map((schedule) => ({
+        ...schedule,
+        categoryName: categoriesMapQuery.data.get(schedule.categoryId)?.name,
+        itemName: itemsMapQuery.data.get(schedule.itemId)?.name,
+        unitName: unitsMapQuery.data.get(schedule.unitId)?.name,
+      })) satisfies ScheduleRowWithNames[]
     )
       .filter(
         (schedule) =>
           (filterSearch === '' ||
             schedule.categoryName?.toLocaleLowerCase().includes(filterSearch) ||
             schedule.itemName?.toLocaleLowerCase().includes(filterSearch)) &&
-          ((filterState === ItemState.Active && schedule.dueAt) ||
+          ((filterState === ItemState.Scheduled && schedule.dueAt) ||
             filterState === ItemState.All ||
             (filterState === ItemState.Due && schedule.dueAt && schedule.dueAt <= now) ||
-            (filterState === ItemState.Inactive && !schedule.dueAt) ||
+            (filterState === ItemState.Unscheduled && !schedule.dueAt) ||
             (filterState === ItemState.AdHoc && schedule.adHoc) ||
             (filterState === ItemState.NotDue && schedule.dueAt && schedule.dueAt > now))
       )
@@ -91,6 +88,7 @@ export function useFilteredSchedulesWithNamesQuery() {
 
 export function useFilteredScheduleGroupsQuery() {
   const schedulesWithNamesQuery = useFilteredSchedulesWithNamesQuery();
+  const filterState = useFilter((state) => state.state);
   const now = new Date();
   const todayEnd = dateSet(now, { hour: 23, minute: 59, ms: 999, second: 59 });
   const tomorrowEnd = dateAdd(todayEnd, { day: 1 });
@@ -100,15 +98,17 @@ export function useFilteredScheduleGroupsQuery() {
         schedulesWithNamesQuery.data,
         (item) =>
           `${
-            item.dueAt === null
-              ? 'Unscheduled'
-              : item.dueAt < now
-                ? 'Due'
-                : item.dueAt < todayEnd
-                  ? formatTimeIso(item.dueAt)
-                  : item.dueAt < tomorrowEnd
-                    ? `Tomorrow ${formatTimeIso(item.dueAt)}`
-                    : formatDateIso(item.dueAt)
+            filterState === ItemState.AdHoc
+              ? 'Ad hoc'
+              : item.dueAt === null
+                ? 'Unscheduled'
+                : item.dueAt < now
+                  ? 'Due'
+                  : item.dueAt < todayEnd
+                    ? formatTimeIso(item.dueAt)
+                    : item.dueAt < tomorrowEnd
+                      ? `Tomorrow ${formatTimeIso(item.dueAt)}`
+                      : formatDateIso(item.dueAt)
           }|${item.categoryId}|${item.categoryName}`
       )
     )

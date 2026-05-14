@@ -5,10 +5,10 @@ import { ItemState, itemStateNames } from '@/hooks/filter';
 import { cn } from '@/lib/utils';
 
 const variants = {
-  [ItemState.Active]: { Icon: Bell, baseClass: 'text-success' },
+  [ItemState.Scheduled]: { Icon: Bell, baseClass: 'text-success' },
   [ItemState.Due]: { Icon: Bell, baseClass: 'text-success fill-success' },
   [ItemState.NotDue]: { Icon: BellMinus, baseClass: 'text-warning' },
-  [ItemState.Inactive]: { Icon: BellOff, baseClass: 'text-danger' },
+  [ItemState.Unscheduled]: { Icon: BellOff, baseClass: 'text-danger' },
   [ItemState.AdHoc]: { Icon: Check, baseClass: 'text-success' },
   [ItemState.All]: { Icon: Circle, baseClass: 'text-foreground' },
 } as const satisfies Record<

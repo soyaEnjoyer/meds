@@ -6,29 +6,29 @@ import { createStore, useStore } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 
 export enum ItemState {
-  Active,
+  Scheduled,
   Due,
   NotDue,
-  Inactive,
+  Unscheduled,
   All,
   AdHoc,
 }
 
 export const itemStates = [
-  ItemState.Active,
+  ItemState.Scheduled,
   ItemState.Due,
   ItemState.NotDue,
-  ItemState.Inactive,
+  ItemState.Unscheduled,
   ItemState.AdHoc,
   ItemState.All,
 ] as const satisfies ItemState[];
 
 export const itemStateNames = {
-  [ItemState.Active]: 'Active',
+  [ItemState.Scheduled]: 'Scheduled',
   [ItemState.Due]: 'Due',
   [ItemState.NotDue]: 'Not due',
-  [ItemState.Inactive]: 'Inactive',
-  [ItemState.AdHoc]: 'Ad Hoc',
+  [ItemState.Unscheduled]: 'Unscheduled',
+  [ItemState.AdHoc]: 'Ad hoc',
   [ItemState.All]: 'All',
 } as const satisfies Record<ItemState, string>;
 
@@ -66,7 +66,7 @@ function ResetSearchOnNavigate() {
 export function FilterProvider({
   children,
   defaultSearch = '',
-  defaultState = ItemState.Active,
+  defaultState = ItemState.Scheduled,
 }: {
   children: ReactNode;
   defaultSearch?: FilterState['search'];

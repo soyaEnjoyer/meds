@@ -2,7 +2,7 @@ import { createServerFn, createServerOnlyFn } from '@tanstack/react-start';
 import { eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { dateAdd, dateSet } from '@/lib/date';
+import { dateAdd, dateSet, daysDiff } from '@/lib/date';
 import { db } from '@/lib/drizzle/db.server';
 import { historyTable, scheduleTable } from '@/lib/drizzle/schema';
 import type { ScheduleRow } from '@/lib/drizzle/zod';
@@ -77,37 +77,51 @@ const scheduleAction = createServerOnlyFn(
   async (data: { id: number; amount?: number | null; unitId?: number; update?: boolean }[]): Promise<ScheduleRow[]> => {
     /** @param amount undefined = scheduled amount, number = custom amount, null = skipped */
     // FIXME: needs optimisation
-    function getNextDueAt(schedule: ScheduleRow, amount: number | null): Date | null {
+    function getNextDueAt(schedule: ScheduleRow, amount: number | null | undefined): Date | null {
       if (!schedule.dueAt) return null;
       const now = new Date();
       const intermediate = dateAdd(schedule.dueAt ?? now, {
-        day: typeof amount === 'undefined' ? 1 : schedule.restDays + 1,
+        day: amount === null ? 1 : schedule.restDays + 1,
       });
       const tomorrow = dateAdd(now, { day: 1 });
       const nextDueAt = intermediate < tomorrow ? tomorrow : intermediate;
-      // console.log('scheduleAction getNextDueAt init', { amount, intermediate, nextDueAt });
       nextDueAt.setHours(0, 0, 0, 0);
 
+      // week starts on monday
+      let weekDay = (nextDueAt.getDay() || 7) - 1;
+      const cycleLength = schedule.cycleOnDays + schedule.cycleOffDays;
+      console.log('scheduleAction getNextDueAt init', { amount, intermediate, nextDueAt });
+      let cycleDay = daysDiff(schedule.startAt, nextDueAt) % cycleLength;
+
       for (let i = 0; i < MAX_SEARCH_ITERATIONS; ++i) {
-        // console.log('scheduleAction getNextDueAt loop', { dueAt: schedule.dueAt, i, nextDueAt });
-        if (i) nextDueAt.setDate(nextDueAt.getDate() + 1);
+        if (i > 0) {
+          nextDueAt.setDate(nextDueAt.getDate() + 1);
+          cycleDay = (cycleDay + 1) % cycleLength;
+          weekDay = (weekDay + 1) % 7;
+        }
+        console.log('scheduleAction getNextDueAt loop', {
+          cycleDay,
+          cycleLength,
+          dueAt: schedule.dueAt,
+          i,
+          nextDueAt,
+          weekDay,
+        });
+
+        // schedule has ended
         if (schedule.endAt && nextDueAt >= schedule.endAt) return null;
 
-        // convert from amerikkkan to normal
-        const weekdayBit = 1 << ((nextDueAt.getDay() || 7) - 1);
-        if ((weekdayBit & schedule.dayMask) !== weekdayBit) continue;
+        // weekday not in mask
+        if (((1 << weekDay) & schedule.dayMask) === 0) continue;
 
-        const monthBit = 1 << nextDueAt.getMonth();
-        if ((monthBit & schedule.monthMask) !== monthBit) continue;
+        // month not in mask
+        if (((1 << nextDueAt.getMonth()) & schedule.monthMask) === 0) continue;
 
-        // cycle is n on, n off. startAt is a date with no time
-        const cycleDay =
-          Math.round((nextDueAt.getTime() - schedule.startAt.getTime()) / 86_400_000) %
-          (schedule.cycleOnDays + schedule.cycleOffDays);
+        // in `off` part of cycle (on is first)
         if (cycleDay >= schedule.cycleOnDays) continue;
 
         nextDueAt.setHours(schedule.time.hour, schedule.time.minute, 0, 0);
-        // console.log('scheduleAction getNextDueAt found:', nextDueAt, 'prev:', schedule.dueAt);
+        console.log('scheduleAction getNextDueAt found:', nextDueAt, 'prev:', schedule.dueAt);
         return nextDueAt;
       }
       throw new Error('could not find next dueAt');
@@ -131,7 +145,7 @@ const scheduleAction = createServerOnlyFn(
               unitId: unitId ?? schedule.unitId,
             })
             .returning();
-          const nextDueAt = getNextDueAt(schedule, amount ?? null);
+          const nextDueAt = getNextDueAt(schedule, amount);
           const [transactionResult] = await tx
             .update(scheduleTable)
             .set({

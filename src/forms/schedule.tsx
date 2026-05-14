@@ -34,6 +34,7 @@ function getDefaults(): EditSchema {
     cycleOffDays: 0,
     cycleOnDays: 1,
     dayMask: 127,
+    description: null,
     dueAt,
     endAt: null,
     itemId: null,
@@ -145,7 +146,7 @@ export function ScheduleForm({
       <h2 className='mx-auto text-base font-semibold'>
         {props.mode === 'new' ? 'New schedule' : `Editing: ${itemName}`}
       </h2>
-      <div className='grid w-full grid-cols-[auto_1fr] items-center gap-4 gap-y-6 @md:grid-cols-[auto_1fr_auto_1fr]'>
+      <div className='grid w-full grid-cols-[auto_1fr] items-center gap-4 gap-y-6 @md:grid-cols-[repeat(2,auto_1fr)]'>
         <fieldset className='contents'>
           <form.AppField name='itemId' listeners={itemIdListeners}>
             {(field) => <FormField component={field.ItemCombobox} label='Item' />}
@@ -186,6 +187,9 @@ export function ScheduleForm({
         </fieldset>
 
         <fieldset className='contents'>
+          <form.AppField name='description'>
+            {(field) => <FormField component={field.Textarea} label='Description (optional)' />}
+          </form.AppField>
           <form.AppField name='adHoc'>{(field) => <FormField component={field.Switch} label='Ad hoc' />}</form.AppField>
           <form.AppField name='sort'>
             {(field) => <FormField component={field.NumberPicker} label='Sort' />}

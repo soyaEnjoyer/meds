@@ -8,7 +8,7 @@
     "build": "vite build",
     "db:gen": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:pull": "cp /mnt/docker/meds/data.db* .local/",
+    "db:pull": "cp /mnt/docker/meds-beta/data.db* .local/",
     "db:reset": "rm .local/data.db; drizzle-kit migrate",
     "dead": "pnpx fallow",
     "dev": "vite dev",

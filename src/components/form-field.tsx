@@ -32,7 +32,7 @@ export function FormField<Value>({
 
   return (
     <div className='col-span-2 grid grid-cols-subgrid items-center gap-2'>
-      <label className='col-start-1' htmlFor={field.name}>
+      <label className='col-start-1 max-w-min min-w-[10ch]' htmlFor={field.name}>
         {label}
       </label>
       <Component
