@@ -38,17 +38,7 @@ export const Route = createFileRoute('/icon/$')({
         const cacheKey: CacheKey = `${format}.${due}`;
         let buffer = cache.get(cacheKey);
         if (!buffer) {
-          const svg = renderToStaticMarkup(
-            <AppIcon
-              width='256px'
-              height='256px'
-              fill='#9810fa'
-              stroke='#9810fa'
-              backgroundFill='#f5f5f5'
-              withBadge={due}
-              badgeFill='#e11d48'
-            />
-          );
+          const svg = renderToStaticMarkup(<AppIcon width='256px' height='256px' withBadge={due} opaque />);
           // oxlint-disable-next-line eslint/no-unsafe-type-assertion
           buffer = (
             format === 'svg'

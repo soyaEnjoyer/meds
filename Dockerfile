@@ -5,7 +5,7 @@ RUN npm install --global pnpm
 
 FROM base AS build
 COPY package.json pnpm-*.yaml ./
-RUN pnpm install --include dev
+RUN pnpm install --frozen-lockfile
 COPY . .
 RUN mkdir .local && pnpm build
 

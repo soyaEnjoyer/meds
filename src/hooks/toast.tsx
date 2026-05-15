@@ -1,5 +1,6 @@
-import { Check, X } from 'lucide-react';
-import type { ReactNode } from 'react';
+import type { LucideProps } from 'lucide-react';
+import { Check, Clock, X } from 'lucide-react';
+import type { ComponentProps, ReactNode } from 'react';
 import { createContext, memo, useContext } from 'react';
 import type { ExtractState } from 'zustand';
 import { createStore, useStore } from 'zustand';
@@ -8,7 +9,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { dateAdd } from '@/lib/date';
 import { cn } from '@/lib/utils';
 
-type ToastKind = 'check' | 'x';
+type ToastKind = 'check' | 'x' | 'clock';
 
 // TODO: unique key
 interface ToastProps {
@@ -48,10 +49,22 @@ export function useToast<U>(selector: (state: ExtractState<Store>) => U): U {
   return useStore(storeContext, useShallow(selector));
 }
 
+const toastParams = {
+  check: [Check, 'text-success'],
+  clock: [Clock, 'text-muted-foreground'],
+  x: [X, 'text-danger'],
+} as const satisfies Record<
+  ToastKind,
+  [
+    React.ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>>,
+    ComponentProps<'div'>['className'],
+  ]
+>;
+
 const Toast = memo(({ kind }: ToastProps) => {
-  const [Icon, className] = kind === 'check' ? ([Check, 'text-success'] as const) : ([X, 'text-danger'] as const);
+  const [Icon, className] = toastParams[kind];
   return (
-    <Icon className={cn('size-[25dvmin] origin-top animate-[toast_1.2s_ease-out_forwards] stroke-5', className)} />
+    <Icon className={cn('size-[25dvmin] origin-top animate-[toast_1.2s_ease-out_forwards] stroke-3', className)} />
   );
 });
 

@@ -74,3 +74,11 @@ export function daysDiff(a: Date, b: Date): number {
   const bStart = dateSet(b, { hour: 0, minute: 0, ms: 0, second: 0 }).getTime();
   return Math.round((bStart - aStart) / DAY_MS);
 }
+
+export function dateMin(a: Date, b: Date): Date {
+  return a < b ? a : b;
+}
+
+export function dateMax(a: Date, b: Date): Date {
+  return a > b ? a : b;
+}

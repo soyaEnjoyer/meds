@@ -10,6 +10,7 @@ import {
 } from '@/hooks/query/queries/base';
 import { dateAdd, dateSet, formatDateIso, formatDatetimeIso, formatTimeIso, MINUTE_MS } from '@/lib/date';
 import type { ScheduleRow } from '@/lib/drizzle/zod';
+import { weekdays } from '@/lib/enums';
 
 // oxlint-disable oxc/no-map-spread
 export interface ScheduleRowWithNames extends ScheduleRow {
@@ -28,74 +29,49 @@ export interface ScheduleGroup {
   items: ScheduleRowWithNames[];
 }
 
-export function useFilteredSchedulesWithNamesQuery() {
+export function useFilteredScheduleGroupsQuery() {
   const schedulesQuery = useSchedulesQuery();
   const categoriesMapQuery = useCategoriesMapQuery();
   const itemsMapQuery = useItemsMapQuery();
   const unitsMapQuery = useUnitsMapQuery();
-  const filterState = useFilter((state) => state.state);
   const filterSearch = useFilter((state) => state.search).toLocaleLowerCase();
-  const now = new Date();
   const pathName = useRouterState({ select: (state) => state.location.pathname });
-
-  const queryFn = () =>
-    (
-      schedulesQuery.data.map((schedule) => ({
-        ...schedule,
-        categoryName: categoriesMapQuery.data.get(schedule.categoryId)?.name,
-        itemName: itemsMapQuery.data.get(schedule.itemId)?.name,
-        unitName: unitsMapQuery.data.get(schedule.unitId)?.name,
-      })) satisfies ScheduleRowWithNames[]
-    )
-      .filter(
-        (schedule) =>
-          (filterSearch === '' ||
-            schedule.categoryName?.toLocaleLowerCase().includes(filterSearch) ||
-            schedule.itemName?.toLocaleLowerCase().includes(filterSearch)) &&
-          ((filterState === ItemState.Scheduled && schedule.dueAt) ||
-            filterState === ItemState.All ||
-            (filterState === ItemState.Due && schedule.dueAt && schedule.dueAt <= now) ||
-            (filterState === ItemState.Unscheduled && !schedule.dueAt) ||
-            (filterState === ItemState.AdHoc && schedule.adHoc) ||
-            (filterState === ItemState.NotDue && schedule.dueAt && schedule.dueAt > now))
-      )
-      .toSorted(
-        (a, b) =>
-          (a.dueAt?.getTime() ?? Infinity) - (b.dueAt?.getTime() ?? Infinity) ||
-          (a.categoryName ?? '').localeCompare(b.categoryName ?? '', undefined, { sensitivity: 'base' }) ||
-          a.sort - b.sort ||
-          (a.itemName ?? '').localeCompare(b.itemName ?? '', undefined, { sensitivity: 'base' })
-      );
-  return useQuery({
-    enabled: pathName === '/',
-    gcTime: MINUTE_MS,
-    initialData: queryFn(),
-    queryFn,
-    queryKey: [
-      'schedule',
-      'with-names',
-      {
-        cat: categoriesMapQuery.dataUpdatedAt,
-        item: itemsMapQuery.dataUpdatedAt,
-        sch: schedulesQuery.dataUpdatedAt,
-        search: filterSearch,
-        state: filterState,
-        unit: unitsMapQuery.dataUpdatedAt,
-      },
-    ],
-  });
-}
-
-export function useFilteredScheduleGroupsQuery() {
-  const schedulesWithNamesQuery = useFilteredSchedulesWithNamesQuery();
   const filterState = useFilter((state) => state.state);
   const now = new Date();
   const todayEnd = dateSet(now, { hour: 23, minute: 59, ms: 999, second: 59 });
-  const tomorrowEnd = dateAdd(todayEnd, { day: 1 });
+  const in7dEnd = dateAdd(todayEnd, { day: 6 });
   const queryFn = () =>
     Object.entries(
       Object.groupBy(
-        schedulesWithNamesQuery.data,
+        (
+          schedulesQuery.data.map((schedule) => ({
+            ...schedule,
+            categoryName: categoriesMapQuery.data.get(schedule.categoryId)?.name,
+            itemName: itemsMapQuery.data.get(schedule.itemId)?.name,
+            unitName: unitsMapQuery.data.get(schedule.unitId)?.name,
+          })) satisfies ScheduleRowWithNames[]
+        )
+          .filter(
+            (schedule) =>
+              (filterSearch === '' ||
+                schedule.categoryName?.toLocaleLowerCase().includes(filterSearch) ||
+                schedule.itemName?.toLocaleLowerCase().includes(filterSearch)) &&
+              ((filterState === ItemState.Scheduled && schedule.dueAt) ||
+                filterState === ItemState.All ||
+                (filterState === ItemState.Due && schedule.dueAt && schedule.dueAt <= now) ||
+                (filterState === ItemState.Unscheduled && !schedule.dueAt) ||
+                (filterState === ItemState.AdHoc && schedule.adHoc) ||
+                (filterState === ItemState.NotDue && schedule.dueAt && schedule.dueAt > now))
+          )
+          .toSorted(
+            (a, b) =>
+              (filterState === ItemState.AdHoc
+                ? 0
+                : (a.dueAt?.getTime() ?? Infinity) - (b.dueAt?.getTime() ?? Infinity)) ||
+              (a.categoryName ?? '').localeCompare(b.categoryName ?? '', undefined, { sensitivity: 'base' }) ||
+              a.sort - b.sort ||
+              (a.itemName ?? '').localeCompare(b.itemName ?? '', undefined, { sensitivity: 'base' })
+          ),
         (item) =>
           `${
             filterState === ItemState.AdHoc
@@ -106,8 +82,8 @@ export function useFilteredScheduleGroupsQuery() {
                   ? 'Due'
                   : item.dueAt < todayEnd
                     ? formatTimeIso(item.dueAt)
-                    : item.dueAt < tomorrowEnd
-                      ? `Tomorrow ${formatTimeIso(item.dueAt)}`
+                    : item.dueAt < in7dEnd
+                      ? `${weekdays[(item.dueAt.getDay() || 7) - 1][1].slice(0, 3)} ${formatTimeIso(item.dueAt)}`
                       : formatDateIso(item.dueAt)
           }|${item.categoryId}|${item.categoryName}`
       )
@@ -134,13 +110,20 @@ export function useFilteredScheduleGroupsQuery() {
 
   // oxlint-disable-next-line tanstack-query/exhaustive-deps
   return useQuery({
+    enabled: pathName === '/',
+    gcTime: MINUTE_MS,
     initialData: queryFn(),
     queryFn,
     queryKey: [
       'schedule',
       'groups',
       {
-        at: schedulesWithNamesQuery.dataUpdatedAt,
+        cat: categoriesMapQuery.dataUpdatedAt,
+        item: itemsMapQuery.dataUpdatedAt,
+        sch: schedulesQuery.dataUpdatedAt,
+        search: filterSearch,
+        state: filterState,
+        unit: unitsMapQuery.dataUpdatedAt,
       },
     ],
     staleTime: ({ state }) => {

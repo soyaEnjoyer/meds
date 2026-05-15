@@ -1,8 +1,8 @@
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start';
-import { eq, isNull } from 'drizzle-orm';
+import { eq, inArray, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { dateAdd, dateSet, daysDiff } from '@/lib/date';
+import { dateAdd, dateMax, dateSet, daysDiff } from '@/lib/date';
 import { db } from '@/lib/drizzle/db.server';
 import { historyTable, scheduleTable } from '@/lib/drizzle/schema';
 import type { ScheduleRow } from '@/lib/drizzle/zod';
@@ -26,6 +26,11 @@ const skipSchema = z
     })
   )
   .transform((value) => value.map(({ id }) => ({ amount: null, id })));
+
+const rescheduleSchema = z.object({
+  ids: z.array(z.int()),
+  to: z.date(),
+});
 
 export const scheduleGet = createServerFn().handler(
   async (): Promise<ScheduleRow[]> =>
@@ -76,21 +81,20 @@ export const scheduleDelete = createServerFn()
 const scheduleAction = createServerOnlyFn(
   async (data: { id: number; amount?: number | null; unitId?: number; update?: boolean }[]): Promise<ScheduleRow[]> => {
     /** @param amount undefined = scheduled amount, number = custom amount, null = skipped */
-    // FIXME: needs optimisation
     function getNextDueAt(schedule: ScheduleRow, amount: number | null | undefined): Date | null {
       if (!schedule.dueAt) return null;
+
       const now = new Date();
-      const intermediate = dateAdd(schedule.dueAt ?? now, {
-        day: amount === null ? 1 : schedule.restDays + 1,
-      });
-      const tomorrow = dateAdd(now, { day: 1 });
-      const nextDueAt = intermediate < tomorrow ? tomorrow : intermediate;
+      const nextDueAt =
+        amount === null
+          ? dateAdd(dateMax(schedule.dueAt, now), { day: 1 })
+          : dateAdd(now, { day: schedule.restDays + 1 });
       nextDueAt.setHours(0, 0, 0, 0);
 
       // week starts on monday
       let weekDay = (nextDueAt.getDay() || 7) - 1;
       const cycleLength = schedule.cycleOnDays + schedule.cycleOffDays;
-      console.log('scheduleAction getNextDueAt init', { amount, intermediate, nextDueAt });
+      console.log('scheduleAction getNextDueAt init', { amount, nextDueAt });
       let cycleDay = daysDiff(schedule.startAt, nextDueAt) % cycleLength;
 
       for (let i = 0; i < MAX_SEARCH_ITERATIONS; ++i) {
@@ -150,7 +154,7 @@ const scheduleAction = createServerOnlyFn(
             .update(scheduleTable)
             .set({
               dueAt: nextDueAt,
-              ...(amount === null ? { skippedAt: at } : { completedAt: at, lastAmount: amount }),
+              ...(amount === null ? { skippedAt: at } : { completedAt: at, lastAmount: amount ?? schedule.amount }),
               ...(update ? { amount: amount ?? undefined, unitId } : {}),
             })
             .where(eq(scheduleTable.id, scheduleId))
@@ -169,3 +173,10 @@ export const scheduleSetDone = createServerFn()
 export const scheduleSetSkipped = createServerFn()
   .inputValidator(skipSchema)
   .handler(async ({ data }) => await scheduleAction(data));
+
+export const scheduleReschedule = createServerFn()
+  .inputValidator(rescheduleSchema)
+  .handler(
+    async ({ data: { ids, to } }) =>
+      await db.update(scheduleTable).set({ dueAt: to }).where(inArray(scheduleTable.id, ids)).returning()
+  );

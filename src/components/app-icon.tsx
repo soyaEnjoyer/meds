@@ -1,29 +1,31 @@
 import type { ComponentProps } from 'react';
 
 export function AppIcon({
-  fill = 'currentColor',
-  stroke = 'currentColor',
-  backgroundFill = 'none',
   viewBox = '0 0 24 24',
   withBadge = false,
-  badgeFill = 'currentColor',
+  opaque = false,
   ...props
-}: ComponentProps<'svg'> & { backgroundFill?: string; withBadge?: boolean; badgeFill?: string }) {
+}: ComponentProps<'svg'> & { withBadge?: boolean; opaque?: boolean }) {
+  const [mainColour, badgeColour] = ['#9810fa', '#e11d48'].toSorted(() =>
+    // oxlint-disable-next-line node/no-process-env
+    process.env.NODE_ENV === 'production' ? 1 : -1
+  );
+
   return (
     <svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='none' viewBox={viewBox} {...props}>
       <path
         d='m 15.5,15.5 -7,-7 -5,5 c -4.761662,4.666424 2.333576,11.761662 7,7 z'
-        fill={fill}
+        fill={mainColour}
         strokeWidth='1'
-        stroke={stroke}
+        stroke={mainColour}
       />
       <path
         d='M 16.761719,1.9277344 C 15.65803,1.9841417 14.52078,2.4583864 13.5,3.5 l -5,5 7,7 5,-5 C 24.220048,6.8543563 20.703466,1.7262797 16.761719,1.9277344 Z'
-        fill={backgroundFill}
+        fill={opaque ? '#f5f5f5' : 'none'}
         strokeWidth='1'
-        stroke={stroke}
+        stroke={mainColour}
       />
-      {withBadge && <circle stroke='none' fill={badgeFill} cx={20} cy={20} r={4} />}
+      {withBadge && <circle stroke='none' fill={badgeColour} cx={19} cy={19} r={5} />}
     </svg>
   );
 }

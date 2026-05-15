@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Check, ChevronDownIcon, EllipsisVertical, Info, Logs, Pencil, Settings, X } from 'lucide-react';
+import { Check, ChevronDownIcon, Clock, EllipsisVertical, Info, Logs, Pencil, Settings, X } from 'lucide-react';
 import type { ComponentProps, CSSProperties, MouseEvent } from 'react';
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
@@ -9,12 +9,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/dialogs/confirm';
 import { useDialog } from '@/hooks/dialog';
-import { useScheduleDoneMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
+import { useScheduleDoneMutator, useScheduleRescheduleMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
 import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { useFilteredScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
-import { dateAdd, dateSet, formatDatetimeIso } from '@/lib/date';
+import { dateAdd, dateMax, dateMin, dateSet, formatDatetimeIso } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)/')({
   component: SchedulePage,
@@ -31,6 +30,8 @@ function ScheduleAccordionItem({
 }: Pick<ScheduleRowWithNames, 'description' | 'id' | 'itemName'> & ComponentProps<typeof ScheduleSummary>) {
   const scheduleDoneMutator = useScheduleDoneMutator();
   const scheduleSkipMutator = useScheduleSkipMutator();
+  const scheduleRescheduleMutator = useScheduleRescheduleMutator();
+
   const openDialog = useDialog((state) => state.actions.open);
 
   const handleEditClick = useCallback(() => openDialog('schedule', id), [id, openDialog]);
@@ -42,6 +43,13 @@ function ScheduleAccordionItem({
   const handleCustomClick = useCallback(() => openDialog('doneCustom', id), [id, openDialog]);
 
   const handleHistoryClick = useCallback(() => openDialog('scheduleHistory', id), [id, openDialog]);
+
+  const handleSnoozeClick = useCallback(() => {
+    const now = new Date();
+    now.setHours(now.getHours(), 0, 0, 0);
+    const dueAt = props.dueAt ?? now;
+    scheduleRescheduleMutator.mutate({ data: { ids: [id], to: dateAdd(dateMin(now, dueAt), { hour: 3 }) } });
+  }, [props.dueAt, id, scheduleRescheduleMutator]);
 
   return (
     <div className='flex items-center gap-4'>
@@ -76,21 +84,25 @@ function ScheduleAccordionItem({
           }
         />
         <PopoverContent className='grid max-w-fit grid-cols-2 gap-4'>
-          <Button onClick={handleEditClick} variant='secondary'>
-            <Settings aria-description='Edit' />
-            Edit
-          </Button>
           <Button onClick={handleSkipClick} variant='destructive'>
             <X aria-description='Skip' />
             Skip
           </Button>
-          <Button onClick={handleCustomClick}>
+          <Button onClick={handleSnoozeClick} variant='secondary'>
+            <Clock aria-description='Snooze' />
+            Snooze
+          </Button>
+          <Button onClick={handleCustomClick} variant='secondary'>
             <Pencil aria-description='Custom' />
             Custom
           </Button>
-          <Button onClick={handleHistoryClick}>
+          <Button onClick={handleHistoryClick} variant='secondary'>
             <Logs aria-description='History' />
             History
+          </Button>
+          <Button onClick={handleEditClick}>
+            <Settings aria-description='Edit' />
+            Edit
           </Button>
         </PopoverContent>
       </Popover>
@@ -101,6 +113,7 @@ function ScheduleAccordionItem({
 function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: ScheduleGroup & { value: string }) {
   const scheduleDoneMutator = useScheduleDoneMutator();
   const scheduleSkipMutator = useScheduleSkipMutator();
+  const scheduleRescheduleMutator = useScheduleRescheduleMutator();
 
   const handleDoneClick = useCallback(
     async (event: MouseEvent<HTMLButtonElement>) => {
@@ -110,11 +123,18 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: Sche
     [items, scheduleDoneMutator]
   );
 
-  const handleSkipConfirm = useCallback(() => {
+  const handleSkipClick = useCallback(() => {
     scheduleSkipMutator.mutate({ data: items.map(({ id }) => ({ id })) });
   }, [items, scheduleSkipMutator]);
 
-  const handleConfirmTriggerClick = useCallback((event: MouseEvent<HTMLButtonElement>) => event.stopPropagation(), []);
+  const handleSnoozeClick = useCallback(() => {
+    const now = new Date();
+    now.setHours(now.getHours(), 0, 0, 0);
+    const dueAt = items.reduce((acc, item) => dateMax(acc, item.dueAt ?? now), now);
+    scheduleRescheduleMutator.mutate({ data: { ids: items.map(({ id }) => id), to: dateAdd(dueAt, { hour: 3 }) } });
+  }, [items, scheduleRescheduleMutator]);
+
+  const handlePopoverTriggerClick = useCallback((event: MouseEvent<HTMLButtonElement>) => event.stopPropagation(), []);
 
   const style: CSSProperties = useMemo(() => {
     const hue =
@@ -131,8 +151,7 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: Sche
   }, [categoryName]);
 
   return (
-    <ConfirmDialog>
-      <ConfirmDialogContent message={`Really skip ${items.length} items?`} onConfirm={handleSkipConfirm} />
+    <Popover>
       <AccordionItem value={value}>
         <AccordionTrigger
           className='-mx-4 flex items-center gap-4 truncate p-2 select-none *:scheme-only-light'
@@ -156,9 +175,13 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: Sche
           <Button onClick={handleDoneClick} className='shadow-sm' variant='background'>
             <Check aria-description='Done' />
           </Button>
-          <ConfirmDialogTrigger variant='destructive-opaque' className='shadow-sm' onClick={handleConfirmTriggerClick}>
-            <X aria-description='Skip' />
-          </ConfirmDialogTrigger>
+          <PopoverTrigger
+            render={
+              <Button variant='ghost' onClick={handlePopoverTriggerClick}>
+                <EllipsisVertical aria-description='Actions' />
+              </Button>
+            }
+          />
         </AccordionTrigger>
         <AccordionContent
           className='mx-0 flex flex-col gap-4 py-2 *:rounded-lg *:odd:-my-2 *:odd:bg-accent *:odd:py-2'
@@ -169,7 +192,17 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: Sche
           ))}
         </AccordionContent>
       </AccordionItem>
-    </ConfirmDialog>
+      <PopoverContent className='grid max-w-fit grid-cols-2 gap-4'>
+        <Button onClick={handleSkipClick} variant='destructive'>
+          <X aria-description='Skip' />
+          Skip
+        </Button>
+        <Button onClick={handleSnoozeClick}>
+          <Clock aria-description='Snooze' />
+          Snooze
+        </Button>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -178,7 +211,7 @@ function SchedulePage() {
   const valueRef = useRef<string[]>([]);
 
   const getUpdatedValue = useCallback(() => {
-    const openUntilIso = formatDatetimeIso(dateAdd(dateSet(new Date(), { minute: 0, ms: 0, second: 0 }), { hour: 6 }));
+    const openUntilIso = formatDatetimeIso(dateAdd(dateSet(new Date(), { minute: 0, ms: 0, second: 0 }), { hour: 3 }));
     const current = new Set(valueRef.current);
     const next = new Set([
       ...valueRef.current,

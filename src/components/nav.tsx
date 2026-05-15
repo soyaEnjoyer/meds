@@ -281,7 +281,7 @@ export function Nav() {
     <header className='fixed top-0 z-10 flex min-h-14 w-full items-center justify-center bg-sidebar/50 p-2 text-sidebar-foreground shadow-xl backdrop-blur-xs transition-colors focus-within:bg-sidebar/75'>
       <nav className='flex w-full max-w-6xl items-center gap-4'>
         <span className='hidden items-center gap-1 md:flex'>
-          <AppIcon className='size-8 text-theme' />
+          <AppIcon className='size-8' />
           <h1 className='text-lg'>{displayName}</h1>
         </span>
 
@@ -300,7 +300,7 @@ export function Nav() {
             showCloseButton={false}
           >
             <SheetClose className='flex items-center justify-center gap-1'>
-              <AppIcon className='size-8 text-theme' />
+              <AppIcon className='size-8' />
               <h1 className='text-lg'>{displayName}</h1>
             </SheetClose>
 
