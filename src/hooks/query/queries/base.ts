@@ -5,6 +5,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { categoryGet } from '@/functions.server/category';
 import { itemGet } from '@/functions.server/item';
 import { scheduleGet } from '@/functions.server/schedule';
+import { getTextStatus } from '@/functions.server/status';
 import { unitGet } from '@/functions.server/unit';
 import { HOUR_MS } from '@/lib/date';
 
@@ -71,6 +72,22 @@ export function useUnitsQuery() {
     initialData,
     queryFn,
     queryKey: ['unit'],
+    staleTime,
+  });
+}
+
+export function useStatusQuery() {
+  const schedulesQuery = useSchedulesQuery();
+  const queryFn = useServerFn(getTextStatus);
+  const initialData = useLoaderData({
+    from: '/(ui)',
+    select: (match) => match.status,
+  });
+
+  return useQuery({
+    initialData,
+    queryFn,
+    queryKey: ['status', { at: schedulesQuery.dataUpdatedAt }],
     staleTime,
   });
 }

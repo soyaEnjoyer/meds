@@ -7,12 +7,7 @@ import { cn } from '@/lib/utils';
 
 import appCss from '@/globals.css?url';
 
-// oxlint-disable node/no-process-env
-
-const title =
-  process.env.NODE_ENV === 'production'
-    ? displayName
-    : `[${process.env.NODE_ENV?.slice(0, 3).toLocaleUpperCase()}] ${displayName}`;
+const title = `${import.meta.hot ? '[DEV] ' : ''}${displayName}`;
 
 export const Route = createRootRoute({
   component: RootLayout,

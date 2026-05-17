@@ -1,15 +1,16 @@
 import type { ComponentProps } from 'react';
 
+const MAIN_COLOUR = '#9810fa';
+const BADGE_COLOUR = '#e11d48';
+
 export function AppIcon({
   viewBox = '0 0 24 24',
   withBadge = false,
   opaque = false,
   ...props
-}: ComponentProps<'svg'> & { withBadge?: boolean; opaque?: boolean }) {
-  const [mainColour, badgeColour] = ['#9810fa', '#e11d48'].toSorted(() =>
-    // oxlint-disable-next-line node/no-process-env
-    process.env.NODE_ENV === 'production' ? 1 : -1
-  );
+}: Omit<ComponentProps<'svg'>, 'fill' | 'stroke' | 'strokeWidth'> & { withBadge?: boolean; opaque?: boolean }) {
+  // oxlint-disable-next-line react-perf/jsx-no-new-array-as-prop
+  const [mainColour, badgeColour] = import.meta.hot ? [BADGE_COLOUR, MAIN_COLOUR] : [MAIN_COLOUR, BADGE_COLOUR];
 
   return (
     <svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='none' viewBox={viewBox} {...props}>

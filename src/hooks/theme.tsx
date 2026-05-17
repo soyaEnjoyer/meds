@@ -74,7 +74,7 @@ const store = createStore(
           document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
         },
         setItem(key, value) {
-          document.cookie = `${key}=${value}`;
+          document.cookie = `${key}=${value}; expires=Wed May 15 2109 08:35:11 UTC`;
         },
       })),
     }

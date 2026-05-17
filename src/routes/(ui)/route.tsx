@@ -6,8 +6,8 @@ import { Outlet, createFileRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { LoaderCircle } from 'lucide-react';
 
+import { HeadUpdater } from '@/components/head-updater';
 import { Nav } from '@/components/nav';
-import { Notifier } from '@/components/notifier';
 import { ScrollTopButton } from '@/components/scroll-top-button';
 import { SseClient } from '@/components/sse-client';
 import { BasicFormDialog, MultimodeFormDialog } from '@/dialogs/form';
@@ -22,28 +22,44 @@ import { UnitForm } from '@/forms/unit';
 import { categoryGet } from '@/functions.server/category';
 import { itemGet } from '@/functions.server/item';
 import { scheduleGet } from '@/functions.server/schedule';
+import { getTextStatus } from '@/functions.server/status';
 import { unitGet } from '@/functions.server/unit';
 import { DialogProvider } from '@/hooks/dialog';
 import { FilterProvider, ItemState } from '@/hooks/filter';
 import { PagerProvider } from '@/hooks/pager';
 import { ToastProvider } from '@/hooks/toast';
 
+// oxlint-disable-next-line sort-keys tanstack router requires a specific order
 export const Route = createFileRoute('/(ui)')({
   component: UiLayout,
   loader: async () => {
-    const [categories, items, schedules, units] = await Promise.all([
+    const [categories, items, schedules, units, status] = await Promise.all([
       categoryGet(),
       itemGet(),
       scheduleGet(),
       unitGet(),
+      getTextStatus(),
     ]);
     // need to explicitly set queryClient data otherwise ssr will use stale data and cause a hydration error
     queryClient.setQueryData(['category'], categories);
     queryClient.setQueryData(['item'], items);
     queryClient.setQueryData(['schedule'], schedules);
+    queryClient.setQueryData(['status'], status);
     queryClient.setQueryData(['unit'], units);
-    return { categories, items, schedules, units };
+    return { categories, items, schedules, status, units };
   },
+  head: (ctx) => ({
+    // this is for ssr and initial render. <HeadUpdater/> handles dynamic updates
+    links: [
+      { href: `icon/${ctx.loaderData?.status.due ? 'due' : 'default'}.png`, rel: 'icon', type: 'image/png' },
+      { href: `icon/${ctx.loaderData?.status.due ? 'due' : 'default'}.webp`, rel: 'icon', type: 'image/webp' },
+    ],
+    meta: [
+      { charSet: 'utf8' },
+      { content: 'width=device-width, initial-scale=1', name: 'viewport' },
+      { title: ctx.loaderData?.status.title },
+    ],
+  }),
   pendingComponent: Pending,
 });
 
@@ -94,7 +110,7 @@ function UiLayout() {
               <ThemeDialog />
               <ScheduleHistoryDialog />
               <ScrollTopButton />
-              <Notifier />
+              <HeadUpdater />
             </FilterProvider>
             <SseClient />
             <TanStackDevtools

@@ -1,4 +1,3 @@
-import { displayName } from '@root/package.json';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useEffectEvent, useRef } from 'react';
 
@@ -29,15 +28,6 @@ export function SseClient() {
     eventSource.addEventListener('invalidate', () => {
       console.debug('sse invalidate');
       void invalidateQueries();
-    });
-
-    eventSource.addEventListener('notification', (event) => {
-      const { message, title } = JSON.parse(event.data);
-      void new Notification(title, {
-        body: message,
-        icon: '/icon/default.svg',
-        tag: displayName,
-      });
     });
 
     function cleanup() {

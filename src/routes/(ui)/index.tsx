@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useDialog } from '@/hooks/dialog';
 import { useScheduleDoneMutator, useScheduleRescheduleMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
 import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
-import { useFilteredScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
+import { ACCORDION_PRE_EXPAND_HOURS, useFilteredScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
 import { dateAdd, dateMax, dateMin, dateSet, formatDatetimeIso } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)/')({
@@ -208,32 +208,30 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: Sche
 
 function SchedulePage() {
   const query = useFilteredScheduleGroupsQuery();
+  const [value, setValue] = useState<string[]>([]);
   const valueRef = useRef<string[]>([]);
 
-  const getUpdatedValue = useCallback(() => {
-    const openUntilIso = formatDatetimeIso(dateAdd(dateSet(new Date(), { minute: 0, ms: 0, second: 0 }), { hour: 3 }));
+  const setValueShim = useCallback((nextValue: string[]) => {
+    setValue(nextValue);
+    valueRef.current = nextValue;
+  }, []);
+
+  useLayoutEffect(() => {
+    const openUntilIso = formatDatetimeIso(
+      dateAdd(dateSet(new Date(), { minute: 0, ms: 0, second: 0 }), { hour: ACCORDION_PRE_EXPAND_HOURS })
+    );
     const current = new Set(valueRef.current);
     const next = new Set([
       ...valueRef.current,
       ...query.data.filter(({ dueAtIso }) => dueAtIso <= openUntilIso).map(({ key }) => key),
     ]);
-    if (current.symmetricDifference(next).size === 0) return valueRef.current;
-    return [...next];
-    // oxlint-disable-next-line eslint-plugin-react-hooks/exhaustive-deps
-  }, [query.dataUpdatedAt]);
-
-  const [value, setValue] = useState<string[]>(getUpdatedValue());
-
-  useLayoutEffect(() => {
-    valueRef.current = value;
-  }, [value]);
-
-  useLayoutEffect(() => {
-    setValue(getUpdatedValue());
-  }, [getUpdatedValue]);
+    if (current.symmetricDifference(next).size === 0) return;
+    setValueShim([...next]);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.dataUpdatedAt, setValueShim]);
 
   return (
-    <Accordion value={value} onValueChange={setValue} multiple className='gap-2'>
+    <Accordion value={value} onValueChange={setValueShim} multiple className='gap-2'>
       {query.data?.map((group) => (
         <ScheduleAccordionGroup {...group} key={group.key} value={group.key} />
       ))}

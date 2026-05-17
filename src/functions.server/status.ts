@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { displayName } from '@root/package.json';
-import { createServerOnlyFn } from '@tanstack/react-start';
+import { createServerFn, createServerOnlyFn } from '@tanstack/react-start';
 import { and, eq, gte, isNotNull, lte, sql } from 'drizzle-orm';
 
 import { dateSet } from '@/lib/date';
@@ -64,11 +64,8 @@ const getStatusBlob = createServerOnlyFn((status: string) => {
   return '🟣';
 });
 
-export const getTextStatus = createServerOnlyFn(async () => {
-  const title =
-    process.env.NODE_ENV === 'production'
-      ? displayName
-      : `[${process.env.NODE_ENV?.slice(0, 3).toLocaleUpperCase()}] ${displayName}`;
+export const getTextStatus = createServerFn().handler(async () => {
+  const title = `${import.meta.hot ? '[DEV] ' : ''}${displayName}`;
   const grouped = await getGroupedStatus();
   const rows = Object.entries(grouped).map(([status, categoryGroups]) =>
     Object.entries(categoryGroups)

@@ -8,7 +8,7 @@ import {
   useSchedulesQuery,
   useUnitsMapQuery,
 } from '@/hooks/query/queries/base';
-import { dateAdd, dateSet, formatDateIso, formatDatetimeIso, formatTimeIso, MINUTE_MS } from '@/lib/date';
+import { dateAdd, dateSet, formatDateIso, formatDatetimeIso, formatTimeIso, HOUR_MS, MINUTE_MS } from '@/lib/date';
 import type { ScheduleRow } from '@/lib/drizzle/zod';
 import { weekdays } from '@/lib/enums';
 
@@ -28,6 +28,8 @@ export interface ScheduleGroup {
   dueAtTs: number;
   items: ScheduleRowWithNames[];
 }
+
+export const ACCORDION_PRE_EXPAND_HOURS = 3;
 
 export function useFilteredScheduleGroupsQuery() {
   const schedulesQuery = useSchedulesQuery();
@@ -78,11 +80,11 @@ export function useFilteredScheduleGroupsQuery() {
               ? 'Ad hoc'
               : item.dueAt === null
                 ? 'Unscheduled'
-                : item.dueAt < now
+                : item.dueAt <= now
                   ? 'Due'
-                  : item.dueAt < todayEnd
+                  : item.dueAt <= todayEnd
                     ? formatTimeIso(item.dueAt)
-                    : item.dueAt < in7dEnd
+                    : item.dueAt <= in7dEnd
                       ? `${weekdays[(item.dueAt.getDay() || 7) - 1][1].slice(0, 3)} ${formatTimeIso(item.dueAt)}`
                       : formatDateIso(item.dueAt)
           }|${item.categoryId}|${item.categoryName}`
@@ -131,10 +133,18 @@ export function useFilteredScheduleGroupsQuery() {
       // this will force a group key recalc
       const nowTs = now.getTime();
       const nextDueAtTs =
-        state.data?.reduce((acc, item) => (item.dueAtTs > nowTs ? Math.min(item.dueAtTs, acc) : acc), Infinity) ??
-        Infinity;
+        state.data
+          ?.flatMap((item) => [item.dueAtTs, item.dueAtTs + HOUR_MS * ACCORDION_PRE_EXPAND_HOURS])
+          .filter((item) => item > nowTs)
+          .reduce((acc, item) => Math.min(acc, item), Infinity) ?? Infinity;
       // infinity - n === infinity
-      return nextDueAtTs - nowTs;
+      const staleMs = nextDueAtTs - nowTs;
+      console.log('useFilteredScheduleGroupsQuery staleTime', {
+        nextDueAt: new Date(nextDueAtTs),
+        nextDueAtTs,
+        staleMs,
+      });
+      return staleMs;
     },
   });
 }
