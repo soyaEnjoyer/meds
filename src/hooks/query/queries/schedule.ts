@@ -54,16 +54,20 @@ export function useFilteredScheduleGroupsQuery() {
           })) satisfies ScheduleRowWithNames[]
         )
           .filter(
+            // oxlint-disable-next-line complexity
             (schedule) =>
               (filterSearch === '' ||
                 schedule.categoryName?.toLocaleLowerCase().includes(filterSearch) ||
                 schedule.itemName?.toLocaleLowerCase().includes(filterSearch)) &&
-              ((filterState === ItemState.Scheduled && schedule.dueAt) ||
-                filterState === ItemState.All ||
+              (filterState === ItemState.All ||
+                (filterState === ItemState.Scheduled && schedule.dueAt) ||
                 (filterState === ItemState.Due && schedule.dueAt && schedule.dueAt <= now) ||
+                (filterState === ItemState.NotDue && schedule.dueAt && schedule.dueAt > now) ||
+                (filterState === ItemState.Skipped &&
+                  schedule.skippedAt &&
+                  schedule.skippedAt >= (schedule.completedAt ?? schedule.skippedAt)) ||
                 (filterState === ItemState.Unscheduled && !schedule.dueAt) ||
-                (filterState === ItemState.AdHoc && schedule.adHoc) ||
-                (filterState === ItemState.NotDue && schedule.dueAt && schedule.dueAt > now))
+                (filterState === ItemState.AdHoc && schedule.adHoc))
           )
           .toSorted(
             (a, b) =>

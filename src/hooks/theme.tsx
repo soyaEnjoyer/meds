@@ -64,17 +64,17 @@ const store = createStore(
       storage: createJSONStorage(() => ({
         getItem(key) {
           return (
-            document.cookie
+            document?.cookie
               .split(/;\s*/)
               .find((item) => item.startsWith(`${key}=`))
               ?.split('=')[1] ?? null
           );
         },
         removeItem(key) {
-          document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+          if (document) document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
         },
         setItem(key, value) {
-          document.cookie = `${key}=${value}; expires=Wed May 15 2109 08:35:11 UTC`;
+          if (document) document.cookie = `${key}=${value}; expires=Wed May 15 2109 08:35:11 UTC`;
         },
       })),
     }

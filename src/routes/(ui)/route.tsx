@@ -98,7 +98,7 @@ function UiLayout() {
           <QueryClientProvider client={queryClient}>
             <FilterProvider defaultState={ItemState.Scheduled}>
               <Nav />
-              <main className='mx-auto mt-16 mb-2 max-w-2xl px-4'>
+              <main className='@container mx-auto mt-16 mb-2 max-w-2xl px-4 has-[.snap-y]:px-0'>
                 <Outlet />
               </main>
               <MultimodeFormDialog dialogName='category' form={CategoryForm} />

@@ -1,4 +1,4 @@
-import { Bell, BellMinus, BellOff, Check, Circle } from 'lucide-react';
+import { Bell, BellMinus, BellOff, BellPlus, Check, Circle } from 'lucide-react';
 import type { ComponentProps, ForwardRefExoticComponent, RefAttributes } from 'react';
 
 import { ItemState, itemStateNames } from '@/hooks/filter';
@@ -8,7 +8,8 @@ const variants = {
   [ItemState.Scheduled]: { Icon: Bell, baseClass: 'text-success' },
   [ItemState.Due]: { Icon: Bell, baseClass: 'text-success fill-success' },
   [ItemState.NotDue]: { Icon: BellMinus, baseClass: 'text-warning' },
-  [ItemState.Unscheduled]: { Icon: BellOff, baseClass: 'text-danger' },
+  [ItemState.Skipped]: { Icon: BellPlus, baseClass: 'text-danger' },
+  [ItemState.Unscheduled]: { Icon: BellOff, baseClass: 'text-muted-foreground' },
   [ItemState.AdHoc]: { Icon: Check, baseClass: 'text-success' },
   [ItemState.All]: { Icon: Circle, baseClass: 'text-foreground' },
 } as const satisfies Record<

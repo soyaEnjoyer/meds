@@ -36,7 +36,7 @@ function RootLayoutThemed() {
       <head>
         <HeadContent {...headProps} />
       </head>
-      <body className={cn('@container h-dvh overflow-y-auto', className)}>
+      <body className={cn('h-dvh overflow-y-auto has-[.snap-y]:overflow-y-hidden', className)}>
         <Outlet />
         <Scripts />
       </body>

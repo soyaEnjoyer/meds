@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDialog } from '@/hooks/dialog';
 import { useScheduleDoneMutator, useScheduleRescheduleMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
+import { useCategoriesQuery } from '@/hooks/query/queries/base';
 import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { ACCORDION_PRE_EXPAND_HOURS, useFilteredScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
 import { dateAdd, dateMax, dateMin, dateSet, formatDatetimeIso } from '@/lib/date';
@@ -52,12 +53,12 @@ function ScheduleAccordionItem({
   }, [props.dueAt, id, scheduleRescheduleMutator]);
 
   return (
-    <div className='flex items-center gap-4'>
+    <div className='flex items-center gap-4 ps-2 md:ps-4 md:pe-2'>
       {description ? (
         <Popover>
           <PopoverTrigger
             render={
-              <h3 className='group ms-2 me-auto flex items-center gap-1 text-base wrap-anywhere'>
+              <h3 className='group me-auto flex items-center gap-1 text-base wrap-anywhere'>
                 <Info className='size-4 text-muted-foreground transition-colors group-hover:text-foreground' />
                 {itemName}
               </h3>
@@ -69,7 +70,7 @@ function ScheduleAccordionItem({
           </PopoverContent>
         </Popover>
       ) : (
-        <h3 className='ms-2 me-auto text-base wrap-anywhere'>{itemName}</h3>
+        <h3 className='me-auto text-base wrap-anywhere'>{itemName}</h3>
       )}
       <ScheduleSummary {...props} />
       <Button onClick={handleDoneClick}>
@@ -110,10 +111,17 @@ function ScheduleAccordionItem({
   );
 }
 
-function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: ScheduleGroup & { value: string }) {
+function ScheduleAccordionGroup({
+  dueAtLabel,
+  categoryId,
+  categoryName,
+  items,
+  value,
+}: ScheduleGroup & { value: string }) {
   const scheduleDoneMutator = useScheduleDoneMutator();
   const scheduleSkipMutator = useScheduleSkipMutator();
   const scheduleRescheduleMutator = useScheduleRescheduleMutator();
+  const categoriesQuery = useCategoriesQuery();
 
   const handleDoneClick = useCallback(
     async (event: MouseEvent<HTMLButtonElement>) => {
@@ -138,23 +146,22 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: Sche
 
   const style: CSSProperties = useMemo(() => {
     const hue =
-      // oxlint-disable-next-line typescript/no-misused-spread
-      ([...categoryName]
-        .map((char) => char.charCodeAt(0))
-        .reduce((acc, item, i, arr) => acc + (item ^ (arr[(i + 3) % categoryName.length] * 3)), 0) %
-        (HUE_MAX - HUE_MIN)) +
+      categoriesQuery.data.map(({ id }) => id).reduce((acc, id, i) => acc + (id === categoryId ? i : 0), 0) *
+        (1 / categoriesQuery.data.length) *
+        (HUE_MAX - HUE_MIN) +
       HUE_MIN;
 
     return {
       backgroundColor: `light-dark(hsl(${hue} 65% 70%), hsl(${hue} 65% 40%))`,
     };
-  }, [categoryName]);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryName, categoriesQuery.dataUpdatedAt]);
 
   return (
     <Popover>
-      <AccordionItem value={value}>
+      <AccordionItem value={value} className='snap-start'>
         <AccordionTrigger
-          className='-mx-4 flex items-center gap-4 truncate p-2 select-none *:scheme-only-light'
+          className='flex items-center gap-4 truncate p-2 select-none *:scheme-only-light md:px-4'
           style={style}
           render={<div />}
           nativeButton={false}
@@ -185,7 +192,7 @@ function ScheduleAccordionGroup({ dueAtLabel, categoryName, items, value }: Sche
         </AccordionTrigger>
         <AccordionContent
           className='mx-0 flex flex-col gap-4 py-2 *:rounded-lg *:odd:-my-2 *:odd:bg-accent *:odd:py-2'
-          panelClassName='-mx-2 bg-sidebar shadow-md rounded-b-lg'
+          panelClassName='mx-2 bg-sidebar shadow-md rounded-b-lg snap-start'
         >
           {items.map((item) => (
             <ScheduleAccordionItem key={item.id} {...item} />
@@ -231,7 +238,12 @@ function SchedulePage() {
   }, [query.dataUpdatedAt, setValueShim]);
 
   return (
-    <Accordion value={value} onValueChange={setValueShim} multiple className='gap-2'>
+    <Accordion
+      value={value}
+      onValueChange={setValueShim}
+      multiple
+      className='-mt-16 max-h-dvh snap-y snap-proximity gap-2 overflow-y-scroll pt-16 *:scroll-mt-16'
+    >
       {query.data?.map((group) => (
         <ScheduleAccordionGroup {...group} key={group.key} value={group.key} />
       ))}
