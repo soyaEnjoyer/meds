@@ -5,6 +5,17 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import type { DialogName } from '@/hooks/dialog';
 import { useDialog } from '@/hooks/dialog';
 
+export interface BasicDialogFormProps {
+  asDialog?: boolean;
+  closeDialog: () => void;
+  id: number;
+}
+
+export type MultimodeDialogFormProps = ({ mode: 'new' } | { mode: 'edit'; id: number }) & {
+  asDialog?: boolean;
+  closeDialog: () => void;
+};
+
 export function BasicFormDialog({
   className,
   dialogName,
@@ -12,7 +23,7 @@ export function BasicFormDialog({
 }: {
   className?: string;
   dialogName: DialogName;
-  form: (props: { id: number; closeDialog: () => void }) => ReactNode;
+  form: (props: BasicDialogFormProps) => ReactNode;
 }) {
   const [closeDialog, setDialog] = useDialog((state) => [state.actions.close, state.actions.set]);
   const dialogState = useDialog((state) => state[dialogName]);
@@ -23,9 +34,11 @@ export function BasicFormDialog({
 
   return (
     <Dialog open={dialogState.open} onOpenChange={handleOpenChange} disablePointerDismissal>
-      <DialogContent className={className}>
-        {dialogState.id && <Form id={dialogState.id} closeDialog={wrappedCloseDialog} />}
-      </DialogContent>
+      {dialogState.id && (
+        <DialogContent className={className}>
+          <Form closeDialog={wrappedCloseDialog} id={dialogState.id} asDialog />
+        </DialogContent>
+      )}
     </Dialog>
   );
 }
@@ -37,21 +50,21 @@ export function MultimodeFormDialog({
 }: {
   className?: string;
   dialogName: DialogName;
-  form: (props: ({ mode: 'new' } | { mode: 'edit'; id: number }) & { closeDialog: () => void }) => ReactNode;
+  form: (props: MultimodeDialogFormProps) => ReactNode;
 }) {
   const [closeDialog, setDialog] = useDialog((state) => [state.actions.close, state.actions.set]);
   const dialogState = useDialog((state) => state[dialogName]);
 
   const handleOpenChange = useCallback((open: boolean) => setDialog(dialogName, open), [dialogName, setDialog]);
 
-  const props = dialogState.id ? ({ id: dialogState.id, mode: 'edit' } as const) : ({ mode: 'new' } as const);
+  const mode = dialogState.id ? ({ id: dialogState.id, mode: 'edit' } as const) : ({ mode: 'new' } as const);
 
   const wrappedCloseDialog = useCallback(() => closeDialog(dialogName), [closeDialog, dialogName]);
 
   return (
     <Dialog open={dialogState.open} onOpenChange={handleOpenChange} disablePointerDismissal>
       <DialogContent className={className}>
-        <Form {...props} closeDialog={wrappedCloseDialog} />
+        <Form closeDialog={wrappedCloseDialog} asDialog {...mode} />
       </DialogContent>
     </Dialog>
   );

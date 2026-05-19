@@ -2,7 +2,9 @@ import type { MouseEvent, SubmitEvent } from 'react';
 import { useCallback, useMemo } from 'react';
 
 import { FormField } from '@/components/form-field';
+import { DialogBody, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/dialogs/confirm';
+import type { MultimodeDialogFormProps } from '@/dialogs/form';
 import { useCategoryCreateMutator, useCategoryDeleteMutator, useCategoryUpdateMutator } from '@/hooks/query/mutators';
 import { useCategoriesMapQuery } from '@/hooks/query/queries/base';
 import type { CategoryInsert } from '@/lib/drizzle/zod';
@@ -20,10 +22,7 @@ const defaults: Schema = {
 const submitSelector = (state: { canSubmit: boolean; isSubmitting: boolean }) =>
   [state.canSubmit, state.isSubmitting] as const;
 
-export function CategoryForm({
-  closeDialog,
-  ...props
-}: ({ mode: 'new' } | { mode: 'edit'; id: number }) & { closeDialog?: () => void }) {
+export function CategoryForm({ asDialog, closeDialog, ...props }: MultimodeDialogFormProps) {
   const createMutator = useCategoryCreateMutator();
   const updateMutator = useCategoryUpdateMutator();
   const deleteMutator = useCategoryDeleteMutator();
@@ -88,15 +87,19 @@ export function CategoryForm({
     [form]
   );
 
+  const [HeaderComponent, BodyComponent, FooterComponent] = asDialog
+    ? [DialogHeader, DialogBody, DialogFooter]
+    : ['h2', 'div', 'footer'];
+
   return (
-    <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto text-base font-semibold'>
-        {props.mode === 'new' ? 'New category' : `Editing: ${defaultValues.name}`}
-      </h2>
-      <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2'>
-        <form.AppField name='name'>{(field) => <FormField component={field.Input} label='Name' />}</form.AppField>
-      </fieldset>
-      <footer className='flex items-center justify-around'>
+    <>
+      <HeaderComponent>{props.mode === 'new' ? 'New category' : `Editing: ${defaultValues.name}`}</HeaderComponent>
+      <BodyComponent className='grid w-full grid-cols-[auto_1fr] items-center gap-2'>
+        <form className='contents' onSubmit={handleSubmit}>
+          <form.AppField name='name'>{(field) => <FormField component={field.Input} label='Name' />}</form.AppField>
+        </form>
+      </BodyComponent>
+      <FooterComponent>
         <form.Subscribe selector={submitSelector}>
           {([canSubmit, isSubmitting]) => (
             <form.Button type='submit' disabled={!canSubmit}>
@@ -112,11 +115,11 @@ export function CategoryForm({
             message={`Really delete category ${defaultValues.name}?`}
             onConfirm={handleDeleteClick}
           />
-          <ConfirmDialogTrigger variant='destructive' hidden={props.mode === 'new'} size='lg'>
+          <ConfirmDialogTrigger variant='destructive' hidden={props.mode === 'new'}>
             Delete
           </ConfirmDialogTrigger>
         </ConfirmDialog>
-      </footer>
-    </form>
+      </FooterComponent>
+    </>
   );
 }

@@ -4,7 +4,7 @@ import { useCallback, useMemo } from 'react';
 import { DateText } from '@/components/date-text';
 import { Pager } from '@/components/pager';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { useDialog } from '@/hooks/dialog';
 import { usePager } from '@/hooks/pager';
 import { useItemsMapQuery, useSchedulesMapQuery } from '@/hooks/query/queries/base';
@@ -47,9 +47,9 @@ export function ScheduleHistoryDialog() {
 
   return (
     <Dialog open={dialogState.open} onOpenChange={handleOpenChange} disablePointerDismissal>
-      <DialogContent className='flex flex-col gap-4'>
-        <DialogHeader className='text-base'>History: {itemName}</DialogHeader>
-        <div className='grid grid-cols-[auto_1fr_auto_auto] items-center gap-x-4 gap-y-2'>
+      <DialogContent>
+        <DialogHeader>History: {itemName}</DialogHeader>
+        <DialogBody className='grid grid-cols-[auto_1fr_auto_auto] items-center gap-x-4 gap-y-2'>
           {!query.data?.length ? (
             <div className='col-span-full flex items-center justify-center gap-2 p-4 text-muted-foreground'>
               No data
@@ -57,8 +57,10 @@ export function ScheduleHistoryDialog() {
           ) : (
             query.data.map((item) => <ScheduleHistoryDialogRow key={item.id} {...item} />)
           )}
-        </div>
-        <Pager name='scheduleHistory' hasNextPage={query.data?.length === pagerState.pageSize} />
+        </DialogBody>
+        <DialogFooter>
+          <Pager name='scheduleHistory' hasNextPage={query.data?.length === pagerState.pageSize} />
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

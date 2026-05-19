@@ -3,6 +3,8 @@ import { useCallback, useMemo } from 'react';
 import { z } from 'zod';
 
 import { FormField } from '@/components/form-field';
+import { DialogBody, DialogFooter, DialogHeader } from '@/components/ui/dialog';
+import type { BasicDialogFormProps } from '@/dialogs/form';
 import { useScheduleDoneMutator } from '@/hooks/query/mutators';
 import { useItemsMapQuery, useSchedulesMapQuery } from '@/hooks/query/queries/base';
 import { useAppForm } from '@/lib/form';
@@ -16,7 +18,7 @@ const schema = z.object({
 const submitSelector = (state: { canSubmit: boolean; isSubmitting: boolean }) =>
   [state.canSubmit, state.isSubmitting] as const;
 
-export function DoneCustomForm({ id, closeDialog }: { id: number; closeDialog?: () => void }) {
+export function DoneCustomForm({ asDialog, closeDialog, id }: BasicDialogFormProps) {
   const doneMutator = useScheduleDoneMutator();
 
   const map = useSchedulesMapQuery();
@@ -75,20 +77,27 @@ export function DoneCustomForm({ id, closeDialog }: { id: number; closeDialog?: 
     [form]
   );
 
-  return (
-    <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto text-base font-semibold'>{`Custom amount: ${itemName}`}</h2>
-      <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2 @sm:grid-cols-[auto_1fr_auto_1fr]'>
-        <form.AppField name='amount'>
-          {(field) => <FormField component={field.NumberPicker} label='Amount' />}
-        </form.AppField>
-        <form.AppField name='unitId'>
-          {(field) => <FormField component={field.UnitCombobox} label='Unit' />}
-        </form.AppField>
-        <form.AppField name='update'>{(field) => <FormField component={field.Switch} label='Update' />}</form.AppField>
-      </fieldset>
+  const [HeaderComponent, BodyComponent, FooterComponent] = asDialog
+    ? [DialogHeader, DialogBody, DialogFooter]
+    : ['h2', 'div', 'footer'];
 
-      <footer className='flex items-center justify-around'>
+  return (
+    <>
+      <HeaderComponent>{`Custom amount: ${itemName}`}</HeaderComponent>
+      <BodyComponent className='grid w-full grid-cols-[auto_1fr] items-center gap-2 @sm:grid-cols-[auto_1fr_auto_1fr]'>
+        <form className='contents' onSubmit={handleSubmit}>
+          <form.AppField name='amount'>
+            {(field) => <FormField component={field.NumberPicker} label='Amount' />}
+          </form.AppField>
+          <form.AppField name='unitId'>
+            {(field) => <FormField component={field.UnitCombobox} label='Unit' />}
+          </form.AppField>
+          <form.AppField name='update'>
+            {(field) => <FormField component={field.Switch} label='Update' />}
+          </form.AppField>
+        </form>
+      </BodyComponent>
+      <FooterComponent>
         <form.Subscribe selector={submitSelector}>
           {([canSubmit, isSubmitting]) => (
             <form.Button type='submit' disabled={!canSubmit}>
@@ -99,7 +108,7 @@ export function DoneCustomForm({ id, closeDialog }: { id: number; closeDialog?: 
         <form.Button type='reset' variant='secondary' onClick={handleResetClick}>
           Reset
         </form.Button>
-      </footer>
-    </form>
+      </FooterComponent>
+    </>
   );
 }

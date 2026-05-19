@@ -2,7 +2,7 @@ import type { ChangeEvent } from 'react';
 import { useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useDialog } from '@/hooks/dialog';
 import type { Font, Scheme } from '@/hooks/theme';
@@ -51,8 +51,8 @@ export function ThemeDialog() {
   return (
     <Dialog open={dialogState.open} onOpenChange={handleOpenChange} disablePointerDismissal>
       <DialogContent>
-        <DialogHeader className='text-base'>Theme preferences</DialogHeader>
-        <fieldset className='grid grid-cols-[auto_1fr] items-center gap-4'>
+        <DialogHeader>Theme preferences</DialogHeader>
+        <DialogBody className='grid grid-cols-[auto_1fr] items-center gap-4'>
           <label className='contents'>
             Scheme
             <div className='flex gap-2 *:grow *:basis-0'>
@@ -84,12 +84,12 @@ export function ThemeDialog() {
               <span>{scale}x</span>
             </div>
           </label>
-        </fieldset>
-        <div className='flex justify-around gap-4'>
+        </DialogBody>
+        <DialogFooter className='flex justify-around gap-4'>
           <Button variant='destructive' size='lg' onClick={reset}>
             Reset
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

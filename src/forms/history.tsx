@@ -3,7 +3,9 @@ import type { MouseEvent, SubmitEvent } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { FormField } from '@/components/form-field';
+import { DialogBody, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/dialogs/confirm';
+import type { BasicDialogFormProps } from '@/dialogs/form';
 import { historyGetOne } from '@/functions.server/history';
 import { useHistoryDeleteMutator, useHistoryUpdateMutator } from '@/hooks/query/mutators';
 import { formatDatetimeIso } from '@/lib/date';
@@ -25,7 +27,7 @@ const defaults: Schema = {
 const submitSelector = (state: { canSubmit: boolean; isSubmitting: boolean }) =>
   [state.canSubmit, state.isSubmitting] as const;
 
-export function HistoryForm({ id, closeDialog }: { id: number; closeDialog?: () => void }) {
+export function HistoryForm({ asDialog, closeDialog, id }: BasicDialogFormProps) {
   const updateMutator = useHistoryUpdateMutator();
   const deleteMutator = useHistoryDeleteMutator();
   const historyGetOneFn = useServerFn(historyGetOne);
@@ -89,19 +91,25 @@ export function HistoryForm({ id, closeDialog }: { id: number; closeDialog?: () 
     [form]
   );
 
+  const [HeaderComponent, BodyComponent, FooterComponent] = asDialog
+    ? [DialogHeader, DialogBody, DialogFooter]
+    : ['h2', 'div', 'footer'];
+
   return (
-    <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto text-base font-semibold'>{`Editing: ${formatDatetimeIso(defaultValuesRef.current.at)}`}</h2>
-      <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2 @sm:grid-cols-[auto_1fr_auto_1fr]'>
-        <form.AppField name='amount'>
-          {(field) => <FormField component={field.NumberPicker} label='Amount' />}
-        </form.AppField>
-        <form.AppField name='unitId'>
-          {(field) => <FormField component={field.UnitCombobox} label='Unit' />}
-        </form.AppField>
-        <form.AppField name='at'>{(field) => <FormField component={field.DatePicker} label='At' />}</form.AppField>
-      </fieldset>
-      <footer className='flex items-center justify-around'>
+    <>
+      <HeaderComponent>{`Editing: ${formatDatetimeIso(defaultValuesRef.current.at)}`}</HeaderComponent>
+      <BodyComponent className='grid w-full grid-cols-[auto_1fr] items-center gap-2 @sm:grid-cols-[auto_1fr_auto_1fr]'>
+        <form className='contents' onSubmit={handleSubmit}>
+          <form.AppField name='amount'>
+            {(field) => <FormField component={field.NumberPicker} label='Amount' />}
+          </form.AppField>
+          <form.AppField name='unitId'>
+            {(field) => <FormField component={field.UnitCombobox} label='Unit' />}
+          </form.AppField>
+          <form.AppField name='at'>{(field) => <FormField component={field.DatePicker} label='At' />}</form.AppField>
+        </form>
+      </BodyComponent>
+      <FooterComponent>
         <form.Subscribe selector={submitSelector}>
           {([canSubmit, isSubmitting]) => (
             <form.Button type='submit' disabled={!canSubmit}>
@@ -117,11 +125,9 @@ export function HistoryForm({ id, closeDialog }: { id: number; closeDialog?: () 
             message={`Really delete history ${formatDatetimeIso(defaultValuesRef.current.at)}?`}
             onConfirm={handleDeleteClick}
           />
-          <ConfirmDialogTrigger variant='destructive' size='lg'>
-            Delete
-          </ConfirmDialogTrigger>
+          <ConfirmDialogTrigger variant='destructive'>Delete</ConfirmDialogTrigger>
         </ConfirmDialog>
-      </footer>
-    </form>
+      </FooterComponent>
+    </>
   );
 }

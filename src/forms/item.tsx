@@ -3,7 +3,9 @@ import { useCallback, useMemo } from 'react';
 import { z } from 'zod';
 
 import { FormField } from '@/components/form-field';
+import { DialogBody, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/dialogs/confirm';
+import type { MultimodeDialogFormProps } from '@/dialogs/form';
 import { useItemCreateMutator, useItemDeleteMutator, useItemUpdateMutator } from '@/hooks/query/mutators';
 import { useItemsMapQuery } from '@/hooks/query/queries/base';
 import type { ItemInsert } from '@/lib/drizzle/zod';
@@ -30,10 +32,7 @@ const defaults: EditSchema = {
 const submitSelector = (state: { canSubmit: boolean; isSubmitting: boolean }) =>
   [state.canSubmit, state.isSubmitting] as const;
 
-export function ItemForm({
-  closeDialog,
-  ...props
-}: ({ mode: 'new' } | { mode: 'edit'; id: number }) & { closeDialog?: () => void }) {
+export function ItemForm({ asDialog, closeDialog, ...props }: MultimodeDialogFormProps) {
   const createMutator = useItemCreateMutator();
   const updateMutator = useItemUpdateMutator();
   const deleteMutator = useItemDeleteMutator();
@@ -96,24 +95,28 @@ export function ItemForm({
     [form]
   );
 
+  const [HeaderComponent, BodyComponent, FooterComponent] = asDialog
+    ? [DialogHeader, DialogBody, DialogFooter]
+    : ['h2', 'div', 'footer'];
+
   return (
-    <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto text-base font-semibold'>
-        {props.mode === 'new' ? 'New item' : `Editing: ${defaultValues.name}`}
-      </h2>
-      <fieldset className='grid w-full grid-cols-[auto_1fr] items-center gap-2'>
-        <form.AppField name='name'>{(field) => <FormField component={field.Input} label='Name' />}</form.AppField>
-        <form.AppField name='defaultCategoryId'>
-          {(field) => <FormField component={field.CategoryCombobox} label='Default category' />}
-        </form.AppField>
-        <form.AppField name='defaultUnitId'>
-          {(field) => <FormField component={field.UnitCombobox} label='Default unit' />}
-        </form.AppField>
-        <form.AppField name='defaultAmount'>
-          {(field) => <FormField component={field.NumberPicker} label='Default amount' />}
-        </form.AppField>
-      </fieldset>
-      <footer className='flex items-center justify-around'>
+    <>
+      <HeaderComponent>{props.mode === 'new' ? 'New item' : `Editing: ${defaultValues.name}`}</HeaderComponent>
+      <BodyComponent className='grid w-full grid-cols-[auto_1fr] items-center gap-2'>
+        <form className='contents' onSubmit={handleSubmit}>
+          <form.AppField name='name'>{(field) => <FormField component={field.Input} label='Name' />}</form.AppField>
+          <form.AppField name='defaultCategoryId'>
+            {(field) => <FormField component={field.CategoryCombobox} label='Default category' />}
+          </form.AppField>
+          <form.AppField name='defaultUnitId'>
+            {(field) => <FormField component={field.UnitCombobox} label='Default unit' />}
+          </form.AppField>
+          <form.AppField name='defaultAmount'>
+            {(field) => <FormField component={field.NumberPicker} label='Default amount' />}
+          </form.AppField>
+        </form>
+      </BodyComponent>
+      <FooterComponent>
         <form.Subscribe selector={submitSelector}>
           {([canSubmit, isSubmitting]) => (
             <form.Button type='submit' disabled={!canSubmit}>
@@ -126,11 +129,11 @@ export function ItemForm({
         </form.Button>
         <ConfirmDialog>
           <ConfirmDialogContent message={`Really delete item ${defaultValues.name}?`} onConfirm={handleDeleteClick} />
-          <ConfirmDialogTrigger variant='destructive' hidden={props.mode === 'new'} size='lg'>
+          <ConfirmDialogTrigger variant='destructive' hidden={props.mode === 'new'}>
             Delete
           </ConfirmDialogTrigger>
         </ConfirmDialog>
-      </footer>
-    </form>
+      </FooterComponent>
+    </>
   );
 }

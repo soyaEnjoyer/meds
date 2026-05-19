@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useRouterState } from '@tanstack/react-router';
 
-import { ItemState, useFilter } from '@/hooks/filter';
+import { ItemState, itemStateNames, useFilter } from '@/hooks/filter';
 import {
   useCategoriesMapQuery,
   useItemsMapQuery,
@@ -71,7 +71,7 @@ export function useFilteredScheduleGroupsQuery() {
           )
           .toSorted(
             (a, b) =>
-              (filterState === ItemState.AdHoc
+              (filterState === ItemState.AdHoc || filterState === ItemState.Skipped
                 ? 0
                 : (a.dueAt?.getTime() ?? Infinity) - (b.dueAt?.getTime() ?? Infinity)) ||
               (a.categoryName ?? '').localeCompare(b.categoryName ?? '', undefined, { sensitivity: 'base' }) ||
@@ -80,8 +80,8 @@ export function useFilteredScheduleGroupsQuery() {
           ),
         (item) =>
           `${
-            filterState === ItemState.AdHoc
-              ? 'Ad hoc'
+            filterState === ItemState.AdHoc || filterState === ItemState.Skipped
+              ? itemStateNames[filterState]
               : item.dueAt === null
                 ? 'Unscheduled'
                 : item.dueAt <= now

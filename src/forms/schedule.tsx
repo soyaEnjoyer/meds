@@ -3,7 +3,9 @@ import { useCallback, useMemo } from 'react';
 import { z } from 'zod';
 
 import { FormField } from '@/components/form-field';
+import { DialogBody, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { ConfirmDialog, ConfirmDialogContent, ConfirmDialogTrigger } from '@/dialogs/confirm';
+import type { MultimodeDialogFormProps } from '@/dialogs/form';
 import { useScheduleCreateMutator, useScheduleDeleteMutator, useScheduleUpdateMutator } from '@/hooks/query/mutators';
 import { useItemsMapQuery, useSchedulesMapQuery } from '@/hooks/query/queries/base';
 import { scheduleInsertSchema } from '@/lib/drizzle/zod';
@@ -52,10 +54,7 @@ function getDefaults(): EditSchema {
 const submitSelector = (state: { canSubmit: boolean; isSubmitting: boolean }) =>
   [state.canSubmit, state.isSubmitting] as const;
 
-export function ScheduleForm({
-  closeDialog,
-  ...props
-}: ({ mode: 'new' } | { mode: 'edit'; id: number }) & { closeDialog?: () => void }) {
+export function ScheduleForm({ asDialog, closeDialog, ...props }: MultimodeDialogFormProps) {
   const createMutator = useScheduleCreateMutator();
   const updateMutator = useScheduleUpdateMutator();
   const deleteMutator = useScheduleDeleteMutator();
@@ -141,75 +140,80 @@ export function ScheduleForm({
     [itemMap.dataUpdatedAt, defaultValues.itemId]
   );
 
+  const [HeaderComponent, BodyComponent, FooterComponent] = asDialog
+    ? [DialogHeader, DialogBody, DialogFooter]
+    : ['h2', 'div', 'footer'];
+
   return (
-    <form className='grid items-center gap-4' onSubmit={handleSubmit}>
-      <h2 className='mx-auto text-base font-semibold'>
-        {props.mode === 'new' ? 'New schedule' : `Editing: ${itemName}`}
-      </h2>
-      <div className='grid w-full grid-cols-[auto_1fr] items-center gap-4 gap-y-6 @md:grid-cols-[repeat(2,auto_1fr)]'>
-        <fieldset className='contents'>
-          <form.AppField name='itemId' listeners={itemIdListeners}>
-            {(field) => <FormField component={field.ItemCombobox} label='Item' />}
-          </form.AppField>
-          <form.AppField name='categoryId'>
-            {(field) => <FormField component={field.CategoryCombobox} label='Category' />}
-          </form.AppField>
-          <form.AppField name='unitId'>
-            {(field) => <FormField component={field.UnitCombobox} label='Unit' />}
-          </form.AppField>
-          <form.AppField name='amount'>
-            {(field) => <FormField component={field.NumberPicker} label='Amount' />}
-          </form.AppField>
-        </fieldset>
+    <>
+      <HeaderComponent>{props.mode === 'new' ? 'New schedule' : `Editing: ${itemName}`}</HeaderComponent>
+      <BodyComponent className='grid w-full grid-cols-[auto_1fr] items-center gap-4 gap-y-6 @md:grid-cols-[repeat(2,auto_1fr)]'>
+        <form className='contents' onSubmit={handleSubmit}>
+          <fieldset className='contents'>
+            <form.AppField name='itemId' listeners={itemIdListeners}>
+              {(field) => <FormField component={field.ItemCombobox} label='Item' />}
+            </form.AppField>
+            <form.AppField name='categoryId'>
+              {(field) => <FormField component={field.CategoryCombobox} label='Category' />}
+            </form.AppField>
+            <form.AppField name='unitId'>
+              {(field) => <FormField component={field.UnitCombobox} label='Unit' />}
+            </form.AppField>
+            <form.AppField name='amount'>
+              {(field) => <FormField component={field.NumberPicker} label='Amount' />}
+            </form.AppField>
+          </fieldset>
 
-        <fieldset className='contents'>
-          <form.AppField name='cycleOnDays'>
-            {(field) => <FormField component={field.NumberPicker} label='Cycle On Days' />}
-          </form.AppField>
-          <form.AppField name='cycleOffDays'>
-            {(field) => <FormField component={field.NumberPicker} label='Cycle Off Days' />}
-          </form.AppField>
-          <form.AppField name='restDays'>
-            {(field) => <FormField component={field.NumberPicker} label='Rest Days' />}
-          </form.AppField>
-          <form.AppField name='repeatCount'>
-            {(field) => <FormField component={field.NumberPicker} label='Repeat Count' />}
-          </form.AppField>
-          <form.AppField name='dayMask'>
-            {(field) => <FormField component={field.DayPicker} label='Days' />}
-          </form.AppField>
-          <form.AppField name='monthMask'>
-            {(field) => <FormField component={field.MonthPicker} label='Months' />}
-          </form.AppField>
-          <form.AppField name='time'>
-            {(field) => <FormField component={field.TimePicker} label='Time' />}
-          </form.AppField>
-        </fieldset>
+          <fieldset className='contents'>
+            <form.AppField name='cycleOnDays'>
+              {(field) => <FormField component={field.NumberPicker} label='Cycle On Days' />}
+            </form.AppField>
+            <form.AppField name='cycleOffDays'>
+              {(field) => <FormField component={field.NumberPicker} label='Cycle Off Days' />}
+            </form.AppField>
+            <form.AppField name='restDays'>
+              {(field) => <FormField component={field.NumberPicker} label='Rest Days' />}
+            </form.AppField>
+            <form.AppField name='repeatCount'>
+              {(field) => <FormField component={field.NumberPicker} label='Repeat Count' />}
+            </form.AppField>
+            <form.AppField name='dayMask'>
+              {(field) => <FormField component={field.DayPicker} label='Days' />}
+            </form.AppField>
+            <form.AppField name='monthMask'>
+              {(field) => <FormField component={field.MonthPicker} label='Months' />}
+            </form.AppField>
+            <form.AppField name='time'>
+              {(field) => <FormField component={field.TimePicker} label='Time' />}
+            </form.AppField>
+          </fieldset>
 
-        <fieldset className='contents'>
-          <form.AppField name='description'>
-            {(field) => <FormField component={field.Textarea} label='Description (optional)' />}
-          </form.AppField>
-          <form.AppField name='adHoc'>{(field) => <FormField component={field.Switch} label='Ad hoc' />}</form.AppField>
-          <form.AppField name='sort'>
-            {(field) => <FormField component={field.NumberPicker} label='Sort' />}
-          </form.AppField>
-        </fieldset>
+          <fieldset className='contents'>
+            <form.AppField name='description'>
+              {(field) => <FormField component={field.Textarea} label='Description (optional)' />}
+            </form.AppField>
+            <form.AppField name='adHoc'>
+              {(field) => <FormField component={field.Switch} label='Ad hoc' />}
+            </form.AppField>
+            <form.AppField name='sort'>
+              {(field) => <FormField component={field.NumberPicker} label='Sort' />}
+            </form.AppField>
+          </fieldset>
 
-        <fieldset className='contents'>
-          <form.AppField name='startAt'>
-            {(field) => <FormField component={field.DatePicker} label='Start' />}
-          </form.AppField>
-          <form.AppField name='endAt'>
-            {(field) => <FormField component={field.DatePicker} label='End' />}
-          </form.AppField>
-          <form.AppField name='dueAt'>
-            {(field) => <FormField component={field.DatePicker} label='Due' />}
-          </form.AppField>
-        </fieldset>
-      </div>
-
-      <footer className='flex items-center justify-around'>
+          <fieldset className='contents'>
+            <form.AppField name='startAt'>
+              {(field) => <FormField component={field.DatePicker} label='Start' />}
+            </form.AppField>
+            <form.AppField name='endAt'>
+              {(field) => <FormField component={field.DatePicker} label='End' />}
+            </form.AppField>
+            <form.AppField name='dueAt'>
+              {(field) => <FormField component={field.DatePicker} label='Due' />}
+            </form.AppField>
+          </fieldset>
+        </form>
+      </BodyComponent>
+      <FooterComponent>
         <form.Subscribe selector={submitSelector}>
           {([canSubmit, isSubmitting]) => (
             <form.Button type='submit' disabled={!canSubmit}>
@@ -222,11 +226,11 @@ export function ScheduleForm({
         </form.Button>
         <ConfirmDialog>
           <ConfirmDialogContent message={`Really delete schedule ${itemName}?`} onConfirm={handleDeleteClick} />
-          <ConfirmDialogTrigger variant='destructive' hidden={props.mode === 'new'} size='lg'>
+          <ConfirmDialogTrigger variant='destructive' hidden={props.mode === 'new'}>
             Delete
           </ConfirmDialogTrigger>
         </ConfirmDialog>
-      </footer>
-    </form>
+      </FooterComponent>
+    </>
   );
 }

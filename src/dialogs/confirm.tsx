@@ -1,8 +1,8 @@
-import type { ComponentProps, Dispatch, ReactNode, SetStateAction, MouseEvent } from 'react';
+import type { ComponentProps, Dispatch, MouseEvent, ReactNode, SetStateAction } from 'react';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { Dialog, DialogBody, DialogClose, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 
 interface Context {
   open: boolean;
@@ -37,9 +37,11 @@ export function ConfirmDialogContent({
   return (
     <Dialog open={open} onOpenChange={setOpen} disablePointerDismissal>
       <DialogContent>
-        <DialogHeader className='text-base'>{title}</DialogHeader>
-        <div className='col-span-full flex items-center justify-center gap-2 p-4 text-destructive'>{message}</div>
-        <div className='flex justify-around gap-4'>
+        <DialogHeader>{title}</DialogHeader>
+        <DialogBody className='col-span-full flex items-center justify-center gap-2 p-4 text-destructive'>
+          {message}
+        </DialogBody>
+        <DialogFooter>
           <DialogClose
             render={
               <Button variant='default' size='lg'>
@@ -54,7 +56,7 @@ export function ConfirmDialogContent({
               </Button>
             }
           />
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
