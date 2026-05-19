@@ -3,9 +3,10 @@ import process from 'node:process';
 import handler from '@tanstack/react-start/server-entry';
 
 import { worker as gotifyWorker } from '@/workers/gotify';
+import { worker as messageWorker } from '@/workers/message-bus';
 // https://tanstack.com/start/latest/docs/framework/react/guide/server-entry-point
 
-const workers: { start: () => void; stop: () => void }[] = [gotifyWorker];
+const workers: { start: () => void; stop: () => void }[] = [gotifyWorker, messageWorker];
 const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];
 
 function setWorkers(method: 'start' | 'stop'): void {

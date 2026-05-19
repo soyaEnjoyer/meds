@@ -39,7 +39,10 @@ function ScheduleAccordionItem({
 
   const handleDoneClick = useCallback(() => scheduleDoneMutator.mutate({ data: [{ id }] }), [id, scheduleDoneMutator]);
 
-  const handleSkipClick = useCallback(() => scheduleSkipMutator.mutate({ data: [{ id }] }), [id, scheduleSkipMutator]);
+  const handleSkipClick = useCallback(
+    () => scheduleSkipMutator.mutate({ data: { ids: [id] } }),
+    [id, scheduleSkipMutator]
+  );
 
   const handleCustomClick = useCallback(() => openDialog('doneCustom', id), [id, openDialog]);
 
@@ -58,7 +61,7 @@ function ScheduleAccordionItem({
         <Popover>
           <PopoverTrigger
             render={
-              <h3 className='group me-auto flex items-center gap-1 text-base wrap-anywhere'>
+              <h3 className='group me-auto flex shrink-0 grow items-center gap-1 text-base wrap-anywhere'>
                 <Info className='size-4 text-muted-foreground transition-colors group-hover:text-foreground' />
                 {itemName}
               </h3>
@@ -70,9 +73,9 @@ function ScheduleAccordionItem({
           </PopoverContent>
         </Popover>
       ) : (
-        <h3 className='me-auto text-base wrap-anywhere'>{itemName}</h3>
+        <h3 className='me-auto shrink-0 grow text-base wrap-anywhere'>{itemName}</h3>
       )}
-      <ScheduleSummary {...props} />
+      <ScheduleSummary className='shrink grow-0' {...props} />
       <Button onClick={handleDoneClick}>
         <Check aria-description='Done' />
       </Button>
@@ -132,7 +135,7 @@ function ScheduleAccordionGroup({
   );
 
   const handleSkipClick = useCallback(() => {
-    scheduleSkipMutator.mutate({ data: items.map(({ id }) => ({ id })) });
+    scheduleSkipMutator.mutate({ data: { ids: items.map(({ id }) => id) } });
   }, [items, scheduleSkipMutator]);
 
   const handleSnoozeClick = useCallback(() => {

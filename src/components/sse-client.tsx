@@ -6,7 +6,7 @@ export function SseClient() {
   const queryClient = useQueryClient();
 
   const invalidateQueries = useEffectEvent(async () => {
-    await queryClient.invalidateQueries();
+    await queryClient.invalidateQueries({ refetchType: 'all', type: 'all' });
   });
 
   useEffect(() => {

@@ -111,6 +111,7 @@ export function ScheduleSummary({
   restDays,
   skippedAt,
   startAt,
+  className,
 }: Pick<
   ScheduleRowWithNames,
   | 'amount'
@@ -125,7 +126,7 @@ export function ScheduleSummary({
   | 'restDays'
   | 'skippedAt'
   | 'startAt'
->) {
+> & { className?: string }) {
   const formattedAmount = useMemo(() => formatAmount({ amount, lastAmount, unitName }), [amount, lastAmount, unitName]);
 
   const formattedRepeat = useMemo(
@@ -134,7 +135,7 @@ export function ScheduleSummary({
   );
 
   return (
-    <div className='flex flex-wrap justify-end gap-x-2 truncate text-xs **:truncate'>
+    <div className={cn('flex flex-wrap justify-end gap-x-2 truncate text-xs **:truncate', className)}>
       {completedAt && (
         <ScheduleSummarySection
           icon={Calendar}

@@ -23,9 +23,7 @@ function EnumButton({
     valueRef.current = value;
   }, [value]);
 
-  const handleClick = useCallback(() => onValueChange(valueRef.current ^ item[0]), [item, onValueChange]);
-
-  const handleMouseOver = useCallback(
+  const handleMouse = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       if (event.buttons) onValueChange(valueRef.current ^ item[0]);
     },
@@ -34,9 +32,8 @@ function EnumButton({
 
   return (
     <Button
-      onClick={handleClick}
-      onMouseEnter={handleMouseOver}
-      onMouseDown={handleMouseOver}
+      onMouseEnter={handleMouse}
+      onMouseDown={handleMouse}
       variant={(value & item[0]) === item[0] ? 'default' : 'ghost'}
       className={cn(
         'block overflow-x-hidden whitespace-nowrap @max-md:px-0',

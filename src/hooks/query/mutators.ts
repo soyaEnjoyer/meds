@@ -105,12 +105,12 @@ export function useScheduleSkipMutator() {
     mutationFn,
     onMutate: async ({ data }) => {
       showToast('x');
-      const previous = data
-        .map(({ id }) => schedulesMapQuery.data.get(id))
+      const previous = data.ids
+        .map((id) => schedulesMapQuery.data.get(id))
         .filter((item) => typeof item !== 'undefined');
       await updateScheduleQueryData(
         queryClient,
-        data.map(({ id }) => id),
+        data.ids.map((id) => id),
         null
       );
       return previous;
@@ -119,7 +119,7 @@ export function useScheduleSkipMutator() {
       if (Array.isArray(prev))
         return await updateScheduleQueryData(
           queryClient,
-          data.map(({ id }) => id),
+          data.ids.map((id) => id),
           prev
         );
       // this can't actually happen - it exists to satisfy typescript since prev is typed as optional

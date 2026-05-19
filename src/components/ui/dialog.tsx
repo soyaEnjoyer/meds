@@ -100,7 +100,7 @@ export function DialogHeader({
     <div
       data-slot='dialog-header'
       className={cn(
-        'rounded-t-xl border-b bg-muted/50 p-4 flex flex-col gap-4 items-center justify-center text-base font-semibold',
+        'rounded-t-xl border-b bg-muted/50 p-4 flex flex-col gap-4 items-center justify-center text-base font-semibold shadow-sm',
         className
       )}
       {...props}
@@ -138,7 +138,7 @@ export function DialogFooter({
   return (
     <div
       data-slot='dialog-footer'
-      className={cn('flex gap-4 rounded-b-xl border-t bg-muted/50 p-4 justify-around', className)}
+      className={cn('flex gap-4 rounded-b-xl border-t bg-muted/50 p-4 justify-around shadow-sm', className)}
       {...props}
     >
       {children}

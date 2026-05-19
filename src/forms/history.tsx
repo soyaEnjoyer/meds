@@ -67,6 +67,14 @@ export function HistoryForm({ asDialog, closeDialog, id }: BasicDialogFormProps)
     })();
   }, [form, historyGetOneFn, id]);
 
+  const handleSubmitClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      void form.handleSubmit();
+    },
+    [form]
+  );
+
   const handleResetClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
@@ -112,7 +120,7 @@ export function HistoryForm({ asDialog, closeDialog, id }: BasicDialogFormProps)
       <FooterComponent>
         <form.Subscribe selector={submitSelector}>
           {([canSubmit, isSubmitting]) => (
-            <form.Button type='submit' disabled={!canSubmit}>
+            <form.Button type='submit' disabled={!canSubmit} onClick={handleSubmitClick}>
               {isSubmitting ? '...' : 'Edit'}
             </form.Button>
           )}

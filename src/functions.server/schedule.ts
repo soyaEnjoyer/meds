@@ -2,13 +2,17 @@ import { createServerFn, createServerOnlyFn } from '@tanstack/react-start';
 import { eq, inArray, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 
+import { getClientId } from '@/functions.server/client';
 import { dateAdd, dateMax, dateSet, daysDiff } from '@/lib/date';
 import { db } from '@/lib/drizzle/db.server';
 import { historyTable, scheduleTable } from '@/lib/drizzle/schema';
 import type { ScheduleRow } from '@/lib/drizzle/zod';
 import { scheduleInsertSchema, scheduleUpdateSchema } from '@/lib/drizzle/zod';
+import { MessageClient } from '@/lib/messaging.server';
 
 const MAX_SEARCH_ITERATIONS = 1000;
+
+const client = new MessageClient(import.meta.url);
 
 const doneSchema = z.array(
   z.object({
@@ -19,18 +23,16 @@ const doneSchema = z.array(
   })
 );
 
-const skipSchema = z
-  .array(
-    z.object({
-      id: z.int(),
-    })
-  )
-  .transform((value) => value.map(({ id }) => ({ amount: null, id })));
-
 const rescheduleSchema = z.object({
   ids: z.array(z.int()),
   to: z.date(),
 });
+
+const dueSchema = z.object({
+  ids: z.array(z.int()),
+});
+
+const skipSchema = dueSchema.transform(({ ids }) => ids.map((id) => ({ amount: null, id })));
 
 export const scheduleGet = createServerFn().handler(
   async (): Promise<ScheduleRow[]> =>
@@ -57,6 +59,7 @@ export const scheduleCreate = createServerFn()
       .values({ dueAt, ...rest })
       .onConflictDoUpdate({ set: { dueAt, ...rest, deletedAt: null }, target: scheduleTable.id })
       .returning();
+    client.send({ source: await getClientId(), topic: 'invalidate' });
     return result;
   });
 
@@ -69,6 +72,7 @@ export const scheduleUpdate = createServerFn()
       .set({ dueAt, ...rest })
       .where(eq(scheduleTable.id, id))
       .returning();
+    client.send({ source: await getClientId(), topic: 'invalidate' });
     return result;
   });
 
@@ -76,6 +80,7 @@ export const scheduleDelete = createServerFn()
   .inputValidator((id: number) => id)
   .handler(async ({ data: id }): Promise<void> => {
     await db.update(scheduleTable).set({ deletedAt: new Date() }).where(eq(scheduleTable.id, id));
+    client.send({ source: await getClientId(), topic: 'invalidate' });
   });
 
 const scheduleAction = createServerOnlyFn(
@@ -162,6 +167,7 @@ const scheduleAction = createServerOnlyFn(
           return transactionResult;
         })
       );
+    client.send({ source: await getClientId(), topic: 'invalidate' });
     return result;
   }
 );
@@ -176,7 +182,20 @@ export const scheduleSetSkipped = createServerFn()
 
 export const scheduleReschedule = createServerFn()
   .inputValidator(rescheduleSchema)
-  .handler(
-    async ({ data: { ids, to } }) =>
-      await db.update(scheduleTable).set({ dueAt: to }).where(inArray(scheduleTable.id, ids)).returning()
-  );
+  .handler(async ({ data: { ids, to } }) => {
+    const result = await db.update(scheduleTable).set({ dueAt: to }).where(inArray(scheduleTable.id, ids)).returning();
+    client.send({ source: await getClientId(), topic: 'invalidate' });
+    return result;
+  });
+
+export const scheduleSetDue = createServerFn()
+  .inputValidator(dueSchema)
+  .handler(async ({ data: { ids } }) => {
+    const result = await db
+      .update(scheduleTable)
+      .set({ dueAt: dateSet(new Date(), { minute: 0, ms: 0, second: 0 }) })
+      .where(inArray(scheduleTable.id, ids))
+      .returning();
+    client.send({ source: await getClientId(), topic: 'invalidate' });
+    return result;
+  });

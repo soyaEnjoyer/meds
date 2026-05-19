@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { and, desc, eq, getTableColumns, isNull, like, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
+import { getClientId } from '@/functions.server/client';
 import { scheduleGetOne } from '@/functions.server/schedule';
 import { db, nullableDateMapper } from '@/lib/drizzle/db.server';
 import { categoryTable, historyTable, itemTable, scheduleTable, unitTable } from '@/lib/drizzle/schema';
@@ -11,6 +12,9 @@ import {
   type HistoryWithItemCatUnitRow,
   type ScheduleRow,
 } from '@/lib/drizzle/zod';
+import { MessageClient } from '@/lib/messaging.server';
+
+const client = new MessageClient(import.meta.url);
 
 const pagerSchema = z.object({
   pageNum: z.int().min(0).default(0),
@@ -107,6 +111,7 @@ export const historyDelete = createServerFn()
         .where(eq(scheduleTable.id, scheduleId));
       return scheduleId;
     });
+    client.send({ source: await getClientId(), topic: 'invalidate' });
     return await scheduleGetOne({ data });
   });
 
@@ -129,5 +134,6 @@ export const historyUpdate = createServerFn()
       await tx.update(scheduleTable).set({ completedAt, skippedAt }).where(eq(scheduleTable.id, scheduleId));
       return scheduleId;
     });
+    client.send({ source: await getClientId(), topic: 'invalidate' });
     return await scheduleGetOne({ data });
   });

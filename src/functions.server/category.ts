@@ -1,10 +1,14 @@
 import { createServerFn } from '@tanstack/react-start';
 import { eq, isNull } from 'drizzle-orm';
 
+import { getClientId } from '@/functions.server/client';
 import { db } from '@/lib/drizzle/db.server';
 import { categoryTable } from '@/lib/drizzle/schema';
 import type { CategoryRow } from '@/lib/drizzle/zod';
 import { categoryInsertSchema, categoryUpdateSchema } from '@/lib/drizzle/zod';
+import { MessageClient } from '@/lib/messaging.server';
+
+const client = new MessageClient(import.meta.url);
 
 export const categoryGet = createServerFn().handler(
   async (): Promise<CategoryRow[]> =>
@@ -19,6 +23,7 @@ export const categoryCreate = createServerFn()
       .values({ name, ...rest })
       .onConflictDoUpdate({ set: { ...rest, deletedAt: null }, target: categoryTable.name })
       .returning();
+    client.send({ source: await getClientId(), topic: 'invalidate' });
     return result;
   });
 
@@ -30,6 +35,7 @@ export const categoryUpdate = createServerFn()
       .set({ ...rest })
       .where(eq(categoryTable.id, id))
       .returning();
+    client.send({ source: await getClientId(), topic: 'invalidate' });
     return result;
   });
 
@@ -37,4 +43,5 @@ export const categoryDelete = createServerFn()
   .inputValidator((id: number) => id)
   .handler(async ({ data: id }): Promise<void> => {
     await db.update(categoryTable).set({ deletedAt: new Date() }).where(eq(categoryTable.id, id));
+    client.send({ source: await getClientId(), topic: 'invalidate' });
   });

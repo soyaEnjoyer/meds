@@ -14,6 +14,7 @@ import { Route as uiIndexRouteImport } from './routes/(ui)/index'
 import { Route as IconSplatRouteImport } from './routes/icon/$'
 import { Route as ApiSseRouteImport } from './routes/api/sse'
 import { Route as ApiPingRouteImport } from './routes/api/ping'
+import { Route as ApiActionRouteImport } from './routes/api/action'
 import { Route as uiUnitsRouteImport } from './routes/(ui)/units'
 import { Route as uiItemsRouteImport } from './routes/(ui)/items'
 import { Route as uiHistoryRouteImport } from './routes/(ui)/history'
@@ -42,6 +43,11 @@ const ApiSseRoute = ApiSseRouteImport.update({
 const ApiPingRoute = ApiPingRouteImport.update({
   id: '/api/ping',
   path: '/api/ping',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiActionRoute = ApiActionRouteImport.update({
+  id: '/api/action',
+  path: '/api/action',
   getParentRoute: () => rootRouteImport,
 } as any)
 const uiUnitsRoute = uiUnitsRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof uiHistoryRoute
   '/items': typeof uiItemsRoute
   '/units': typeof uiUnitsRoute
+  '/api/action': typeof ApiActionRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
   '/icon/$': typeof IconSplatRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/history': typeof uiHistoryRoute
   '/items': typeof uiItemsRoute
   '/units': typeof uiUnitsRoute
+  '/api/action': typeof ApiActionRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
   '/icon/$': typeof IconSplatRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/(ui)/history': typeof uiHistoryRoute
   '/(ui)/items': typeof uiItemsRoute
   '/(ui)/units': typeof uiUnitsRoute
+  '/api/action': typeof ApiActionRoute
   '/api/ping': typeof ApiPingRoute
   '/api/sse': typeof ApiSseRoute
   '/icon/$': typeof IconSplatRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/items'
     | '/units'
+    | '/api/action'
     | '/api/ping'
     | '/api/sse'
     | '/icon/$'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/items'
     | '/units'
+    | '/api/action'
     | '/api/ping'
     | '/api/sse'
     | '/icon/$'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '/(ui)/history'
     | '/(ui)/items'
     | '/(ui)/units'
+    | '/api/action'
     | '/api/ping'
     | '/api/sse'
     | '/icon/$'
@@ -145,6 +157,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   uiRouteRoute: typeof uiRouteRouteWithChildren
+  ApiActionRoute: typeof ApiActionRoute
   ApiPingRoute: typeof ApiPingRoute
   ApiSseRoute: typeof ApiSseRoute
   IconSplatRoute: typeof IconSplatRoute
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       path: '/api/ping'
       fullPath: '/api/ping'
       preLoaderRoute: typeof ApiPingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/action': {
+      id: '/api/action'
+      path: '/api/action'
+      fullPath: '/api/action'
+      preLoaderRoute: typeof ApiActionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(ui)/units': {
@@ -247,6 +267,7 @@ const uiRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   uiRouteRoute: uiRouteRouteWithChildren,
+  ApiActionRoute: ApiActionRoute,
   ApiPingRoute: ApiPingRoute,
   ApiSseRoute: ApiSseRoute,
   IconSplatRoute: IconSplatRoute,

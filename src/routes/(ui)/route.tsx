@@ -20,6 +20,7 @@ import { ItemForm } from '@/forms/item';
 import { ScheduleForm } from '@/forms/schedule';
 import { UnitForm } from '@/forms/unit';
 import { categoryGet } from '@/functions.server/category';
+import { getClientId } from '@/functions.server/client';
 import { itemGet } from '@/functions.server/item';
 import { scheduleGet } from '@/functions.server/schedule';
 import { getTextStatus } from '@/functions.server/status';
@@ -33,12 +34,13 @@ import { ToastProvider } from '@/hooks/toast';
 export const Route = createFileRoute('/(ui)')({
   component: UiLayout,
   loader: async () => {
-    const [categories, items, schedules, units, status] = await Promise.all([
+    const [categories, items, schedules, units, status, clientId] = await Promise.all([
       categoryGet(),
       itemGet(),
       scheduleGet(),
       unitGet(),
       getTextStatus(),
+      getClientId(),
     ]);
     // need to explicitly set queryClient data otherwise ssr will use stale data and cause a hydration error
     queryClient.setQueryData(['category'], categories);
@@ -46,7 +48,8 @@ export const Route = createFileRoute('/(ui)')({
     queryClient.setQueryData(['schedule'], schedules);
     queryClient.setQueryData(['status'], status);
     queryClient.setQueryData(['unit'], units);
-    return { categories, items, schedules, status, units };
+
+    return { categories, clientId, items, schedules, status, units };
   },
   head: (ctx) => ({
     // this is for ssr and initial render. <HeadUpdater/> handles dynamic updates

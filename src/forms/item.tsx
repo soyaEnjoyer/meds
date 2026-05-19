@@ -70,6 +70,14 @@ export function ItemForm({ asDialog, closeDialog, ...props }: MultimodeDialogFor
     },
   });
 
+  const handleSubmitClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      void form.handleSubmit();
+    },
+    [form]
+  );
+
   const handleResetClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
@@ -119,7 +127,7 @@ export function ItemForm({ asDialog, closeDialog, ...props }: MultimodeDialogFor
       <FooterComponent>
         <form.Subscribe selector={submitSelector}>
           {([canSubmit, isSubmitting]) => (
-            <form.Button type='submit' disabled={!canSubmit}>
+            <form.Button type='submit' disabled={!canSubmit} onClick={handleSubmitClick}>
               {isSubmitting ? '...' : props.mode === 'new' ? 'Create' : 'Save'}
             </form.Button>
           )}
