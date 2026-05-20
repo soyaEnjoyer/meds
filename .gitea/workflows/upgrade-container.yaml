@@ -1,0 +1,10 @@
+name: Upgrade container
+run-name: Upgrade container
+on: [push]
+
+jobs:
+  Upgrade-container:
+    runs-on: media
+    steps:
+      - run: docker-git meds --strict
+      - run: systemctl restart meds

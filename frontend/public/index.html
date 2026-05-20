@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>Meds</title>
+    <link href="%PUBLIC_URL%/index.css" rel="stylesheet" />
+    <link rel="preload" as="font" href="/static/media/bootstrap-icons.b7bcc075b395c14ce8c2.woff2" crossorigin="anonymous"/>
+    <script>
+      /*toggle dark mode*/
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(e){
+        document.documentElement.setAttribute('data-bs-theme',e.matches ? 'dark' : 'light');
+      });
+      document.documentElement.setAttribute('data-bs-theme',window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    </script>
+  </head>
+  <body class="bg-secondary-subtle">
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
