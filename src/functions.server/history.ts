@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
-import { and, desc, eq, getTableColumns, isNull, like, sql } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, isNull, like, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { getClientId } from '@/functions.server/client';
@@ -78,7 +78,12 @@ export const historyAllGet = createServerFn()
         .where(
           and(
             isNull(historyTable.deletedAt),
-            search ? like(itemTable.name, `%${search.replaceAll('%', String.raw`\%`)}%`) : undefined
+            search
+              ? or(
+                  like(itemTable.name, `%${search.replaceAll('%', String.raw`\%`)}%`),
+                  like(categoryTable.name, `%${search.replaceAll('%', String.raw`\%`)}%`)
+                )
+              : undefined
           )
         )
         .orderBy(desc(historyTable.at))

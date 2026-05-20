@@ -110,7 +110,7 @@ export function ItemForm({ asDialog, closeDialog, ...props }: MultimodeDialogFor
   return (
     <>
       <HeaderComponent>{props.mode === 'new' ? 'New item' : `Editing: ${defaultValues.name}`}</HeaderComponent>
-      <BodyComponent className='grid w-full grid-cols-[auto_1fr] items-center gap-2'>
+      <BodyComponent className='grid-cols-[auto_1fr] @md:grid-cols-[repeat(2,auto_1fr)]'>
         <form className='contents' onSubmit={handleSubmit}>
           <form.AppField name='name'>{(field) => <FormField component={field.Input} label='Name' />}</form.AppField>
           <form.AppField name='defaultCategoryId'>

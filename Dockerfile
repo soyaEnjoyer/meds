@@ -15,7 +15,7 @@ COPY drizzle drizzle/
 COPY drizzle.config.ts ./
 
 ENV TZ=Europe/London PORT=3000 HOSTNAME='0.0.0.0' DB_DIR=/config
-RUN rm -rf "$HOME" && mkdir -p "$HOME" "$DB_DIR" && chmod -R ugo+rwX "$HOME" "$DB_DIR"
+RUN rm -rf "$HOME" && mkdir -p "$HOME" "$DB_DIR" && chmod -R ugo+rwX "$HOME" "$DB_DIR" .
 VOLUME ["$DB_DIR"]
 EXPOSE $PORT/tcp
 ENV DB_FILE_NAME="file:${DB_DIR}/data.db"

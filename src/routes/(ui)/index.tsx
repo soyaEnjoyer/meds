@@ -8,13 +8,13 @@ import { ScheduleSummary } from '@/components/schedule-summary';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDialog } from '@/hooks/dialog';
 import { useScheduleDoneMutator, useScheduleRescheduleMutator, useScheduleSkipMutator } from '@/hooks/query/mutators';
 import { useCategoriesQuery } from '@/hooks/query/queries/base';
 import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { ACCORDION_PRE_EXPAND_HOURS, useFilteredScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
-import { dateAdd, dateMax, dateMin, dateSet, formatDatetimeIso } from '@/lib/date';
+import { dateAdd, dateMax, dateSet, formatDatetimeIso } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)/')({
   component: SchedulePage,
@@ -22,13 +22,16 @@ export const Route = createFileRoute('/(ui)/')({
 
 const HUE_MIN = 150;
 const HUE_MAX = 280;
+const SNOOZE_HOURS = 6;
 
 function ScheduleAccordionItem({
   description,
   id,
   itemName,
+  siblings,
   ...props
-}: Pick<ScheduleRowWithNames, 'description' | 'id' | 'itemName'> & ComponentProps<typeof ScheduleSummary>) {
+}: Pick<ScheduleRowWithNames, 'description' | 'id' | 'itemName'> &
+  ComponentProps<typeof ScheduleSummary> & { siblings: Pick<ScheduleRowWithNames, 'id'>[] }) {
   const scheduleDoneMutator = useScheduleDoneMutator();
   const scheduleSkipMutator = useScheduleSkipMutator();
   const scheduleRescheduleMutator = useScheduleRescheduleMutator();
@@ -44,15 +47,25 @@ function ScheduleAccordionItem({
     [id, scheduleSkipMutator]
   );
 
+  const handleSkipSiblingsClick = useCallback(() => {
+    const siblingIds = siblings.map((item) => item.id).filter((item) => item !== id);
+    if (siblingIds.length) scheduleSkipMutator.mutate({ data: { ids: siblingIds } });
+  }, [id, siblings, scheduleSkipMutator]);
+
   const handleCustomClick = useCallback(() => openDialog('doneCustom', id), [id, openDialog]);
 
   const handleHistoryClick = useCallback(() => openDialog('scheduleHistory', id), [id, openDialog]);
 
   const handleSnoozeClick = useCallback(() => {
     const now = new Date();
-    now.setHours(now.getHours(), 0, 0, 0);
-    const dueAt = props.dueAt ?? now;
-    scheduleRescheduleMutator.mutate({ data: { ids: [id], to: dateAdd(dateMin(now, dueAt), { hour: 3 }) } });
+    scheduleRescheduleMutator.mutate({
+      data: {
+        ids: [id],
+        to: dateAdd(dateSet(props.dueAt ? dateMax(props.dueAt, now) : now, { minute: 0, ms: 0, second: 0 }), {
+          hour: SNOOZE_HOURS,
+        }),
+      },
+    });
   }, [props.dueAt, id, scheduleRescheduleMutator]);
 
   return (
@@ -88,26 +101,55 @@ function ScheduleAccordionItem({
           }
         />
         <PopoverContent className='grid max-w-fit grid-cols-2 gap-4'>
-          <Button onClick={handleSkipClick} variant='destructive'>
-            <X aria-description='Skip' />
-            Skip
-          </Button>
-          <Button onClick={handleSnoozeClick} variant='secondary'>
-            <Clock aria-description='Snooze' />
-            Snooze
-          </Button>
-          <Button onClick={handleCustomClick} variant='secondary'>
-            <Pencil aria-description='Custom' />
-            Custom
-          </Button>
-          <Button onClick={handleHistoryClick} variant='secondary'>
-            <Logs aria-description='History' />
-            History
-          </Button>
-          <Button onClick={handleEditClick}>
-            <Settings aria-description='Edit' />
-            Edit
-          </Button>
+          <PopoverClose
+            render={
+              <Button onClick={handleSkipClick} variant='destructive'>
+                <X aria-description='Skip' />
+                Skip
+              </Button>
+            }
+          />
+          <PopoverClose
+            disabled={siblings.length < 2}
+            render={
+              <Button onClick={handleSkipSiblingsClick} variant='destructive'>
+                <X aria-description='Skip siblings' />
+                Others
+              </Button>
+            }
+          />
+          <PopoverClose
+            render={
+              <Button onClick={handleSnoozeClick} variant='secondary'>
+                <Clock aria-description='Snooze' />
+                Snooze
+              </Button>
+            }
+          />
+          <PopoverClose
+            render={
+              <Button onClick={handleCustomClick} variant='secondary'>
+                <Pencil aria-description='Custom' />
+                Custom
+              </Button>
+            }
+          />
+          <PopoverClose
+            render={
+              <Button onClick={handleHistoryClick} variant='secondary'>
+                <Logs aria-description='History' />
+                History
+              </Button>
+            }
+          />
+          <PopoverClose
+            render={
+              <Button onClick={handleEditClick}>
+                <Settings aria-description='Edit' />
+                Edit
+              </Button>
+            }
+          />
         </PopoverContent>
       </Popover>
     </div>
@@ -115,9 +157,10 @@ function ScheduleAccordionItem({
 }
 
 function ScheduleAccordionGroup({
-  dueAtLabel,
   categoryId,
   categoryName,
+  dueAtLabel,
+  dueAtTs,
   items,
   value,
 }: ScheduleGroup & { value: string }) {
@@ -140,10 +183,18 @@ function ScheduleAccordionGroup({
 
   const handleSnoozeClick = useCallback(() => {
     const now = new Date();
-    now.setHours(now.getHours(), 0, 0, 0);
-    const dueAt = items.reduce((acc, item) => dateMax(acc, item.dueAt ?? now), now);
-    scheduleRescheduleMutator.mutate({ data: { ids: items.map(({ id }) => id), to: dateAdd(dueAt, { hour: 3 }) } });
-  }, [items, scheduleRescheduleMutator]);
+    scheduleRescheduleMutator.mutate({
+      data: {
+        ids: items.map(({ id }) => id),
+        to: dateAdd(
+          dateSet(dueAtTs < Infinity ? dateMax(new Date(dueAtTs), now) : now, { minute: 0, ms: 0, second: 0 }),
+          {
+            hour: SNOOZE_HOURS,
+          }
+        ),
+      },
+    });
+  }, [dueAtTs, items, scheduleRescheduleMutator]);
 
   const handlePopoverTriggerClick = useCallback((event: MouseEvent<HTMLButtonElement>) => event.stopPropagation(), []);
 
@@ -162,7 +213,7 @@ function ScheduleAccordionGroup({
 
   return (
     <Popover>
-      <AccordionItem value={value} className='snap-start'>
+      <AccordionItem value={value} className='w-[min(100dvw,--spacing(168))] snap-start'>
         <AccordionTrigger
           className='flex items-center gap-4 truncate p-2 select-none *:scheme-only-light md:px-4'
           style={style}
@@ -198,19 +249,27 @@ function ScheduleAccordionGroup({
           panelClassName='mx-2 bg-sidebar shadow-md rounded-b-lg snap-start'
         >
           {items.map((item) => (
-            <ScheduleAccordionItem key={item.id} {...item} />
+            <ScheduleAccordionItem key={item.id} siblings={items} {...item} />
           ))}
         </AccordionContent>
       </AccordionItem>
       <PopoverContent className='grid max-w-fit grid-cols-2 gap-4'>
-        <Button onClick={handleSkipClick} variant='destructive'>
-          <X aria-description='Skip' />
-          Skip
-        </Button>
-        <Button onClick={handleSnoozeClick}>
-          <Clock aria-description='Snooze' />
-          Snooze
-        </Button>
+        <PopoverClose
+          render={
+            <Button onClick={handleSkipClick} variant='destructive'>
+              <X aria-description='Skip' />
+              Skip
+            </Button>
+          }
+        />
+        <PopoverClose
+          render={
+            <Button onClick={handleSnoozeClick}>
+              <Clock aria-description='Snooze' />
+              Snooze
+            </Button>
+          }
+        />
       </PopoverContent>
     </Popover>
   );
@@ -245,7 +304,7 @@ function SchedulePage() {
       value={value}
       onValueChange={setValueShim}
       multiple
-      className='-mt-16 max-h-dvh snap-y snap-proximity gap-2 overflow-y-scroll pt-16 *:scroll-mt-16'
+      className='-mt-16 max-h-dvh snap-y snap-proximity items-center gap-2 overflow-y-scroll pt-16 pb-2 *:scroll-mt-16'
     >
       {query.data?.map((group) => (
         <ScheduleAccordionGroup {...group} key={group.key} value={group.key} />

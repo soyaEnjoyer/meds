@@ -155,7 +155,7 @@ export function ScheduleForm({ asDialog, closeDialog, ...props }: MultimodeDialo
   return (
     <>
       <HeaderComponent>{props.mode === 'new' ? 'New schedule' : `Editing: ${itemName}`}</HeaderComponent>
-      <BodyComponent className='grid w-full grid-cols-[auto_1fr] items-center gap-4 gap-y-6 @md:grid-cols-[repeat(2,auto_1fr)]'>
+      <BodyComponent className='grid-cols-[auto_1fr] @md:grid-cols-[repeat(2,auto_1fr)]'>
         <form className='contents' onSubmit={handleSubmit}>
           <fieldset className='contents'>
             <form.AppField name='itemId' listeners={itemIdListeners}>

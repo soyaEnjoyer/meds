@@ -92,7 +92,7 @@ export function DoneCustomForm({ asDialog, closeDialog, id }: BasicDialogFormPro
   return (
     <>
       <HeaderComponent>{`Custom amount: ${itemName}`}</HeaderComponent>
-      <BodyComponent className='grid w-full grid-cols-[auto_1fr] items-center gap-2 @sm:grid-cols-[auto_1fr_auto_1fr]'>
+      <BodyComponent className='grid-cols-[auto_1fr] @md:grid-cols-[repeat(2,auto_1fr)]'>
         <form className='contents' onSubmit={handleSubmit}>
           <form.AppField name='amount'>
             {(field) => <FormField component={field.NumberPicker} label='Amount' />}

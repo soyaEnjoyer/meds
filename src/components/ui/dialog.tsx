@@ -121,7 +121,7 @@ export function DialogHeader({
 
 export function DialogBody({ className, children, ...props }: ComponentProps<'div'>) {
   return (
-    <div className={cn('max-h-full overflow-y-auto p-4', className)} {...props}>
+    <div className={cn('max-h-full overflow-y-auto p-4 grid items-center gap-x-4 gap-y-6', className)} {...props}>
       {children}
     </div>
   );

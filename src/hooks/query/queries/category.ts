@@ -13,6 +13,6 @@ export function useFilteredCategoriesQuery() {
   return useQuery({
     initialData: queryFn(),
     queryFn,
-    queryKey: ['category', { ad: categoriesQuery.dataUpdatedAt, search: filterSearch }],
+    queryKey: ['category', { at: categoriesQuery.dataUpdatedAt, search: filterSearch }],
   });
 }

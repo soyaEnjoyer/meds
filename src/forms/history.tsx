@@ -106,7 +106,7 @@ export function HistoryForm({ asDialog, closeDialog, id }: BasicDialogFormProps)
   return (
     <>
       <HeaderComponent>{`Editing: ${formatDatetimeIso(defaultValuesRef.current.at)}`}</HeaderComponent>
-      <BodyComponent className='grid w-full grid-cols-[auto_1fr] items-center gap-2 @sm:grid-cols-[auto_1fr_auto_1fr]'>
+      <BodyComponent className='grid-cols-[auto_1fr] @md:grid-cols-[repeat(2,auto_1fr)]'>
         <form className='contents' onSubmit={handleSubmit}>
           <form.AppField name='amount'>
             {(field) => <FormField component={field.NumberPicker} label='Amount' />}

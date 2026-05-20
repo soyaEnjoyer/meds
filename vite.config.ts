@@ -23,7 +23,7 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     tanstackStart({ importProtection: { behavior: 'error', client: { excludeFiles: [/(^|\b)server(\b|$)/] } } }),
-    devtools(),
+    devtools({ removeDevtoolsOnBuild: false }),
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     nitro({ minify: true }),

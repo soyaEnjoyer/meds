@@ -1,10 +1,7 @@
-import { TanStackDevtools } from '@tanstack/react-devtools';
-import { formDevtoolsPlugin } from '@tanstack/react-form-devtools';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
-import { Outlet, createFileRoute } from '@tanstack/react-router';
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { LoaderCircle } from 'lucide-react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 
 import { HeadUpdater } from '@/components/head-updater';
 import { Nav } from '@/components/nav';
@@ -29,6 +26,7 @@ import { DialogProvider } from '@/hooks/dialog';
 import { FilterProvider, ItemState } from '@/hooks/filter';
 import { PagerProvider } from '@/hooks/pager';
 import { ToastProvider } from '@/hooks/toast';
+import { MINUTE_MS } from '@/lib/date';
 
 // oxlint-disable-next-line sort-keys tanstack router requires a specific order
 export const Route = createFileRoute('/(ui)')({
@@ -69,6 +67,7 @@ export const Route = createFileRoute('/(ui)')({
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      gcTime: MINUTE_MS,
       // these options are actually refetch on x **if stale** (i.e. they were inactive then were invalidated via sse)
       refetchOnMount: true,
       refetchOnReconnect: 'always',
@@ -93,6 +92,26 @@ function Pending() {
   );
 }
 
+const ReactQueryDevtoolsProduction = lazy(async () => {
+  const { ReactQueryDevtools } = await import('@tanstack/react-query-devtools/production');
+  return { default: ReactQueryDevtools };
+});
+
+// tanstack start doesn't seem to have a way to opt individual components out of ssr
+function ReactQueryDevtoolsProductionClient() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => setIsClient(true), []);
+
+  if (!isClient) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <ReactQueryDevtoolsProduction />
+    </Suspense>
+  );
+}
+
 function UiLayout() {
   return (
     <ToastProvider>
@@ -101,7 +120,7 @@ function UiLayout() {
           <QueryClientProvider client={queryClient}>
             <FilterProvider defaultState={ItemState.Scheduled}>
               <Nav />
-              <main className='@container mx-auto mt-16 mb-2 max-w-2xl px-4 has-[.snap-y]:px-0'>
+              <main className='@container mx-auto mt-16 max-w-2xl px-4 pb-4 has-[.snap-y]:max-w-none has-[.snap-y]:px-0'>
                 <Outlet />
               </main>
               <MultimodeFormDialog dialogName='category' form={CategoryForm} />
@@ -116,21 +135,7 @@ function UiLayout() {
               <HeadUpdater />
             </FilterProvider>
             <SseClient />
-            <TanStackDevtools
-              // defining this anywhere else breaks the build
-              // oxlint-disable-next-line react_perf/jsx-no-new-array-as-prop
-              plugins={[
-                formDevtoolsPlugin(),
-                {
-                  name: 'Tanstack Query',
-                  render: <ReactQueryDevtoolsPanel />,
-                },
-                {
-                  name: 'Tanstack Router',
-                  render: <TanStackRouterDevtoolsPanel />,
-                },
-              ]}
-            />
+            <ReactQueryDevtoolsProductionClient />
           </QueryClientProvider>
         </PagerProvider>
       </DialogProvider>

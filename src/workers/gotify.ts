@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { cwd, env } from 'node:process';
 import { parseEnv } from 'node:util';
 
-import { getTextStatus } from '@/functions.server/status';
+import { getTextStatusServer } from '@/functions.server/status.server-only';
 import { HOUR_MS } from '@/lib/date';
 
 const INTERVAL_MS = HOUR_MS / 4;
@@ -53,7 +53,7 @@ function start(): void {
   let prevHash: string | null = null;
 
   async function send(): Promise<void> {
-    const { hash, message, title } = await getTextStatus();
+    const { hash, message, title } = await getTextStatusServer();
     if (hash === prevHash) return;
     const response = await fetch(new URL('/message', gotifyUrl), {
       body: JSON.stringify({

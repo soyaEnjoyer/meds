@@ -64,6 +64,7 @@ export function useFilteredScheduleGroupsQuery() {
                 (filterState === ItemState.Due && schedule.dueAt && schedule.dueAt <= now) ||
                 (filterState === ItemState.NotDue && schedule.dueAt && schedule.dueAt > now) ||
                 (filterState === ItemState.Skipped &&
+                  schedule.dueAt &&
                   schedule.skippedAt &&
                   schedule.skippedAt >= (schedule.completedAt ?? schedule.skippedAt)) ||
                 (filterState === ItemState.Unscheduled && !schedule.dueAt) ||
