@@ -58,7 +58,7 @@ export function DatePicker({
           <X />
         </Button>
       </div>
-      <PopoverContent className='w-auto overflow-hidden p-0' align='start'>
+      <PopoverContent className='w-auto overflow-hidden p-0'>
         <Calendar
           mode='single'
           selected={value ?? undefined}

@@ -5,15 +5,17 @@ import { dateSet, formatDateDistance, formatDateIso, formatDatetimeIso, formatTi
 import { cn } from '@/lib/utils';
 
 export function DateText({
-  date,
   as = 'date',
   className,
+  date,
   precision = 'auto',
+  size = 'base',
 }: {
-  date: Date | null;
   as?: 'date' | 'dist';
   className?: string;
+  date: Date | null;
   precision?: 'date' | 'time' | 'datetime' | 'auto';
+  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl';
 }) {
   const [iso, dist] = useMemo(() => {
     if (!date) return ['', ''];
@@ -31,14 +33,25 @@ export function DateText({
 
   const toggleOpen = useCallback(() => setOpen((prev) => !prev), []);
 
+  const sizeClass =
+    size === 'xs'
+      ? 'text-xs'
+      : size === 'sm'
+        ? 'text-sm'
+        : size === 'lg'
+          ? 'text-lg'
+          : size === 'xl'
+            ? 'text-xl'
+            : 'text-base';
+
   return (
     <HoverCard open={open} onOpenChange={setOpen}>
       <HoverCardTrigger
-        render={<span className={cn('text-xs', className)}>{as === 'date' ? iso : dist}</span>}
+        render={<span className={cn(sizeClass, className)}>{as === 'date' ? iso : dist}</span>}
         onClick={toggleOpen}
       />
       <HoverCardContent className='max-w-fit'>
-        <span className='text-xs'>{as === 'date' ? dist : iso}</span>
+        <span className={sizeClass}>{as === 'date' ? dist : iso}</span>
       </HoverCardContent>
     </HoverCard>
   );

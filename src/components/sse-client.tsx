@@ -1,43 +1,69 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useEffectEvent, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function SseClient() {
-  const deploymentId = useRef<string | null>(null);
+  const deploymentIdRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
-
-  const invalidateQueries = useEffectEvent(async () => {
-    await queryClient.invalidateQueries({ refetchType: 'all', type: 'all' });
-  });
+  const [sseErrorAt, setSseErrorAt] = useState<Date | null>(null);
+  const sseErrorCountRef = useRef(0);
 
   useEffect(() => {
-    const eventSource = new EventSource('/api/sse');
+    function invalidateQueries() {
+      void queryClient.invalidateQueries({ refetchType: 'all', type: 'all' });
+    }
 
-    eventSource.addEventListener('connected', (event) => {
-      if (!deploymentId.current) {
-        console.debug('sse connected', event.data);
-        deploymentId.current = event.data;
-      } else if (deploymentId.current !== event.data) {
-        console.info('detected new deployment', deploymentId.current, '->', event.data);
-        globalThis.location.reload();
+    function triggerReconnect(reason: string) {
+      setSseErrorAt((prev) => {
+        console.info('sse triggering reconnect', { count: sseErrorCountRef.current, prev, reason });
+        ++sseErrorCountRef.current;
+        return new Date();
+      });
+    }
+
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    const typedGlobalThis = globalThis as typeof globalThis & { eventSource: EventSource };
+    const abortController = new AbortController();
+
+    typedGlobalThis.eventSource = new EventSource('/api/sse');
+
+    typedGlobalThis.eventSource.addEventListener('connected', (event) => {
+      // reset error count on (re)?connect
+      sseErrorCountRef.current = 0;
+      const deploymentId: string = event.data;
+      if (!deploymentIdRef.current) {
+        console.debug('sse connected', { deploymentId });
+        deploymentIdRef.current = deploymentId;
+      } else if (deploymentIdRef.current !== deploymentId) {
+        console.info('detected new deployment', deploymentIdRef.current, '->', deploymentId);
+        typedGlobalThis.location.reload();
       } else {
-        console.debug('sse reconnected', event.data);
-        void invalidateQueries();
+        console.info('sse reconnected', { deploymentId });
+        invalidateQueries();
       }
     });
 
-    eventSource.addEventListener('invalidate', () => {
+    typedGlobalThis.eventSource.addEventListener('invalidate', () => {
       console.debug('sse invalidate');
-      void invalidateQueries();
+      invalidateQueries();
     });
 
-    function cleanup() {
-      eventSource.close();
-    }
+    typedGlobalThis.eventSource.addEventListener('error', () => {
+      typedGlobalThis.eventSource.close();
+      const delayMs = Math.min((sseErrorCountRef.current + 1) ** 2, 900) * 1000;
+      console.warn('sse error', { delayMs });
+      const timeout = setTimeout(() => triggerReconnect('timeout'), delayMs);
+      abortController.signal.addEventListener('abort', () => clearTimeout(timeout));
+      document.addEventListener('visibilitychange', () => triggerReconnect('visibility'), {
+        once: true,
+        signal: abortController.signal,
+      });
+    });
 
-    window.addEventListener('beforeunload', cleanup, { once: true });
+    abortController.signal.addEventListener('abort', () => typedGlobalThis.eventSource.close());
+    window.addEventListener('beforeunload', () => abortController.abort());
 
-    return cleanup;
-  }, [queryClient]);
+    return () => abortController.abort();
+  }, [queryClient, sseErrorAt]);
 
   return null;
 }

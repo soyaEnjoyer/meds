@@ -18,8 +18,8 @@ function ScheduleHistoryDialogRow({ id, at, amount, unitName }: HistoryWithItemC
 
   return (
     <div className='contents transition-in-up'>
-      <DateText date={at} as='date' />
-      <DateText date={at} as='dist' className='me-auto' />
+      <DateText date={at} as='date' size='xs' />
+      <DateText date={at} as='dist' size='xs' className='me-auto' />
       <span className='text-xs'>{(amount && `${amount} ${unitName}`) || 'Skipped'}</span>
       <Button onClick={handleEditClick} aria-description='Edit'>
         <Pencil />

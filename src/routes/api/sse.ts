@@ -12,10 +12,14 @@ const streamControllers = new Map<ReadableStreamDefaultController<unknown>, stri
 const client = new MessageClient(import.meta.url);
 
 const unsubscribe = client.subscribe('invalidate', ({ source }) => {
+  console.log('api/sse received invalidation', source, 'streamControllers.size=', streamControllers.size);
   if (!streamControllers.size) return;
   const chunk = `event: invalidate\ndata: null\n\n`;
   for (const [controller, clientId] of streamControllers) {
-    if (source !== clientId) controller.enqueue(chunk);
+    if (source !== clientId) {
+      console.log('api/sse enqueue', chunk, 'on', clientId);
+      controller.enqueue(chunk);
+    } else console.log('api/sse skipping', clientId);
   }
 });
 

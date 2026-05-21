@@ -21,10 +21,10 @@ function HistoryPageRow({ id, amount, unitName, at, itemName, categoryName }: Hi
 
   return (
     <div className='contents'>
-      <span>{categoryName}</span>
+      <span className='text-xs'>{categoryName}</span>
       <span>{itemName}</span>
       <span className='text-xs'>{(amount && `${amount} ${unitName}`) || 'Skipped'}</span>
-      <DateText date={at} as='date' />
+      <DateText date={at} as='date' size='xs' />
       <Button onClick={handleEditClick} aria-description='Edit'>
         <Pencil />
       </Button>

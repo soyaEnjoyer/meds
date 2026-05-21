@@ -86,7 +86,7 @@ export function TimePicker({
           </Button>
         }
       />
-      <PopoverContent className='grid w-auto grid-cols-[2fr_1fr] items-center gap-x-4' align='start'>
+      <PopoverContent className='grid w-auto grid-cols-[2fr_1fr] items-center gap-x-4'>
         <div className='contents text-center'>
           <h4>Hour</h4>
           <h4>Minute</h4>

@@ -141,7 +141,7 @@ export function ScheduleSummary({
           icon={Calendar}
           className={skippedAt && skippedAt > completedAt ? 'text-danger' : undefined}
         >
-          <DateText date={completedAt} as='dist' />
+          <DateText date={completedAt} as='dist' size='xs' />
         </ScheduleSummarySection>
       )}
       <ScheduleSummarySection icon={RotateCw}>{formattedRepeat}</ScheduleSummarySection>

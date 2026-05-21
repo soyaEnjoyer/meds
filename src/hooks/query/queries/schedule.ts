@@ -39,11 +39,11 @@ export function useFilteredScheduleGroupsQuery() {
   const filterSearch = useFilter((state) => state.search).toLocaleLowerCase();
   const pathName = useRouterState({ select: (state) => state.location.pathname });
   const filterState = useFilter((state) => state.state);
-  const now = new Date();
-  const todayEnd = dateSet(now, { hour: 23, minute: 59, ms: 999, second: 59 });
-  const in7dEnd = dateAdd(todayEnd, { day: 6 });
-  const queryFn = () =>
-    Object.entries(
+  const queryFn = () => {
+    const now = new Date();
+    const todayEnd = dateSet(now, { hour: 23, minute: 59, ms: 999, second: 59 });
+    const in7dEnd = dateAdd(todayEnd, { day: 6 });
+    return Object.entries(
       Object.groupBy(
         (
           schedulesQuery.data.map((schedule) => ({
@@ -114,6 +114,7 @@ export function useFilteredScheduleGroupsQuery() {
           key,
         };
       }) satisfies ScheduleGroup[];
+  };
 
   // oxlint-disable-next-line tanstack-query/exhaustive-deps
   return useQuery({
@@ -136,7 +137,7 @@ export function useFilteredScheduleGroupsQuery() {
     staleTime: ({ state }) => {
       // mark stale when the next schedule item is due, or never (infinity)
       // this will force a group key recalc
-      const nowTs = now.getTime();
+      const nowTs = Date.now();
       const nextDueAtTs =
         state.data
           ?.flatMap((item) => [item.dueAtTs, item.dueAtTs + HOUR_MS * ACCORDION_PRE_EXPAND_HOURS])

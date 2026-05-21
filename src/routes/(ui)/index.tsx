@@ -1,3 +1,4 @@
+import type { DefinedUseQueryResult } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { Check, ChevronDownIcon, Clock, EllipsisVertical, Info, Logs, Pencil, Settings, X } from 'lucide-react';
 import type { ComponentProps, CSSProperties, MouseEvent } from 'react';
@@ -81,7 +82,7 @@ function ScheduleAccordionItem({
             }
             nativeButton={false}
           />
-          <PopoverContent className='whitespace-pre-wrap'>
+          <PopoverContent className='max-w-fit whitespace-pre-wrap' align='start'>
             <Linkify>{description}</Linkify>
           </PopoverContent>
         </Popover>
@@ -100,7 +101,7 @@ function ScheduleAccordionItem({
             </Button>
           }
         />
-        <PopoverContent className='grid max-w-fit grid-cols-2 gap-4'>
+        <PopoverContent className='grid max-w-fit grid-cols-2 gap-4' align='end'>
           <PopoverClose
             render={
               <Button onClick={handleSkipClick} variant='destructive'>
@@ -253,7 +254,7 @@ function ScheduleAccordionGroup({
           ))}
         </AccordionContent>
       </AccordionItem>
-      <PopoverContent className='grid max-w-fit grid-cols-2 gap-4'>
+      <PopoverContent className='grid max-w-fit grid-cols-2 gap-4' align='end'>
         <PopoverClose
           render={
             <Button onClick={handleSkipClick} variant='destructive'>
@@ -275,8 +276,7 @@ function ScheduleAccordionGroup({
   );
 }
 
-function SchedulePage() {
-  const query = useFilteredScheduleGroupsQuery();
+function ScheduleAccordion({ query }: { query: DefinedUseQueryResult<ScheduleGroup[]> }) {
   const [value, setValue] = useState<string[]>([]);
   const valueRef = useRef<string[]>([]);
 
@@ -311,4 +311,9 @@ function SchedulePage() {
       ))}
     </Accordion>
   );
+}
+
+function SchedulePage() {
+  const query = useFilteredScheduleGroupsQuery();
+  return <ScheduleAccordion query={query} />;
 }
