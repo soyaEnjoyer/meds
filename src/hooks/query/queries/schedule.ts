@@ -145,11 +145,6 @@ export function useFilteredScheduleGroupsQuery() {
           .reduce((acc, item) => Math.min(acc, item), Infinity) ?? Infinity;
       // infinity - n === infinity
       const staleMs = nextDueAtTs - nowTs;
-      console.log('useFilteredScheduleGroupsQuery staleTime', {
-        nextDueAt: new Date(nextDueAtTs),
-        nextDueAtTs,
-        staleMs,
-      });
       return staleMs;
     },
   });

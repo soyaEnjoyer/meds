@@ -1,11 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 
+import { createLogger } from '@/lib/logger/isomorphic';
+
 export function SseClient() {
   const deploymentIdRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
   const [sseErrorAt, setSseErrorAt] = useState<Date | null>(null);
   const sseErrorCountRef = useRef(0);
+  const logger = createLogger(import.meta.url);
 
   useEffect(() => {
     function invalidateQueries() {
@@ -14,7 +17,7 @@ export function SseClient() {
 
     function triggerReconnect(reason: string) {
       setSseErrorAt((prev) => {
-        console.info('sse triggering reconnect', { count: sseErrorCountRef.current, prev, reason });
+        logger.info('sse triggering reconnect', { count: sseErrorCountRef.current, prev, reason });
         ++sseErrorCountRef.current;
         return new Date();
       });
@@ -31,26 +34,26 @@ export function SseClient() {
       sseErrorCountRef.current = 0;
       const deploymentId: string = event.data;
       if (!deploymentIdRef.current) {
-        console.debug('sse connected', { deploymentId });
+        logger.debug('sse connected', { deploymentId });
         deploymentIdRef.current = deploymentId;
       } else if (deploymentIdRef.current !== deploymentId) {
-        console.info('detected new deployment', deploymentIdRef.current, '->', deploymentId);
+        logger.info('detected new deployment', deploymentIdRef.current, '->', deploymentId);
         typedGlobalThis.location.reload();
       } else {
-        console.info('sse reconnected', { deploymentId });
+        logger.info('sse reconnected', { deploymentId });
         invalidateQueries();
       }
     });
 
     typedGlobalThis.eventSource.addEventListener('invalidate', () => {
-      console.debug('sse invalidate');
+      logger.debug('sse invalidate');
       invalidateQueries();
     });
 
     typedGlobalThis.eventSource.addEventListener('error', () => {
       typedGlobalThis.eventSource.close();
       const delayMs = Math.min((sseErrorCountRef.current + 1) ** 2, 900) * 1000;
-      console.warn('sse error', { delayMs });
+      logger.warn('sse error', { delayMs });
       const timeout = setTimeout(() => triggerReconnect('timeout'), delayMs);
       abortController.signal.addEventListener('abort', () => clearTimeout(timeout));
       document.addEventListener('visibilitychange', () => triggerReconnect('visibility'), {
@@ -63,7 +66,7 @@ export function SseClient() {
     window.addEventListener('beforeunload', () => abortController.abort());
 
     return () => abortController.abort();
-  }, [queryClient, sseErrorAt]);
+  }, [queryClient, sseErrorAt, logger]);
 
   return null;
 }

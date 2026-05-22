@@ -6,12 +6,14 @@ import { parseEnv } from 'node:util';
 
 import { getTextStatusServer } from '@/functions.server/status.server-only';
 import { HOUR_MS } from '@/lib/date';
+import { createLoggerServer } from '@/lib/logger/server';
 
 const INTERVAL_MS = HOUR_MS / 4;
 const MAX_ENV_TRAVERSALS = 2;
 
 let timeout: NodeJS.Timeout | null = null;
 let interval: NodeJS.Timeout | null = null;
+const logger = createLoggerServer(import.meta.url);
 
 // vite processes .env files in the project root, but nitro builds to a subdirectory
 function loadEnv(): void {
@@ -46,7 +48,7 @@ function start(): void {
     token = envOrThrow('GOTIFY_APP_TOKEN');
     appUrl = envOrThrow('APP_URL');
   } catch (error) {
-    console.error('gotify:', String(error));
+    logger.error(String(error));
     return;
   }
 
@@ -75,9 +77,9 @@ function start(): void {
       method: 'POST',
     });
     if (response.ok) {
-      console.debug('gotify: sent', title);
+      logger.debug('sent', title);
       prevHash = hash;
-    } else console.error('gotify: error sending', await response.text());
+    } else logger.error('error sending', await response.text());
   }
 
   void send();

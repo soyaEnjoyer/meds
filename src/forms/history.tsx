@@ -1,6 +1,6 @@
 import { useServerFn } from '@tanstack/react-start';
 import type { MouseEvent, SubmitEvent } from 'react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { FormField } from '@/components/form-field';
 import { DialogBody, DialogFooter, DialogHeader } from '@/components/ui/dialog';
@@ -12,6 +12,7 @@ import { formatDatetimeIso } from '@/lib/date';
 import type { HistoryUpdate } from '@/lib/drizzle/zod';
 import { historyUpdateSchema } from '@/lib/drizzle/zod';
 import { useAppForm } from '@/lib/form';
+import { createLogger } from '@/lib/logger/isomorphic';
 
 const schema = historyUpdateSchema;
 
@@ -32,27 +33,31 @@ export function HistoryForm({ asDialog, closeDialog, id }: BasicDialogFormProps)
   const deleteMutator = useHistoryDeleteMutator();
   const historyGetOneFn = useServerFn(historyGetOne);
   const defaultValuesRef = useRef({ ...defaults });
+  const [submitError, setSubmitError] = useState<Error | null>(null);
+  const logger = createLogger(import.meta.url);
 
   const form = useAppForm({
     defaultValues: defaultValuesRef.current,
     onSubmit({ formApi, value }) {
-      console.log('onSubmit', value);
+      logger.info('onSubmit', value);
       updateMutator.mutate(
         { data: value },
         {
           onError(error: Error) {
-            console.error('error submitting form', error);
+            logger.error('error submitting form', error);
+            setSubmitError(error);
           },
           onSuccess(data) {
-            console.log('submitted form', data);
+            logger.success('submitted form', data);
+            closeDialog?.();
             formApi.reset({ ...defaults });
+            setSubmitError(null);
           },
         }
       );
-      closeDialog?.();
     },
     onSubmitInvalid({ value }) {
-      console.log('onSubmitInvalid', value);
+      logger.warn('onSubmitInvalid', value);
     },
     validators: {
       onSubmit: schema,
@@ -91,12 +96,12 @@ export function HistoryForm({ asDialog, closeDialog, id }: BasicDialogFormProps)
 
   const handleSubmit = useCallback(
     (event: SubmitEvent<HTMLFormElement>) => {
-      console.log('form handleSubmit');
+      logger.debug('form handleSubmit');
       event.preventDefault();
       event.stopPropagation();
       void form.handleSubmit();
     },
-    [form]
+    [form, logger]
   );
 
   const [HeaderComponent, BodyComponent, FooterComponent] = asDialog
@@ -116,6 +121,7 @@ export function HistoryForm({ asDialog, closeDialog, id }: BasicDialogFormProps)
           </form.AppField>
           <form.AppField name='at'>{(field) => <FormField component={field.DatePicker} label='At' />}</form.AppField>
         </form>
+        {submitError && <span className='col-span-full text-xs text-danger'>{String(submitError)}</span>}
       </BodyComponent>
       <FooterComponent>
         <form.Subscribe selector={submitSelector}>

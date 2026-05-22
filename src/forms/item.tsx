@@ -1,5 +1,5 @@
 import type { MouseEvent, SubmitEvent } from 'react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { z } from 'zod';
 
 import { FormField } from '@/components/form-field';
@@ -11,6 +11,7 @@ import { useItemsMapQuery } from '@/hooks/query/queries/base';
 import type { ItemInsert } from '@/lib/drizzle/zod';
 import { itemInsertSchema } from '@/lib/drizzle/zod';
 import { useAppForm } from '@/lib/form';
+import { createLogger } from '@/lib/logger/isomorphic';
 
 const editSchema = itemInsertSchema.extend({
   defaultCategoryId: z.nullable(itemInsertSchema.shape.defaultCategoryId),
@@ -37,6 +38,8 @@ export function ItemForm({ asDialog, closeDialog, ...props }: MultimodeDialogFor
   const updateMutator = useItemUpdateMutator();
   const deleteMutator = useItemDeleteMutator();
   const map = useItemsMapQuery();
+  const [submitError, setSubmitError] = useState<Error | null>(null);
+  const logger = createLogger(import.meta.url);
 
   const defaultValues: EditSchema = useMemo(() => {
     if (props.mode === 'edit') {
@@ -52,18 +55,20 @@ export function ItemForm({ asDialog, closeDialog, ...props }: MultimodeDialogFor
     onSubmit({ formApi, value }) {
       const options = {
         onError(error: Error) {
-          console.error('error submitting form', error);
+          logger.error('error submitting form', error);
+          setSubmitError(error);
         },
         onSuccess(data: unknown) {
-          console.log('submitted form', data);
+          logger.success('submitted form', data);
+          closeDialog?.();
           formApi.reset({ ...defaults });
+          setSubmitError(null);
         },
       } as const;
       // oxlint-disable-next-line typescript/no-unsafe-type-assertion
       const typedValue = value as SubmitSchema;
       if (props.mode === 'new') createMutator.mutate({ data: typedValue }, options);
       else updateMutator.mutate({ data: { id: props.id, ...typedValue } }, options);
-      closeDialog?.();
     },
     validators: {
       onSubmit: submitSchema,
@@ -123,6 +128,7 @@ export function ItemForm({ asDialog, closeDialog, ...props }: MultimodeDialogFor
             {(field) => <FormField component={field.NumberPicker} label='Default amount' />}
           </form.AppField>
         </form>
+        {submitError && <span className='col-span-full text-xs text-danger'>{String(submitError)}</span>}
       </BodyComponent>
       <FooterComponent>
         <form.Subscribe selector={submitSelector}>

@@ -76,6 +76,7 @@ const queryClient = new QueryClient({
       staleTime: Infinity,
       // make sure errors actually get logged
       throwOnError: (error, query) => {
+        // oxlint-disable-next-line no-console
         console.error('query error', query.queryKey, query, error);
         return false;
       },

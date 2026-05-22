@@ -5,9 +5,6 @@ import { useFieldContext } from '@/lib/form';
 import { cn } from '@/lib/utils';
 
 function FieldErrors({ field, className, ...props }: { field: AnyFieldApi } & ComponentProps<'em'>) {
-  if (field.state.meta.errors?.length)
-    console.log('FieldErrors', field.name, field.state.meta.errors, field.state.meta.isValid);
-  if (!field.state.meta.errors?.length) return null;
   return (
     <em className={cn('text-xs text-danger', className)} {...props}>
       {field.state.meta.errors.map((err) => ('message' in err ? err.message : err)).join(', ')}

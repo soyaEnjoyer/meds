@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { createFileRoute } from '@tanstack/react-router';
 
 import { getClientId } from '@/functions.server/client';
+import { createLoggerServer } from '@/lib/logger/server';
 import { MessageClient } from '@/lib/messaging.server';
 
 const DEPLOYMENT_ID_LENGTH = 8;
@@ -10,16 +11,17 @@ const DEPLOYMENT_ID_LENGTH = 8;
 const deploymentId = randomUUID().slice(-DEPLOYMENT_ID_LENGTH);
 const streamControllers = new Map<ReadableStreamDefaultController<unknown>, string>();
 const client = new MessageClient(import.meta.url);
+const logger = createLoggerServer(import.meta.url);
 
 const unsubscribe = client.subscribe('invalidate', ({ source }) => {
-  console.log('api/sse received invalidation', source, 'streamControllers.size=', streamControllers.size);
+  logger.info('received invalidation', source, 'streamControllers.size=', streamControllers.size);
   if (!streamControllers.size) return;
   const chunk = `event: invalidate\ndata: null\n\n`;
   for (const [controller, clientId] of streamControllers) {
     if (source !== clientId) {
-      console.log('api/sse enqueue', chunk, 'on', clientId);
+      logger.info('enqueue', chunk, 'on', clientId);
       controller.enqueue(chunk);
-    } else console.log('api/sse skipping', clientId);
+    } else logger.info('skipping', clientId);
   }
 });
 
@@ -48,7 +50,7 @@ export const Route = createFileRoute('/api/sse')({
 
 if (import.meta.hot) {
   import.meta.hot.on('vite:beforeFullReload', () => {
-    console.log('sse hmr close streams');
+    logger.info('sse hmr close streams');
     for (const [controller] of streamControllers) controller.close();
     unsubscribe();
   });

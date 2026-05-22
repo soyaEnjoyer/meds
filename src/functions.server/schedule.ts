@@ -8,6 +8,7 @@ import { db } from '@/lib/drizzle/db.server';
 import { historyTable, scheduleTable } from '@/lib/drizzle/schema';
 import type { ScheduleRow } from '@/lib/drizzle/zod';
 import { scheduleInsertSchema, scheduleUpdateSchema } from '@/lib/drizzle/zod';
+import { createLogger } from '@/lib/logger/isomorphic';
 import { MessageClient } from '@/lib/messaging.server';
 
 const MAX_SEARCH_ITERATIONS = 1000;
@@ -85,6 +86,7 @@ export const scheduleDelete = createServerFn()
 
 const scheduleAction = createServerOnlyFn(
   async (data: { id: number; amount?: number | null; unitId?: number; update?: boolean }[]): Promise<ScheduleRow[]> => {
+    const logger = createLogger(import.meta.url, 'scheduleAction');
     /** @param amount undefined = scheduled amount, number = custom amount, null = skipped */
     function getNextDueAt(schedule: ScheduleRow, amount: number | null | undefined): Date | null {
       if (!schedule.dueAt) return null;
@@ -99,7 +101,7 @@ const scheduleAction = createServerOnlyFn(
       // week starts on monday
       let weekDay = (nextDueAt.getDay() || 7) - 1;
       const cycleLength = schedule.cycleOnDays + schedule.cycleOffDays;
-      console.log('scheduleAction getNextDueAt init', { amount, nextDueAt });
+      logger.debug('getNextDueAt init', { amount, nextDueAt });
       let cycleDay = daysDiff(schedule.startAt, nextDueAt) % cycleLength;
 
       for (let i = 0; i < MAX_SEARCH_ITERATIONS; ++i) {
@@ -108,7 +110,7 @@ const scheduleAction = createServerOnlyFn(
           cycleDay = (cycleDay + 1) % cycleLength;
           weekDay = (weekDay + 1) % 7;
         }
-        console.log('scheduleAction getNextDueAt loop', {
+        logger.debug('getNextDueAt loop', {
           cycleDay,
           cycleLength,
           dueAt: schedule.dueAt,
@@ -130,7 +132,7 @@ const scheduleAction = createServerOnlyFn(
         if (cycleDay >= schedule.cycleOnDays) continue;
 
         nextDueAt.setHours(schedule.time.hour, schedule.time.minute, 0, 0);
-        console.log('scheduleAction getNextDueAt found:', nextDueAt, 'prev:', schedule.dueAt);
+        logger.success('getNextDueAt found:', nextDueAt, 'prev:', schedule.dueAt);
         return nextDueAt;
       }
       throw new Error('could not find next dueAt');

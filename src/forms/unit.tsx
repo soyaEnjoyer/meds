@@ -1,5 +1,5 @@
 import type { MouseEvent, SubmitEvent } from 'react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { FormField } from '@/components/form-field';
 import { DialogBody, DialogFooter, DialogHeader } from '@/components/ui/dialog';
@@ -10,6 +10,7 @@ import { useUnitsMapQuery } from '@/hooks/query/queries/base';
 import type { UnitInsert } from '@/lib/drizzle/zod';
 import { unitInsertSchema } from '@/lib/drizzle/zod';
 import { useAppForm } from '@/lib/form';
+import { createLogger } from '@/lib/logger/isomorphic';
 
 const schema = unitInsertSchema;
 
@@ -27,6 +28,8 @@ export function UnitForm({ asDialog, closeDialog, ...props }: MultimodeDialogFor
   const updateMutator = useUnitUpdateMutator();
   const deleteMutator = useUnitDeleteMutator();
   const map = useUnitsMapQuery();
+  const [submitError, setSubmitError] = useState<Error | null>(null);
+  const logger = createLogger(import.meta.url);
 
   const defaultValues: Schema = useMemo(() => {
     if (props.mode === 'edit') {
@@ -42,16 +45,18 @@ export function UnitForm({ asDialog, closeDialog, ...props }: MultimodeDialogFor
     onSubmit({ formApi, value }) {
       const options = {
         onError(error: Error) {
-          console.error('error submitting form', error);
+          logger.error('error submitting form', error);
+          setSubmitError(error);
         },
         onSuccess(data: unknown) {
-          console.log('submitted form', data);
+          logger.success('submitted form', data);
+          closeDialog?.();
           formApi.reset({ ...defaults });
+          setSubmitError(null);
         },
       } as const;
       if (props.mode === 'new') createMutator.mutate({ data: value }, options);
       else updateMutator.mutate({ data: { id: props.id, ...value } }, options);
-      closeDialog?.();
     },
     validators: {
       onSubmit: schema,
@@ -101,6 +106,7 @@ export function UnitForm({ asDialog, closeDialog, ...props }: MultimodeDialogFor
         <form className='contents' onSubmit={handleSubmit}>
           <form.AppField name='name'>{(field) => <FormField component={field.Input} label='Name' />}</form.AppField>
         </form>
+        {submitError && <span className='col-span-full text-xs text-danger'>{String(submitError)}</span>}
       </BodyComponent>
       <FooterComponent>
         <form.Subscribe selector={submitSelector}>

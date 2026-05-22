@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 
 import { displayName } from '@root/package.json';
 import { createServerOnlyFn } from '@tanstack/react-start';
-import { and, eq, gte, isNotNull, lte, sql } from 'drizzle-orm';
+import { and, eq, isNotNull, lte } from 'drizzle-orm';
 
 import { dateSet } from '@/lib/date';
 import { db } from '@/lib/drizzle/db.server';
@@ -12,13 +12,21 @@ import { categoryTable, itemTable, scheduleTable } from '@/lib/drizzle/schema';
 
 const HASH_LENGTH = 8;
 
-const getGroupedStatus = createServerOnlyFn(async () => {
+enum State {
+  Due = 0,
+  Next = 1,
+  Later = 2,
+}
+
+export const getTextStatusServer = createServerOnlyFn(async () => {
   const now = new Date();
-  const data = await db
+
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+  const data = (await db
     .select({
       category: categoryTable.name,
+      dueAt: scheduleTable.dueAt,
       item: itemTable.name,
-      status: sql<string>`iif(${scheduleTable.dueAt} <= ${now}, 'Due', 'Later')`,
     })
     .from(scheduleTable)
     .innerJoin(itemTable, eq(itemTable.id, scheduleTable.itemId))
@@ -26,79 +34,81 @@ const getGroupedStatus = createServerOnlyFn(async () => {
     .where(
       and(
         isNotNull(scheduleTable.dueAt),
-        gte(scheduleTable.dueAt, dateSet(now, { hour: 0, minute: 0, ms: 0, second: 0 })),
         lte(scheduleTable.dueAt, dateSet(now, { hour: 23, minute: 59, ms: 999, second: 59 }))
       )
-    );
-
-  const grouped = Object.fromEntries(
-    Object.entries(Object.groupBy(data, ({ status }) => status))
-      .map(
-        ([status, itemsA]) =>
-          [
-            status,
-            Object.fromEntries(
-              // oxlint-disable-next-line typescript/no-non-null-assertion
-              Object.entries(Object.groupBy(itemsA!, ({ category }) => category))
-                .map(
-                  ([category, itemsB]) =>
-                    [
-                      category,
-                      // oxlint-disable-next-line typescript/no-non-null-assertion
-                      itemsB!
-                        .map(({ item }) => item)
-                        .toSorted((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })),
-                    ] as const
-                )
-                .toSorted(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
-            ),
-          ] as const
-      )
-      .toSorted(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
-  );
-  return grouped;
-});
-
-const getStatusBlob = createServerOnlyFn((status: string) => {
-  if (status === 'Due') return '🟡';
-  return '🟣';
-});
-
-// workers run outside of TS Start so cannot use a function created with createServerFn()
-export const getTextStatusServer = createServerOnlyFn(async () => {
-  const title = `${import.meta.hot ? '[DEV] ' : ''}${displayName}`;
-  const grouped = await getGroupedStatus();
-  const rows = Object.entries(grouped).map(([status, categoryGroups]) =>
-    Object.entries(categoryGroups)
-      .map(([category, items]) => `${getStatusBlob(status)} ${category}: ${items.join(', ')}`)
-      .join(' ')
-  );
-  const summary = Object.entries(grouped)
-    .map(
-      ([status, categoryGroups]) =>
-        `${getStatusBlob(status)} ${status} [${Object.values(categoryGroups).reduce(
-          (acc, item) => acc + item.length,
-          0
-        )}]`
     )
+    .orderBy(categoryTable.name, itemTable.name)) as {
+    category: string;
+    dueAt: Date;
+    item: string;
+  }[];
+
+  const nextAt = data
+    .map(({ dueAt }) => dueAt)
+    .filter((dueAt) => dueAt !== null)
+    .toSorted((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+    .find((dueAt) => dueAt > now);
+
+  const stateRows = data.map((item) =>
+    Object.assign(
+      item,
+      item.dueAt <= now
+        ? { blob: '🔴', state: State.Due }
+        : nextAt && item.dueAt <= nextAt
+          ? { blob: '🟠', state: State.Next }
+          : { blob: '🟡', state: State.Later }
+    )
+  );
+
+  const due = stateRows.filter((row) => row.state === State.Due);
+  const next = stateRows.filter((row) => row.state === State.Next);
+  const later = stateRows.filter((row) => row.state === State.Later);
+
+  const appName = `${import.meta.hot ? '[DEV] ' : ''}${displayName}`;
+
+  const summary = [
+    due.length ? `${due[0].blob} Due: ${due.length}` : null,
+    next.length ? `${next[0].blob} Next: ${next.length}` : null,
+    later.length ? `${later[0].blob} Later: ${later.length}` : null,
+  ]
+    .filter((item) => item !== null)
     .join(' ');
-  const status = {
-    ...(rows.length
-      ? {
-          message: rows.join('\n'),
-          title: `${title}: ${summary}`,
-        }
-      : {
-          message: '🟢 All done!',
-          title,
-        }),
-    due: 'Due' in grouped ? Object.values(grouped.Due).reduce((acc, item) => acc + item.length, 0) : 0,
-  };
+
+  const message =
+    [
+      due.length
+        ? Object.entries(Object.groupBy(due, (item) => item.category))
+            .map(
+              ([category, items]) => `${items?.at(0)?.blob} ${category}: ${items?.map(({ item }) => item).join(', ')}`
+            )
+            .join(' ')
+        : null,
+      next.length
+        ? Object.entries(Object.groupBy(next, (item) => item.category))
+            .map(
+              ([category, items]) => `${items?.at(0)?.blob} ${category}: ${items?.map(({ item }) => item).join(', ')}`
+            )
+            .join(' ')
+        : null,
+      later.length
+        ? Object.entries(Object.groupBy(later, (item) => item.category))
+            .map(
+              ([category, items]) => `${items?.at(0)?.blob} ${category}: ${items?.map(({ item }) => item).join(', ')}`
+            )
+            .join(' ')
+        : null,
+    ]
+      .filter((item) => item !== null)
+      .join('\n') || '🟢 All done!';
+
+  const status = { due: due.length, message, title: `${appName}${summary ? ` ${summary}` : ''}` };
+
   const hash = createHash('sha256', { encoding: 'utf8' })
     .update(JSON.stringify(status))
     .digest('base64url')
     .slice(-HASH_LENGTH);
-  return { ...status, hash };
+
+  return Object.assign(status, { hash });
 });
 
-export type Status = Awaited<ReturnType<typeof getTextStatusServer>>;
+export type StatusMessage = Awaited<ReturnType<typeof getTextStatusServer>>;

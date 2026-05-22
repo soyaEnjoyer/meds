@@ -68,7 +68,6 @@ export default defineConfig({
     'eslint/max-params': 'off',
     'eslint/max-statements': 'off',
     'eslint/no-bitwise': 'off',
-    'eslint/no-console': 'off',
     'eslint/no-continue': 'off',
     'eslint/no-duplicate-imports': 'off',
     'eslint/no-magic-numbers': 'off',

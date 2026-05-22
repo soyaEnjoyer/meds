@@ -1,5 +1,5 @@
 import type { MouseEvent, SubmitEvent } from 'react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { z } from 'zod';
 
 import { FormField } from '@/components/form-field';
@@ -8,6 +8,7 @@ import type { BasicDialogFormProps } from '@/dialogs/form';
 import { useScheduleDoneMutator } from '@/hooks/query/mutators';
 import { useItemsMapQuery, useSchedulesMapQuery } from '@/hooks/query/queries/base';
 import { useAppForm } from '@/lib/form';
+import { createLogger } from '@/lib/logger/isomorphic';
 
 const schema = z.object({
   amount: z.number().min(0.001),
@@ -20,9 +21,10 @@ const submitSelector = (state: { canSubmit: boolean; isSubmitting: boolean }) =>
 
 export function DoneCustomForm({ asDialog, closeDialog, id }: BasicDialogFormProps) {
   const doneMutator = useScheduleDoneMutator();
-
   const map = useSchedulesMapQuery();
   const itemMap = useItemsMapQuery();
+  const [submitError, setSubmitError] = useState<Error | null>(null);
+  const logger = createLogger(import.meta.url);
 
   const { defaultValues, itemName } = useMemo(() => {
     const schedule = map.data.get(id);
@@ -46,14 +48,16 @@ export function DoneCustomForm({ asDialog, closeDialog, id }: BasicDialogFormPro
         { data: [{ id, ...value }] },
         {
           onError(error: Error) {
-            console.error('error submitting form', error);
+            logger.error('error submitting form', error);
+            setSubmitError(error);
           },
           onSuccess(data) {
-            console.log('submitted form', data);
+            logger.success('submitted form', data);
+            closeDialog?.();
+            setSubmitError(null);
           },
         }
       );
-      closeDialog?.();
     },
     validators: {
       onSubmit: schema,
@@ -104,6 +108,7 @@ export function DoneCustomForm({ asDialog, closeDialog, id }: BasicDialogFormPro
             {(field) => <FormField component={field.Switch} label='Update' />}
           </form.AppField>
         </form>
+        {submitError && <span className='col-span-full text-xs text-danger'>{String(submitError)}</span>}
       </BodyComponent>
       <FooterComponent>
         <form.Subscribe selector={submitSelector}>

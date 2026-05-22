@@ -2,6 +2,9 @@ import { rmSync } from 'node:fs';
 import { createServer, Socket } from 'node:net';
 import { createInterface } from 'node:readline';
 
+import { createLogger } from '@/lib/logger/isomorphic';
+import { createLoggerServer } from '@/lib/logger/server';
+
 const SOCKET_PATH = '.message-bus.sock';
 const CONNECT_RETRY_MS = 100;
 const MAX_CONNECT_RETRIES = 10;
@@ -37,11 +40,12 @@ type Unsubscribe = () => void;
 export class MessageServer {
   readonly #topicClients = new Map<MessageTopic, Set<Socket>>();
   readonly #states = new Map<MessageTopic, Message>();
+  readonly #logger = createLoggerServer(import.meta.url, 'server');
 
   readonly #server = createServer((client) => {
-    client.addListener('error', console.error);
+    client.addListener('error', this.#logger.error);
     const readline = createInterface(client);
-    readline.addListener('error', console.error);
+    readline.addListener('error', this.#logger.error);
     readline.addListener('close', () => {
       for (const clients of this.#topicClients.values()) clients.delete(client);
     });
@@ -70,7 +74,7 @@ export class MessageServer {
         }
 
         default: {
-          console.warn('server - unhandled message kind', parsed);
+          this.#logger.warn('unhandled message kind', parsed);
         }
       }
     });
@@ -86,15 +90,15 @@ export class MessageServer {
 
   public constructor() {
     MessageServer.#cleanup();
-    this.#server.addListener('error', console.error);
+    this.#server.addListener('error', this.#logger.error);
     this.#server.listen(SOCKET_PATH);
-    console.log('listening on', SOCKET_PATH);
+    this.#logger.info('listening on', SOCKET_PATH);
   }
 
   public stop(): void {
     for (const clients of this.#topicClients.values()) for (const client of clients) client.destroy();
     this.#server.close(() => {
-      console.log('message server stopped');
+      this.#logger.info('message server stopped');
     });
   }
 }
@@ -103,16 +107,17 @@ export class MessageClient {
   #socket: Socket | null = null;
   readonly #queue: ClientToServerMessage[] = [];
   readonly #topicCallbacks = new Map<MessageTopic, Set<Callback<MessageTopic>>>();
+  readonly #logger = createLogger(import.meta.url, 'client');
 
   #sendInternal(...messages: ClientToServerMessage[]): void {
     if (!this.#socket) {
-      console.log('queuing', ...messages);
+      this.#logger.info('queuing', ...messages);
       if (messages.length) this.#queue.push(...messages);
       return;
     } else {
       const allMessages: ClientToServerMessage[] = [...this.#queue.splice(0, this.#queue.length), ...messages];
       if (!allMessages.length) return;
-      console.log('sending', allMessages);
+      this.#logger.info('sending', allMessages);
       this.#socket.write(allMessages.map((message) => `${JSON.stringify(message)}\n`).join(''));
     }
   }
@@ -140,12 +145,12 @@ export class MessageClient {
       socket.addListener('ready', () => {
         clearInterval(interval);
         this.#socket = socket;
-        console.info(importMetaUrl, 'connected to', SOCKET_PATH);
+        this.#logger.info(importMetaUrl, 'connected to', SOCKET_PATH);
         const readline = createInterface(socket);
-        readline.addListener('error', console.error);
+        readline.addListener('error', this.#logger.error);
         readline.addListener('line', (data) => {
           const parsed: Message = JSON.parse(data);
-          console.log('received', parsed);
+          this.#logger.debug('received', parsed);
           // oxlint-disable-next-line promise/prefer-await-to-callbacks
           for (const callback of this.#topicCallbacks?.get(parsed.topic) ?? []) void callback(parsed);
         });

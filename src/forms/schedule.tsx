@@ -1,5 +1,5 @@
 import type { MouseEvent, SubmitEvent } from 'react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { z } from 'zod';
 
 import { FormField } from '@/components/form-field';
@@ -10,6 +10,7 @@ import { useScheduleCreateMutator, useScheduleDeleteMutator, useScheduleUpdateMu
 import { useItemsMapQuery, useSchedulesMapQuery } from '@/hooks/query/queries/base';
 import { scheduleInsertSchema } from '@/lib/drizzle/zod';
 import { useAppForm } from '@/lib/form';
+import { createLogger } from '@/lib/logger/isomorphic';
 
 const editSchema = scheduleInsertSchema.extend({
   categoryId: z.nullable(scheduleInsertSchema.shape.categoryId),
@@ -60,6 +61,8 @@ export function ScheduleForm({ asDialog, closeDialog, ...props }: MultimodeDialo
   const deleteMutator = useScheduleDeleteMutator();
   const map = useSchedulesMapQuery();
   const itemMap = useItemsMapQuery();
+  const [submitError, setSubmitError] = useState<Error | null>(null);
+  const logger = createLogger(import.meta.url);
 
   const defaultValues: EditSchema = useMemo(() => {
     if (props.mode === 'edit') {
@@ -75,18 +78,20 @@ export function ScheduleForm({ asDialog, closeDialog, ...props }: MultimodeDialo
     onSubmit({ formApi, value }) {
       const options = {
         onError(error: Error) {
-          console.error('error submitting form', error);
+          logger.error('error submitting form', error);
+          setSubmitError(error);
         },
         onSuccess(data: SubmitSchema) {
-          console.log('submitted form', data);
+          logger.success('submitted form', data);
+          closeDialog?.();
           formApi.reset(getDefaults());
+          setSubmitError(null);
         },
       } as const;
       // oxlint-disable-next-line typescript/no-unsafe-type-assertion
       const typedValue = value as SubmitSchema;
       if (props.mode === 'new') createMutator.mutate({ data: typedValue }, options);
       else updateMutator.mutate({ data: { id: props.id, ...typedValue } }, options);
-      closeDialog?.();
     },
     validators: {
       onSubmit: submitSchema,
@@ -220,6 +225,7 @@ export function ScheduleForm({ asDialog, closeDialog, ...props }: MultimodeDialo
             </form.AppField>
           </fieldset>
         </form>
+        {submitError && <span className='col-span-full text-xs text-danger'>{String(submitError)}</span>}
       </BodyComponent>
       <FooterComponent>
         <form.Subscribe selector={submitSelector}>
