@@ -16,6 +16,11 @@ export function useScheduleHistoryQuery() {
   const pagerState = usePager((state) => state.scheduleHistory);
   const historyGetFn = useServerFn(historyScheduleGet);
   const scheduleAt = schedulesQuery.data.find((item) => item.id === scheduleHistoryDialogState.id)?.updatedAt.getTime();
+  const showSkipped = Boolean(
+    scheduleHistoryDialogState.meta &&
+    'showSkipped' in scheduleHistoryDialogState.meta &&
+    scheduleHistoryDialogState.meta.showSkipped
+  );
 
   return useQuery({
     enabled: scheduleHistoryDialogState.id !== null && scheduleHistoryDialogState.open,
@@ -25,9 +30,20 @@ export function useScheduleHistoryQuery() {
         data: {
           ...pagerState,
           scheduleId: scheduleHistoryDialogState.id ?? -1,
+          showSkipped,
         },
       }),
-    queryKey: ['history', 'item', { id: scheduleHistoryDialogState.id, scheduleAt, ...pagerState, historyGetFn }],
+    queryKey: [
+      'history',
+      'item',
+      {
+        id: scheduleHistoryDialogState.id,
+        scheduleAt,
+        showSkipped,
+        ...pagerState,
+        historyGetFn,
+      },
+    ],
   });
 }
 
@@ -42,6 +58,14 @@ export function useHistoryQuery() {
     enabled: pathName === '/history',
     placeholderData: keepPreviousData,
     queryFn: async () => historyWithItemGetFn({ data: { ...pagerState, search } }),
-    queryKey: ['history', { scheduleAt: schedulesQuery.dataUpdatedAt, search, ...pagerState, historyWithItemGetFn }],
+    queryKey: [
+      'history',
+      {
+        scheduleAt: schedulesQuery.dataUpdatedAt,
+        search,
+        ...pagerState,
+        historyWithItemGetFn,
+      },
+    ],
   });
 }

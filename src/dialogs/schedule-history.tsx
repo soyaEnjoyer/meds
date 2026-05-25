@@ -5,6 +5,7 @@ import { DateText } from '@/components/date-text';
 import { Pager } from '@/components/pager';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
 import { useDialog } from '@/hooks/dialog';
 import { usePager } from '@/hooks/pager';
 import { useItemsMapQuery, useSchedulesMapQuery } from '@/hooks/query/queries/base';
@@ -30,6 +31,7 @@ function ScheduleHistoryDialogRow({ id, at, amount, unitName }: HistoryWithItemC
 
 export function ScheduleHistoryDialog() {
   const setDialog = useDialog((state) => state.actions.set);
+  const setMeta = useDialog((state) => state.actions.setMeta);
   const dialogState = useDialog((state) => state.scheduleHistory);
   const query = useScheduleHistoryQuery();
   const pagerState = usePager((state) => state.scheduleHistory);
@@ -45,10 +47,24 @@ export function ScheduleHistoryDialog() {
 
   const handleOpenChange = useCallback((open: boolean) => setDialog('scheduleHistory', open), [setDialog]);
 
+  const handleSwitchChange = useCallback(
+    (value: boolean) => setMeta('scheduleHistory', { showSkipped: value }),
+    [setMeta]
+  );
+
   return (
     <Dialog open={dialogState.open} onOpenChange={handleOpenChange} disablePointerDismissal>
       <DialogContent>
-        <DialogHeader>History: {itemName}</DialogHeader>
+        <DialogHeader className='flex-row'>
+          <span>History: {itemName}</span>
+          <label className='flex items-center gap-2 text-sm font-normal'>
+            Skipped
+            <Switch
+              value={Boolean(dialogState.meta && 'showSkipped' in dialogState.meta && dialogState.meta.showSkipped)}
+              onValueChange={handleSwitchChange}
+            />
+          </label>
+        </DialogHeader>
         <DialogBody className='grid grid-cols-[auto_1fr_auto_auto] items-center gap-x-4 gap-y-2'>
           {!query.data?.length ? (
             <div className='col-span-full flex items-center justify-center gap-2 p-4 text-muted-foreground'>

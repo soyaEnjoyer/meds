@@ -32,7 +32,7 @@ export function DoneCustomForm({ asDialog, closeDialog, id }: BasicDialogFormPro
     const item = itemMap.data.get(schedule.itemId);
     return {
       defaultValues: {
-        amount: schedule.amount,
+        amount: schedule.amount ?? schedule.lastAmount ?? 0,
         unitId: schedule.unitId,
         update: false,
       },

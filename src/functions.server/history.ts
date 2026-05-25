@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
-import { and, desc, eq, getTableColumns, isNull, like, or, sql } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, isNotNull, isNull, like, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { getClientId } from '@/functions.server/client';
@@ -19,6 +19,7 @@ const client = new MessageClient(import.meta.url);
 const pagerSchema = z.object({
   pageNum: z.int().min(0).default(0),
   pageSize: z.int().min(10).max(100).default(10),
+  showSkipped: z.boolean().default(true),
 });
 
 const getScheduleSchema = pagerSchema.extend({
@@ -32,7 +33,7 @@ const getAllSchema = pagerSchema.extend({
 export const historyScheduleGet = createServerFn()
   .inputValidator(getScheduleSchema)
   .handler(
-    async ({ data: { pageSize, pageNum, scheduleId } }): Promise<HistoryWithItemCatUnitRow[]> =>
+    async ({ data: { pageSize, pageNum, scheduleId, showSkipped } }): Promise<HistoryWithItemCatUnitRow[]> =>
       await db
         .select({
           ...getTableColumns(historyTable),
@@ -44,7 +45,13 @@ export const historyScheduleGet = createServerFn()
         .innerJoin(itemTable, eq(itemTable.id, historyTable.itemId))
         .innerJoin(categoryTable, eq(categoryTable.id, historyTable.categoryId))
         .innerJoin(unitTable, eq(unitTable.id, historyTable.unitId))
-        .where(and(isNull(historyTable.deletedAt), eq(historyTable.scheduleId, scheduleId)))
+        .where(
+          and(
+            isNull(historyTable.deletedAt),
+            eq(historyTable.scheduleId, scheduleId),
+            showSkipped ? undefined : isNotNull(historyTable.amount)
+          )
+        )
         .orderBy(desc(historyTable.at))
         .limit(pageSize)
         .offset(pageSize * pageNum)
@@ -63,7 +70,7 @@ export const historyGetOne = createServerFn()
 export const historyAllGet = createServerFn()
   .inputValidator(getAllSchema)
   .handler(
-    async ({ data: { pageSize, pageNum, search } }): Promise<HistoryWithItemCatUnitRow[]> =>
+    async ({ data: { pageSize, pageNum, search, showSkipped } }): Promise<HistoryWithItemCatUnitRow[]> =>
       await db
         .select({
           ...getTableColumns(historyTable),
@@ -83,7 +90,8 @@ export const historyAllGet = createServerFn()
                   like(itemTable.name, `%${search.replaceAll('%', String.raw`\%`)}%`),
                   like(categoryTable.name, `%${search.replaceAll('%', String.raw`\%`)}%`)
                 )
-              : undefined
+              : undefined,
+            showSkipped ? undefined : isNotNull(historyTable.amount)
           )
         )
         .orderBy(desc(historyTable.at))

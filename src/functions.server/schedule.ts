@@ -12,6 +12,7 @@ import { createLogger } from '@/lib/logger/isomorphic';
 import { MessageClient } from '@/lib/messaging.server';
 
 const MAX_SEARCH_ITERATIONS = 1000;
+const MAX_OVERDUE_HOURS = 18;
 
 const client = new MessageClient(import.meta.url);
 
@@ -92,10 +93,11 @@ const scheduleAction = createServerOnlyFn(
       if (!schedule.dueAt) return null;
 
       const now = new Date();
+      const overdueAt = dateAdd(now, { hour: -MAX_OVERDUE_HOURS });
       const nextDueAt =
         amount === null
-          ? dateAdd(dateMax(schedule.dueAt, now), { day: 1 })
-          : dateAdd(now, { day: schedule.restDays + 1 });
+          ? dateAdd(overdueAt < schedule.dueAt ? overdueAt : dateMax(schedule.dueAt, now), { day: 1 })
+          : dateAdd(overdueAt < schedule.dueAt ? overdueAt : now, { day: schedule.restDays + 1 });
       nextDueAt.setHours(0, 0, 0, 0);
 
       // week starts on monday

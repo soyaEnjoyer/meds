@@ -1,0 +1,36 @@
+PRAGMA foreign_keys=OFF;--> statement-breakpoint
+CREATE TABLE `__new_schedule` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`categoryId` integer NOT NULL,
+	`itemId` integer NOT NULL,
+	`unitId` integer NOT NULL,
+	`amount` real,
+	`description` text,
+	`cycleOffDays` integer NOT NULL,
+	`cycleOnDays` integer NOT NULL,
+	`restDays` integer NOT NULL,
+	`repeatCount` integer NOT NULL,
+	`dayMask` integer NOT NULL,
+	`monthMask` integer NOT NULL,
+	`time` text NOT NULL,
+	`startAt` integer NOT NULL,
+	`endAt` integer,
+	`adHoc` integer NOT NULL,
+	`sort` integer NOT NULL,
+	`dueAt` integer,
+	`completedAt` integer,
+	`skippedAt` integer,
+	`lastAmount` real,
+	`createdAt` integer DEFAULT (unixepoch('subsec') * 1000) NOT NULL,
+	`updatedAt` integer NOT NULL,
+	`deletedAt` integer,
+	FOREIGN KEY (`categoryId`) REFERENCES `category`(`id`) ON UPDATE cascade ON DELETE cascade,
+	FOREIGN KEY (`itemId`) REFERENCES `item`(`id`) ON UPDATE cascade ON DELETE cascade,
+	FOREIGN KEY (`unitId`) REFERENCES `unit`(`id`) ON UPDATE cascade ON DELETE cascade
+);
+--> statement-breakpoint
+INSERT INTO `__new_schedule`("id", "categoryId", "itemId", "unitId", "amount", "description", "cycleOffDays", "cycleOnDays", "restDays", "repeatCount", "dayMask", "monthMask", "time", "startAt", "endAt", "adHoc", "sort", "dueAt", "completedAt", "skippedAt", "lastAmount", "createdAt", "updatedAt", "deletedAt") SELECT "id", "categoryId", "itemId", "unitId", "amount", "description", "cycleOffDays", "cycleOnDays", "restDays", "repeatCount", "dayMask", "monthMask", "time", "startAt", "endAt", "adHoc", "sort", "dueAt", "completedAt", "skippedAt", "lastAmount", "createdAt", "updatedAt", "deletedAt" FROM `schedule`;--> statement-breakpoint
+DROP TABLE `schedule`;--> statement-breakpoint
+ALTER TABLE `__new_schedule` RENAME TO `schedule`;--> statement-breakpoint
+PRAGMA foreign_keys=ON;--> statement-breakpoint
+CREATE UNIQUE INDEX `scheduleUnique` ON `schedule` (`categoryId`,`itemId`,`unitId`,`time`);

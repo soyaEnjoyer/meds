@@ -69,7 +69,7 @@ export const scheduleTable = sqliteTable(
       .notNull()
       .references(() => unitTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
 
-    amount: real().notNull(),
+    amount: real(),
     description: text(),
 
     cycleOffDays: integer().notNull(),

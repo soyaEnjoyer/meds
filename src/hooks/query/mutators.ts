@@ -18,6 +18,9 @@ import { useSchedulesMapQuery } from '@/hooks/query/queries/base';
 import { useToast } from '@/hooks/toast';
 import type { CategoryRow, ItemRow, ScheduleRow, UnitRow } from '@/lib/drizzle/zod';
 
+const STATUS_TIMEOUT_THROTTLE_MS = 3000;
+let statusTimeout: NodeJS.Timeout | null = null;
+
 //#region schedule
 async function updateScheduleQueryData(queryClient: QueryClient, ids: number[], updated: ScheduleRow[] | null) {
   await queryClient.setQueryData(['schedule'], (prev: ScheduleRow[]) =>
@@ -25,6 +28,10 @@ async function updateScheduleQueryData(queryClient: QueryClient, ids: number[], 
       (a, b) => (a.dueAt?.getTime() ?? Infinity) - (b.dueAt?.getTime() ?? Infinity)
     )
   );
+  statusTimeout ??= setTimeout(() => {
+    void queryClient.invalidateQueries({ exact: false, queryKey: ['status'] });
+    statusTimeout = null;
+  }, STATUS_TIMEOUT_THROTTLE_MS);
 }
 
 export function useScheduleCreateMutator() {
@@ -71,7 +78,7 @@ export function useScheduleDoneMutator() {
       await updateScheduleQueryData(
         queryClient,
         data.map(({ id }) => id),
-        null
+        previous.map((item) => ({ ...item, dueAt: null }))
       );
       return previous;
     },
@@ -111,7 +118,7 @@ export function useScheduleSkipMutator() {
       await updateScheduleQueryData(
         queryClient,
         data.ids.map((id) => id),
-        null
+        previous.map((item) => ({ ...item, dueAt: null }))
       );
       return previous;
     },
@@ -146,7 +153,11 @@ export function useScheduleRescheduleMutator() {
     onMutate: async ({ data: { ids } }) => {
       showToast('clock');
       const previous = ids.map((id) => schedulesMapQuery.data.get(id)).filter((item) => typeof item !== 'undefined');
-      await updateScheduleQueryData(queryClient, ids, null);
+      await updateScheduleQueryData(
+        queryClient,
+        ids,
+        previous.map((item) => ({ ...item, dueAt: null }))
+      );
       return previous;
     },
     onError: async (_error, { data: { ids } }, prev: ScheduleRow[] | undefined) => {

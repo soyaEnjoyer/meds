@@ -7,6 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 interface DialogState {
   id: number | null;
   open: boolean;
+  meta: Record<string, unknown>;
 }
 
 export type DialogName =
@@ -25,10 +26,11 @@ interface DialogStore extends Record<DialogName, DialogState> {
     close: (name: DialogName) => void;
     /** called by dialog onOpenChange */
     set: (name: DialogName, open: boolean) => void;
+    setMeta: (name: DialogName, meta: Record<string, unknown>) => void;
   };
 }
 
-const dialogDefault: DialogState = { id: null, open: false } as const;
+const dialogDefault: DialogState = { id: null, meta: {}, open: false } as const;
 
 const store = createStore<DialogStore>((set) => ({
   actions: {
@@ -40,6 +42,9 @@ const store = createStore<DialogStore>((set) => ({
     },
     set(name, open) {
       set((prev) => ({ [name]: { ...prev[name], open } }));
+    },
+    setMeta(name, meta) {
+      set((prev) => ({ [name]: { ...prev[name], meta } }));
     },
   },
   category: dialogDefault,

@@ -4,13 +4,14 @@ import { displayName } from '@root/package.json';
 import { createServerOnlyFn } from '@tanstack/react-start';
 import { and, eq, isNotNull, lte } from 'drizzle-orm';
 
-import { dateSet } from '@/lib/date';
+import { dateAdd, dateSet } from '@/lib/date';
 import { db } from '@/lib/drizzle/db.server';
 import { categoryTable, itemTable, scheduleTable } from '@/lib/drizzle/schema';
 
 // oxlint-disable node/no-process-env
 
 const HASH_LENGTH = 8;
+const NEXT_MAX_HOURS = 3;
 
 enum State {
   Due = 0,
@@ -54,7 +55,7 @@ export const getTextStatusServer = createServerOnlyFn(async () => {
       item,
       item.dueAt <= now
         ? { blob: '🔴', state: State.Due }
-        : nextAt && item.dueAt <= nextAt
+        : nextAt && nextAt <= dateAdd(now, { hour: NEXT_MAX_HOURS }) && item.dueAt <= nextAt
           ? { blob: '🟠', state: State.Next }
           : { blob: '🟡', state: State.Later }
     )

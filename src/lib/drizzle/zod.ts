@@ -79,6 +79,7 @@ export const scheduleUpdateSchema = scheduleSchema
     updatedAt: true,
   })
   .extend({
+    amount: scheduleSchema.shape.amount.transform((value) => value || null),
     cycleOffDays: scheduleSchema.shape.cycleOffDays.min(0).max(365),
     cycleOnDays: scheduleSchema.shape.cycleOnDays.min(1).max(365),
     description: scheduleSchema.shape.description.transform((value) => value || null),

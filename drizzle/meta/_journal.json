@@ -35,6 +35,13 @@
       "when": 1778770301858,
       "tag": "0004_pink_hydra",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1779704379453,
+      "tag": "0005_cool_thor",
+      "breakpoints": true
     }
   ],
   "version": "7"

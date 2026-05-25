@@ -6,6 +6,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { Linkify } from '@/components/linkify';
 import { ScheduleSummary } from '@/components/schedule-summary';
+import { ScrollTopButton } from '@/components/scroll-top-button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,12 +27,13 @@ const HUE_MAX = 280;
 const SNOOZE_HOURS = 6;
 
 function ScheduleAccordionItem({
+  amount,
   description,
   id,
   itemName,
   siblings,
   ...props
-}: Pick<ScheduleRowWithNames, 'description' | 'id' | 'itemName'> &
+}: Pick<ScheduleRowWithNames, 'amount' | 'description' | 'id' | 'itemName'> &
   ComponentProps<typeof ScheduleSummary> & { siblings: Pick<ScheduleRowWithNames, 'id'>[] }) {
   const scheduleDoneMutator = useScheduleDoneMutator();
   const scheduleSkipMutator = useScheduleSkipMutator();
@@ -89,8 +91,8 @@ function ScheduleAccordionItem({
       ) : (
         <h3 className='me-auto shrink-0 grow text-base wrap-anywhere'>{itemName}</h3>
       )}
-      <ScheduleSummary className='shrink grow-0' {...props} />
-      <Button onClick={handleDoneClick}>
+      <ScheduleSummary className='shrink grow-0' amount={amount} {...props} />
+      <Button onClick={amount ? handleDoneClick : handleCustomClick}>
         <Check aria-description='Done' />
       </Button>
       <Popover>
@@ -128,6 +130,7 @@ function ScheduleAccordionItem({
             }
           />
           <PopoverClose
+            disabled={!amount}
             render={
               <Button onClick={handleCustomClick} variant='secondary'>
                 <Pencil aria-description='Custom' />
@@ -173,7 +176,7 @@ function ScheduleAccordionGroup({
   const handleDoneClick = useCallback(
     async (event: MouseEvent<HTMLButtonElement>) => {
       event.stopPropagation();
-      scheduleDoneMutator.mutate({ data: items.map(({ id }) => ({ id })) });
+      scheduleDoneMutator.mutate({ data: items.filter(({ amount }) => amount).map(({ id }) => ({ id })) });
     },
     [items, scheduleDoneMutator]
   );
@@ -234,7 +237,12 @@ function ScheduleAccordionGroup({
           <Badge variant='glass' className='shadow-sm'>
             {items.length.toLocaleString()}
           </Badge>
-          <Button onClick={handleDoneClick} className='shadow-sm' variant='background'>
+          <Button
+            onClick={handleDoneClick}
+            className='shadow-sm'
+            variant='background'
+            disabled={!items.filter(({ amount }) => amount).length}
+          >
             <Check aria-description='Done' />
           </Button>
           <PopoverTrigger
@@ -279,6 +287,7 @@ function ScheduleAccordionGroup({
 function ScheduleAccordion({ query }: { query: DefinedUseQueryResult<ScheduleGroup[]> }) {
   const [value, setValue] = useState<string[]>([]);
   const valueRef = useRef<string[]>([]);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   const setValueShim = useCallback((nextValue: string[]) => {
     setValue(nextValue);
@@ -299,17 +308,29 @@ function ScheduleAccordion({ query }: { query: DefinedUseQueryResult<ScheduleGro
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [query.dataUpdatedAt, setValueShim]);
 
+  const handleScrollTopClick = useCallback(() => {
+    const openUntilIso = formatDatetimeIso(
+      dateAdd(dateSet(new Date(), { minute: 0, ms: 0, second: 0 }), { hour: ACCORDION_PRE_EXPAND_HOURS })
+    );
+    setValueShim(query.data.filter(({ dueAtIso }) => dueAtIso <= openUntilIso).map(({ key }) => key));
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.dataUpdatedAt, setValueShim]);
+
   return (
-    <Accordion
-      value={value}
-      onValueChange={setValueShim}
-      multiple
-      className='-mt-16 max-h-dvh snap-y snap-proximity items-center gap-2 overflow-y-scroll pt-16 pb-2 *:scroll-mt-16'
-    >
-      {query.data?.map((group) => (
-        <ScheduleAccordionGroup {...group} key={group.key} value={group.key} />
-      ))}
-    </Accordion>
+    <>
+      <Accordion
+        value={value}
+        onValueChange={setValueShim}
+        multiple
+        className='-mt-16 max-h-dvh snap-y snap-proximity items-center gap-2 overflow-y-scroll pt-16 pb-2 *:scroll-mt-16'
+        ref={ref}
+      >
+        {query.data?.map((group) => (
+          <ScheduleAccordionGroup {...group} key={group.key} value={group.key} />
+        ))}
+      </Accordion>
+      <ScrollTopButton elementRef={ref} onClick={handleScrollTopClick} />
+    </>
   );
 }
 
