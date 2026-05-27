@@ -79,7 +79,7 @@ export function EnumPicker({
   return (
     <div className='@container flex items-center' onBlur={onBlur}>
       <Button onClick={handleToggleClick} variant='outline' size='icon-sm'>
-        <Circle className={value === maxVal ? undefined : 'fill-current'} />
+        <Circle className={value === maxVal ? 'fill-current' : undefined} />
       </Button>
       <div className={cn('grid grid-flow-col size-full grid-cols-[repeat(auto-fit,minmax(1px,1fr))]', className)}>
         {items.map((item) => (

@@ -21,7 +21,7 @@ function formatRepeatRules({
 }: Pick<
   ScheduleRowWithNames,
   'cycleOffDays' | 'cycleOnDays' | 'dayMask' | 'dueAt' | 'monthMask' | 'restDays' | 'startAt'
->): string {
+>): string | null {
   if (dueAt === null || dayMask === 0 || monthMask === 0) return 'Never';
   const items: (string | { toString: () => string })[] = [];
   if (restDays) items.push(`${restDays + 1}d`);
@@ -65,7 +65,7 @@ function formatRepeatRules({
         .join(', ')
     );
 
-  return items.length ? items.join('/') : 'Daily';
+  return items.length ? items.join('/') : null;
 }
 
 function formatAmount({
@@ -144,7 +144,7 @@ export function ScheduleSummary({
           <DateText date={completedAt} as='dist' size='xs' />
         </ScheduleSummarySection>
       )}
-      <ScheduleSummarySection icon={RotateCw}>{formattedRepeat}</ScheduleSummarySection>
+      {formattedRepeat && <ScheduleSummarySection icon={RotateCw}>{formattedRepeat}</ScheduleSummarySection>}
       {formattedAmount && <ScheduleSummarySection icon={Pill}>{formattedAmount}</ScheduleSummarySection>}
     </div>
   );

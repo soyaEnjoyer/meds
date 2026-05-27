@@ -90,7 +90,7 @@ const scheduleAction = createServerOnlyFn(
     const logger = createLogger(import.meta.url, 'scheduleAction');
     /** @param amount undefined = scheduled amount, number = custom amount, null = skipped */
     function getNextDueAt(schedule: ScheduleRow, amount: number | null | undefined): Date | null {
-      if (!schedule.dueAt) return null;
+      if (!schedule.dueAt || !schedule.dayMask || !schedule.monthMask) return null;
 
       const now = new Date();
       const overdueAt = dateAdd(now, { hour: -MAX_OVERDUE_HOURS });

@@ -16,6 +16,7 @@ export type Scheme = 'dark' | 'light' | 'auto';
 
 export interface ThemeState {
   font: Font;
+  radius: number;
   scale: number;
   scheme: Scheme;
 }
@@ -24,12 +25,13 @@ interface ThemeStore extends ThemeState {
   actions: {
     reset: () => void;
     setFont: (font: ThemeState['font']) => void;
+    setRadius: (radius: ThemeState['radius']) => void;
     setScale: (scale: ThemeState['scale']) => void;
     setScheme: (scheme: ThemeState['scheme']) => void;
   };
 }
 
-export const themeDefault: ThemeState = { font: 'sans', scale: 1, scheme: 'auto' } as const;
+export const themeDefault: ThemeState = { font: 'sans', radius: 0.625, scale: 1, scheme: 'auto' } as const;
 export const themeCookieName = `${name}.theme`;
 
 const store = createStore(
@@ -41,6 +43,9 @@ const store = createStore(
         },
         setFont(font) {
           set(() => ({ font }));
+        },
+        setRadius(radius) {
+          set(() => ({ radius }));
         },
         setScale(scale) {
           set(() => ({ scale }));
@@ -93,10 +98,7 @@ export function useTheme<U>(selector: (state: ExtractState<Store>) => U): U {
 
 const getServerThemeCookieFn = createIsomorphicFn().server(() => {
   const value = getCookie(themeCookieName);
-  const state: ThemeState = {
-    ...themeDefault,
-    ...(value ? JSON.parse(value).state : undefined),
-  };
+  const state: ThemeState | undefined = value ? JSON.parse(value).state : undefined;
   return state;
 });
 
@@ -104,21 +106,23 @@ export function useThemeResult() {
   const serverTheme = getServerThemeCookieFn();
   const reactiveTheme = useTheme((state) => ({
     font: state.font,
+    radius: state.radius,
     scale: state.scale,
     scheme: state.scheme,
   }));
   const { className, style } = useMemo(() => {
     // reactiveTheme is invalid on the server, serverTheme is undefined on client
-    const { font, scale, scheme } = { ...reactiveTheme, ...serverTheme };
+    const { font, radius, scale, scheme } = { ...themeDefault, ...reactiveTheme, ...serverTheme };
     return {
       className: cn(
         font === 'sans' ? 'font-sans' : font === 'serif' ? 'font-serif' : 'font-mono',
         scheme === 'dark' ? 'scheme-dark' : scheme === 'light' ? 'scheme-light' : 'scheme-light-dark'
       ),
       style: {
+        '--radius': `${radius}rem`,
         fontSize: `${Math.round(16 * scale)}px`,
       },
-    } satisfies { className: string; style: CSSProperties };
+    } satisfies { className: string; style: CSSProperties & Record<`--${string}`, string> };
   }, [reactiveTheme, serverTheme]);
 
   // using suppressHydrationWarning because the server is actually adding className and style attribs twice - looks like a bug in tanstack router

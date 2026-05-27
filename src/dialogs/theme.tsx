@@ -39,11 +39,17 @@ export function ThemeDialog() {
   const setDialog = useDialog((state) => state.actions.set);
   const dialogState = useDialog((state) => state.theme);
   const scale = useTheme((state) => state.scale);
-  const { reset, setScale } = useTheme((state) => state.actions);
+  const radius = useTheme((state) => state.radius);
+  const { reset, setScale, setRadius } = useTheme((state) => state.actions);
 
   const handleScaleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => setScale(event.target.valueAsNumber),
     [setScale]
+  );
+
+  const handleRadiusChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => setRadius(event.target.valueAsNumber),
+    [setRadius]
   );
 
   const handleOpenChange = useCallback((open: boolean) => setDialog('theme', open), [setDialog]);
@@ -82,6 +88,13 @@ export function ThemeDialog() {
                 required
               />
               <span>{scale}x</span>
+            </div>
+          </label>
+          <label className='contents'>
+            Radius
+            <div className='flex items-center gap-4'>
+              <Input type='range' value={radius} min={0} max={1} step={0.125} onChange={handleRadiusChange} required />
+              <span>{radius} rem</span>
             </div>
           </label>
         </DialogBody>

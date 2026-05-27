@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLoaderData } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
+import { useRef } from 'react';
 
 import { categoryGet } from '@/functions.server/category';
 import { itemGet } from '@/functions.server/item';
@@ -14,6 +15,8 @@ import { HOUR_MS } from '@/lib/date';
 // base queries have a defined staleTime so that they'll periodically refetch
 // all other queries are derived so use the default value of Infinity defined in `route.ts`
 const staleTime = HOUR_MS;
+// status has its own timeout so that it will refetch when the tab is idle
+const STATUS_REFRESH_MS = HOUR_MS;
 
 //#region base
 export function useCategoriesQuery() {
@@ -79,17 +82,30 @@ export function useUnitsQuery() {
 export function useStatusQuery() {
   const schedulesQuery = useSchedulesQuery();
   const queryFn = useServerFn(getTextStatus);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const initialData = useLoaderData({
     from: '/(ui)',
     select: (match) => match.status,
   });
 
-  return useQuery({
+  const query = useQuery({
     initialData,
     queryFn,
     queryKey: ['status', { at: schedulesQuery.dataUpdatedAt }],
     staleTime,
   });
+
+  if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  timeoutRef.current = setTimeout(
+    () => {
+      timeoutRef.current = null;
+      void query.refetch();
+    },
+    STATUS_REFRESH_MS - (Date.now() % STATUS_REFRESH_MS)
+  );
+
+  return query;
 }
 //#endregion
 

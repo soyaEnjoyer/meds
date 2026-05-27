@@ -1,6 +1,6 @@
 import type { DefinedUseQueryResult } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { Check, ChevronDownIcon, Clock, EllipsisVertical, Info, Logs, Pencil, Settings, X } from 'lucide-react';
+import { Check, ChevronDownIcon, Clock, EllipsisVertical, Info, Logs, Pencil, Settings, Star, X } from 'lucide-react';
 import type { ComponentProps, CSSProperties, MouseEvent } from 'react';
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
@@ -25,6 +25,28 @@ export const Route = createFileRoute('/(ui)/')({
 const HUE_MIN = 150;
 const HUE_MAX = 280;
 const SNOOZE_HOURS = 6;
+
+function ScheduleAccordionItemName({
+  itemName,
+  withInfo,
+  withStar,
+}: {
+  itemName: string | undefined;
+  withInfo?: boolean;
+  withStar?: boolean;
+}) {
+  return (
+    <h3 className='group me-auto flex shrink-0 grow items-center gap-1 text-base wrap-anywhere'>
+      {withInfo && (
+        <Info className='ite size-4 text-muted-foreground transition-colors group-hover:text-primary group-active:text-primary' />
+      )}
+      {withStar && (
+        <Star className='size-4 text-muted-foreground transition-colors group-hover:text-primary group-active:text-primary' />
+      )}
+      {itemName}
+    </h3>
+  );
+}
 
 function ScheduleAccordionItem({
   amount,
@@ -71,17 +93,14 @@ function ScheduleAccordionItem({
     });
   }, [props.dueAt, id, scheduleRescheduleMutator]);
 
+  const withStar = props.dayMask < 127 || props.monthMask < 4095 || props.restDays > 0 || props.cycleOffDays > 0;
+
   return (
     <div className='flex items-center gap-4 ps-2 md:ps-4 md:pe-2'>
       {description ? (
         <Popover>
           <PopoverTrigger
-            render={
-              <h3 className='group me-auto flex shrink-0 grow items-center gap-1 text-base wrap-anywhere'>
-                <Info className='size-4 text-muted-foreground transition-colors group-hover:text-foreground' />
-                {itemName}
-              </h3>
-            }
+            render={<ScheduleAccordionItemName itemName={itemName} withInfo withStar={withStar} />}
             nativeButton={false}
           />
           <PopoverContent className='max-w-fit whitespace-pre-wrap' align='start'>
@@ -89,7 +108,7 @@ function ScheduleAccordionItem({
           </PopoverContent>
         </Popover>
       ) : (
-        <h3 className='me-auto shrink-0 grow text-base wrap-anywhere'>{itemName}</h3>
+        <ScheduleAccordionItemName itemName={itemName} withStar={withStar} />
       )}
       <ScheduleSummary className='shrink grow-0' amount={amount} {...props} />
       <Button onClick={amount ? handleDoneClick : handleCustomClick}>
