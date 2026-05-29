@@ -38,9 +38,13 @@ function FontButton({ font, className }: { font: Font; className?: string }) {
 export function ThemeDialog() {
   const setDialog = useDialog((state) => state.actions.set);
   const dialogState = useDialog((state) => state.theme);
-  const scale = useTheme((state) => state.scale);
-  const radius = useTheme((state) => state.radius);
-  const { reset, setScale, setRadius } = useTheme((state) => state.actions);
+  const [hueCenter, hueWidth, radius, scale] = useTheme((state) => [
+    state.hueCenter,
+    state.hueWidth,
+    state.radius,
+    state.scale,
+  ]);
+  const { reset, setHueCenter, setHueWidth, setScale, setRadius } = useTheme((state) => state.actions);
 
   const handleScaleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => setScale(event.target.valueAsNumber),
@@ -50,6 +54,16 @@ export function ThemeDialog() {
   const handleRadiusChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => setRadius(event.target.valueAsNumber),
     [setRadius]
+  );
+
+  const handleHueCenterChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => setHueCenter(event.target.valueAsNumber),
+    [setHueCenter]
+  );
+
+  const handleHueWidthChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => setHueWidth(event.target.valueAsNumber),
+    [setHueWidth]
   );
 
   const handleOpenChange = useCallback((open: boolean) => setDialog('theme', open), [setDialog]);
@@ -95,6 +109,36 @@ export function ThemeDialog() {
             <div className='flex items-center gap-4'>
               <Input type='range' value={radius} min={0} max={1} step={0.125} onChange={handleRadiusChange} required />
               <span>{radius} rem</span>
+            </div>
+          </label>
+          <label className='contents'>
+            Hue center
+            <div className='flex items-center gap-4'>
+              <Input
+                type='range'
+                value={hueCenter}
+                min={0}
+                max={360}
+                step={5}
+                onChange={handleHueCenterChange}
+                required
+              />
+              <span>{hueCenter}</span>
+            </div>
+          </label>
+          <label className='contents'>
+            Hue width
+            <div className='flex items-center gap-4'>
+              <Input
+                type='range'
+                value={hueWidth}
+                min={0}
+                max={360}
+                step={5}
+                onChange={handleHueWidthChange}
+                required
+              />
+              <span>{hueWidth}</span>
             </div>
           </label>
         </DialogBody>

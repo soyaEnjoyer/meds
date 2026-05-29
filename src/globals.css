@@ -86,7 +86,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground slashed-zero tabular-nums;
+    @apply bg-background text-foreground slashed-zero tabular-nums accent-theme;
   }
   html {
     @apply font-mono scheme-light-dark [interpolate-size:allow-keywords];

@@ -16,6 +16,8 @@ export type Scheme = 'dark' | 'light' | 'auto';
 
 export interface ThemeState {
   font: Font;
+  hueCenter: number;
+  hueWidth: number;
   radius: number;
   scale: number;
   scheme: Scheme;
@@ -25,13 +27,22 @@ interface ThemeStore extends ThemeState {
   actions: {
     reset: () => void;
     setFont: (font: ThemeState['font']) => void;
+    setHueCenter: (hueCenter: ThemeState['hueCenter']) => void;
+    setHueWidth: (hueWidth: ThemeState['hueWidth']) => void;
     setRadius: (radius: ThemeState['radius']) => void;
     setScale: (scale: ThemeState['scale']) => void;
     setScheme: (scheme: ThemeState['scheme']) => void;
   };
 }
 
-export const themeDefault: ThemeState = { font: 'sans', radius: 0.625, scale: 1, scheme: 'auto' } as const;
+export const themeDefault: ThemeState = {
+  font: 'sans',
+  hueCenter: 215,
+  hueWidth: 130,
+  radius: 0.625,
+  scale: 1,
+  scheme: 'auto',
+} as const;
 export const themeCookieName = `${name}.theme`;
 
 const store = createStore(
@@ -43,6 +54,12 @@ const store = createStore(
         },
         setFont(font) {
           set(() => ({ font }));
+        },
+        setHueCenter(hueCenter) {
+          set(() => ({ hueCenter }));
+        },
+        setHueWidth(hueWidth) {
+          set(() => ({ hueWidth }));
         },
         setRadius(radius) {
           set(() => ({ radius }));

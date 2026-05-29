@@ -16,14 +16,13 @@ import { useScheduleDoneMutator, useScheduleRescheduleMutator, useScheduleSkipMu
 import { useCategoriesQuery } from '@/hooks/query/queries/base';
 import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { ACCORDION_PRE_EXPAND_HOURS, useFilteredScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
+import { useTheme } from '@/hooks/theme';
 import { dateAdd, dateMax, dateSet, formatDatetimeIso } from '@/lib/date';
 
 export const Route = createFileRoute('/(ui)/')({
   component: SchedulePage,
 });
 
-const HUE_MIN = 150;
-const HUE_MAX = 280;
 const SNOOZE_HOURS = 6;
 
 function ScheduleAccordionItemName({
@@ -191,6 +190,7 @@ function ScheduleAccordionGroup({
   const scheduleSkipMutator = useScheduleSkipMutator();
   const scheduleRescheduleMutator = useScheduleRescheduleMutator();
   const categoriesQuery = useCategoriesQuery();
+  const [hueCenter, hueWidth] = useTheme((state) => [state.hueCenter, state.hueWidth]);
 
   const handleDoneClick = useCallback(
     async (event: MouseEvent<HTMLButtonElement>) => {
@@ -225,14 +225,14 @@ function ScheduleAccordionGroup({
     const hue =
       categoriesQuery.data.map(({ id }) => id).reduce((acc, id, i) => acc + (id === categoryId ? i : 0), 0) *
         (1 / categoriesQuery.data.length) *
-        (HUE_MAX - HUE_MIN) +
-      HUE_MIN;
+        hueWidth +
+      (hueCenter - hueWidth / 2);
 
     return {
       backgroundColor: `light-dark(hsl(${hue} 65% 70%), hsl(${hue} 65% 40%))`,
     };
     // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoryName, categoriesQuery.dataUpdatedAt]);
+  }, [categoryName, categoriesQuery.dataUpdatedAt, hueCenter, hueWidth]);
 
   return (
     <Popover>
