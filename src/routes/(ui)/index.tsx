@@ -18,6 +18,7 @@ import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/
 import { ACCORDION_PRE_EXPAND_HOURS, useFilteredScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
 import { useTheme } from '@/hooks/theme';
 import { dateAdd, dateMax, dateSet, formatDatetimeIso } from '@/lib/date';
+import { cn } from '@/lib/utils';
 
 export const Route = createFileRoute('/(ui)/')({
   component: SchedulePage,
@@ -26,16 +27,21 @@ export const Route = createFileRoute('/(ui)/')({
 const SNOOZE_HOURS = 6;
 
 function ScheduleAccordionItemName({
+  className,
   itemName,
   withInfo,
   withStar,
+  ...props
 }: {
   itemName: string | undefined;
   withInfo?: boolean;
   withStar?: boolean;
-}) {
+} & ComponentProps<'h3'>) {
   return (
-    <h3 className='group me-auto flex shrink-0 grow items-center gap-1 text-base wrap-anywhere'>
+    <h3
+      className={cn('group me-auto flex shrink-0 grow items-center gap-1 text-base wrap-anywhere', className)}
+      {...props}
+    >
       {withInfo && (
         <Info className='ite size-4 text-muted-foreground transition-colors group-hover:text-primary group-active:text-primary' />
       )}
