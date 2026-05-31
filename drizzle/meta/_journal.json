@@ -1,0 +1,48 @@
+{
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "breakpoints": true,
+      "idx": 0,
+      "tag": "0000_old_schema",
+      "version": "6",
+      "when": 1777036724102
+    },
+    {
+      "breakpoints": true,
+      "idx": 1,
+      "tag": "0001_rapid_talisman",
+      "version": "6",
+      "when": 1777043468996
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1778072790277,
+      "tag": "0002_glamorous_sentinels",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1778409806458,
+      "tag": "0003_greedy_norman_osborn",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1778770301858,
+      "tag": "0004_pink_hydra",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1779704379453,
+      "tag": "0005_cool_thor",
+      "breakpoints": true
+    }
+  ],
+  "version": "7"
+}

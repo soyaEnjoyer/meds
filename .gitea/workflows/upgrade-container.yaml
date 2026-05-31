@@ -1,6 +1,9 @@
 name: Upgrade container
 run-name: Upgrade container
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   Upgrade-container:

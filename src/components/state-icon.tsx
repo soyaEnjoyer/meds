@@ -1,0 +1,23 @@
+import { Bell, BellMinus, BellOff, BellPlus, Check, Circle } from 'lucide-react';
+import type { ComponentProps, ForwardRefExoticComponent, RefAttributes } from 'react';
+
+import { ItemState, itemStateNames } from '@/hooks/filter';
+import { cn } from '@/lib/utils';
+
+const variants = {
+  [ItemState.Scheduled]: { Icon: Bell, baseClass: 'text-success' },
+  [ItemState.Due]: { Icon: Bell, baseClass: 'text-success fill-success' },
+  [ItemState.NotDue]: { Icon: BellMinus, baseClass: 'text-warning' },
+  [ItemState.Skipped]: { Icon: BellPlus, baseClass: 'text-danger' },
+  [ItemState.Unscheduled]: { Icon: BellOff, baseClass: 'text-muted-foreground' },
+  [ItemState.AdHoc]: { Icon: Check, baseClass: 'text-success' },
+  [ItemState.All]: { Icon: Circle, baseClass: 'text-foreground' },
+} as const satisfies Record<
+  ItemState,
+  { Icon: ForwardRefExoticComponent<RefAttributes<SVGSVGElement>>; baseClass: string }
+>;
+
+export function StateIcon({ state, className, ...props }: { state: ItemState } & ComponentProps<typeof Bell>) {
+  const { Icon, baseClass } = variants[state];
+  return <Icon className={cn(baseClass, className)} {...props} aria-description={itemStateNames[state]} />;
+}

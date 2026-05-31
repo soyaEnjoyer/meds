@@ -1,0 +1,38 @@
+import { createFormHook, createFormHookContexts } from '@tanstack/react-form';
+
+import { DatePicker } from '@/components/inputs/date-picker';
+import { DayPicker, MonthPicker } from '@/components/inputs/enum-picker';
+import { NumberPicker } from '@/components/inputs/number-picker';
+import { CategoryCombobox, ItemCombobox, UnitCombobox } from '@/components/inputs/query-combobox';
+import { TimePicker } from '@/components/inputs/time-picker';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+
+// https://tanstack.com/form/latest/docs/framework/react/guides/form-composition
+
+export const { fieldContext, formContext, useFieldContext } = createFormHookContexts();
+
+export const { useAppForm } = createFormHook({
+  fieldComponents: {
+    CategoryCombobox,
+    DatePicker,
+    DayPicker,
+    Input,
+    ItemCombobox,
+    MonthPicker,
+    NumberPicker,
+    Select,
+    Switch,
+    Textarea,
+    TimePicker,
+    UnitCombobox,
+  },
+  fieldContext,
+  formComponents: {
+    Button,
+  },
+  formContext,
+});

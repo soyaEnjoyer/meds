@@ -1,25 +1,22 @@
-FROM node:slim AS build
+FROM node:trixie-slim AS base
 WORKDIR /app
-COPY frontend/*.json frontend/*.config ./
-RUN npm install
-COPY frontend/src ./src
-COPY frontend/public ./public
-RUN npm run build
+ENV HOME=/home
+RUN npm install --global pnpm
 
-FROM node:slim
-# better-sqlite3 doesn't have binaries for node23
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y openssl tini python3 make g++
-WORKDIR /app
-COPY backend/*.json backend/*.ts ./
-RUN npm install
-COPY backend/src ./src
-COPY backend/drizzle ./drizzle
-RUN npm run build
+FROM base AS build
+COPY package.json pnpm-*.yaml ./
+RUN pnpm install --frozen-lockfile
+COPY . .
+RUN mkdir .local && pnpm build
 
-ENV TZ=Europe/London HTTP_PORT=3000 FRONTEND_DIR=/app/public DB_DIR=/config LOG_LEVEL=HTTP
-ENTRYPOINT ["/usr/bin/tini", "-e", "143", "--"]
-RUN mkdir -p "$DB_DIR" && chmod 777 "$DB_DIR"
-COPY --from=build /app/build "$FRONTEND_DIR"
+FROM base AS final
+COPY --from=build --chown=1000:1000 /app/.output ./
+COPY drizzle drizzle/
+COPY drizzle.config.ts ./
+
+ENV TZ=Europe/London PORT=3000 HOSTNAME='0.0.0.0' DB_DIR=/config
+RUN rm -rf "$HOME" && mkdir -p "$HOME" "$DB_DIR" && chmod -R ugo+rwX "$HOME" "$DB_DIR" .
 VOLUME ["$DB_DIR"]
-EXPOSE $HTTP_PORT/tcp
-CMD ["node", "dist/src/index.js"]
+EXPOSE $PORT/tcp
+ENV DB_FILE_NAME="file:${DB_DIR}/data.db"
+ENTRYPOINT ["node", "server/index.mjs"]

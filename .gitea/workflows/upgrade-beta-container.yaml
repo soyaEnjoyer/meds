@@ -1,0 +1,13 @@
+name: Upgrade beta container
+run-name: Upgrade beta container
+on:
+  push:
+    branches:
+      - rewrite
+
+jobs:
+  Upgrade-beta-container:
+    runs-on: media
+    steps:
+      - run: docker-git meds-beta --git_repo_name meds --git_branch rewrite --strict
+      - run: systemctl restart meds-beta

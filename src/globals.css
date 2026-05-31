@@ -1,0 +1,137 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource/jetbrains-mono';
+@import '@fontsource/literata';
+@import '@fontsource/figtree';
+
+:root {
+  interpolate-size: allow-keywords;
+  --radius: 0.625rem;
+
+  /* defined here so i can access them directly from css */
+  --background: light-dark(oklch(1 0 0), oklch(0.145 0 0));
+  --danger: light-dark(var(--color-rose-600), var(--color-rose-400));
+}
+
+@theme inline {
+  --font-heading: 'JetBrains Mono', monospace;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-theme: light-dark(var(--color-purple-600), var(--color-purple-400));
+  --color-success: light-dark(var(--color-emerald-600), var(--color-emerald-400));
+  --color-warning: light-dark(var(--color-amber-600), var(--color-amber-400));
+  --color-danger: var(--danger);
+
+  --color-sidebar-ring: light-dark(oklch(0.708 0 0), oklch(0.556 0 0));
+  --color-sidebar-border: light-dark(oklch(0.922 0 0), oklch(1 0 0 / 10%));
+  --color-sidebar-accent-foreground: light-dark(oklch(0.205 0 0), oklch(0.985 0 0));
+  --color-sidebar-accent: light-dark(oklch(0.97 0 0), oklch(0.269 0 0));
+  --color-sidebar-primary-foreground: light-dark(oklch(0.985 0 0), oklch(0.985 0 0));
+  --color-sidebar-primary: light-dark(oklch(0.205 0 0), oklch(0.488 0.243 264.376));
+  --color-sidebar-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+  --color-sidebar: light-dark(oklch(0.985 0 0), oklch(0.205 0 0));
+  --color-chart-1: light-dark(oklch(0.87 0 0), oklch(0.87 0 0));
+  --color-chart-2: light-dark(oklch(0.556 0 0), oklch(0.556 0 0));
+  --color-chart-3: light-dark(oklch(0.439 0 0), oklch(0.439 0 0));
+  --color-chart-4: light-dark(oklch(0.371 0 0), oklch(0.371 0 0));
+  --color-chart-5: light-dark(oklch(0.269 0 0), oklch(0.269 0 0));
+  --color-ring: light-dark(oklch(0.708 0 0), oklch(0.556 0 0));
+  --color-input: light-dark(oklch(0.922 0 0), oklch(1 0 0 / 15%));
+  --color-border: light-dark(oklch(0.922 0 0), oklch(1 0 0 / 10%));
+  --color-destructive: var(--color-danger);
+  --color-accent-foreground: light-dark(oklch(0.205 0 0), oklch(0.985 0 0));
+  --color-accent: light-dark(oklch(0.97 0 0), oklch(0.269 0 0));
+
+  --color-muted-foreground: light-dark(oklch(0.556 0 0), oklch(0.708 0 0));
+  --color-muted: light-dark(oklch(0.97 0 0), oklch(0.269 0 0));
+  --color-secondary-foreground: light-dark(oklch(0.205 0 0), oklch(0.985 0 0));
+  --color-secondary: light-dark(oklch(0.97 0 0), oklch(0.269 0 0));
+  --color-primary-foreground: light-dark(oklch(0.985 0 0), oklch(0.205 0 0));
+  --color-primary: light-dark(oklch(0.205 0 0), oklch(0.922 0 0));
+  --color-popover-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+  --color-popover: light-dark(oklch(1 0 0), oklch(0.205 0 0));
+  --color-card-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+  --color-card: light-dark(oklch(1 0 0), oklch(0.205 0 0));
+  --color-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+  --color-background: var(--background);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@utility transition-in-up {
+  @apply origin-top translate-y-0 scale-100 opacity-100 transition-[translate,opacity,display] transition-discrete starting:translate-y-1/2 starting:opacity-0;
+}
+
+@utility transition-in-down {
+  @apply origin-top translate-y-0 scale-100 opacity-100 transition-[translate,opacity,display] transition-discrete starting:-translate-y-1/2 starting:opacity-0;
+}
+
+@utility transition-in-left {
+  @apply origin-left translate-x-0 scale-100 opacity-100 transition-[translate,opacity,display] transition-discrete starting:translate-x-1/2 starting:opacity-0;
+}
+
+@utility transition-in-right {
+  @apply origin-left translate-x-0 scale-100 opacity-100 transition-[translate,opacity,display] transition-discrete starting:-translate-x-1/2 starting:opacity-0;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground slashed-zero tabular-nums accent-theme;
+  }
+  html {
+    @apply font-mono scheme-light-dark [interpolate-size:allow-keywords];
+  }
+
+  /* https://developer.chrome.com/docs/web-platform/view-transitions/same-document */
+  @keyframes view-transtion-in {
+    from {
+      opacity: 0;
+      transform: translateY(10%);
+      scale: 95%;
+    }
+  }
+  @keyframes view-transition-out {
+    to {
+      opacity: 0;
+      transform: translateY(10%);
+      scale: 95%;
+    }
+  }
+  ::view-transition-old(slide) {
+    animation: 150ms ease-in both view-transition-out;
+  }
+  ::view-transition-new(slide) {
+    animation: 150ms ease-out both view-transtion-in;
+  }
+  :root {
+    view-transition-name: none;
+  }
+  main {
+    view-transition-name: slide;
+  }
+  @keyframes toast {
+    0% {
+      opacity: 100%;
+      scale: 10%;
+      translate: 0 100%;
+    }
+    50% {
+      opacity: 100%;
+    }
+    100% {
+      opacity: 0;
+      scale: 100%;
+      translate: 0 -75dvh;
+    }
+  }
+}

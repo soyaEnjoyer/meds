@@ -1,0 +1,12 @@
+# https://pnpm.io/settings
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  fallow: true
+  inotify: false
+  msw: true
+  sharp: true
+  unrs-resolver: true
+minimumReleaseAge: 2880
+resolutionMode: time-based
+blockExoticSubdeps: true

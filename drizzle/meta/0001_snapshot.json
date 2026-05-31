@@ -1,0 +1,573 @@
+{
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  },
+  "dialect": "sqlite",
+  "enums": {},
+  "id": "b5d69840-de6e-4ae7-ae7d-61e51df38e9b",
+  "internal": {
+    "indexes": {}
+  },
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "category": {
+      "checkConstraints": {},
+      "columns": {
+        "createdAt": {
+          "autoincrement": false,
+          "default": "(unixepoch('subsec') * 1000)",
+          "name": "createdAt",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "deletedAt": {
+          "autoincrement": false,
+          "name": "deletedAt",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "integer"
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "updatedAt": {
+          "autoincrement": false,
+          "name": "updatedAt",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {},
+      "indexes": {
+        "category_name_unique": {
+          "columns": ["name"],
+          "isUnique": true,
+          "name": "category_name_unique"
+        }
+      },
+      "name": "category",
+      "uniqueConstraints": {}
+    },
+    "history": {
+      "checkConstraints": {},
+      "columns": {
+        "amount": {
+          "autoincrement": false,
+          "name": "amount",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "real"
+        },
+        "categoryId": {
+          "autoincrement": false,
+          "name": "categoryId",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "createdAt": {
+          "autoincrement": false,
+          "default": "(unixepoch('subsec') * 1000)",
+          "name": "createdAt",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "deletedAt": {
+          "autoincrement": false,
+          "name": "deletedAt",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "integer"
+        },
+        "itemId": {
+          "autoincrement": false,
+          "name": "itemId",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "scheduledAmount": {
+          "autoincrement": false,
+          "name": "scheduledAmount",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "real"
+        },
+        "scheduledAt": {
+          "autoincrement": false,
+          "name": "scheduledAt",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "scheduleId": {
+          "autoincrement": false,
+          "name": "scheduleId",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "unitId": {
+          "autoincrement": false,
+          "name": "unitId",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "updatedAt": {
+          "autoincrement": false,
+          "name": "updatedAt",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {
+        "history_categoryId_category_id_fk": {
+          "columnsFrom": ["categoryId"],
+          "columnsTo": ["id"],
+          "name": "history_categoryId_category_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "cascade",
+          "tableFrom": "history",
+          "tableTo": "category"
+        },
+        "history_itemId_item_id_fk": {
+          "columnsFrom": ["itemId"],
+          "columnsTo": ["id"],
+          "name": "history_itemId_item_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "cascade",
+          "tableFrom": "history",
+          "tableTo": "item"
+        },
+        "history_scheduleId_schedule_id_fk": {
+          "columnsFrom": ["scheduleId"],
+          "columnsTo": ["id"],
+          "name": "history_scheduleId_schedule_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "cascade",
+          "tableFrom": "history",
+          "tableTo": "schedule"
+        },
+        "history_unitId_unit_id_fk": {
+          "columnsFrom": ["unitId"],
+          "columnsTo": ["id"],
+          "name": "history_unitId_unit_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "cascade",
+          "tableFrom": "history",
+          "tableTo": "unit"
+        }
+      },
+      "indexes": {},
+      "name": "history",
+      "uniqueConstraints": {}
+    },
+    "item": {
+      "checkConstraints": {},
+      "columns": {
+        "createdAt": {
+          "autoincrement": false,
+          "default": "(unixepoch('subsec') * 1000)",
+          "name": "createdAt",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "defaultAmount": {
+          "autoincrement": false,
+          "default": 1,
+          "name": "defaultAmount",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "real"
+        },
+        "defaultCategoryId": {
+          "autoincrement": false,
+          "name": "defaultCategoryId",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "defaultUnitId": {
+          "autoincrement": false,
+          "name": "defaultUnitId",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "deletedAt": {
+          "autoincrement": false,
+          "name": "deletedAt",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "integer"
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "updatedAt": {
+          "autoincrement": false,
+          "name": "updatedAt",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {
+        "item_defaultCategoryId_category_id_fk": {
+          "columnsFrom": ["defaultCategoryId"],
+          "columnsTo": ["id"],
+          "name": "item_defaultCategoryId_category_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "cascade",
+          "tableFrom": "item",
+          "tableTo": "category"
+        },
+        "item_defaultUnitId_unit_id_fk": {
+          "columnsFrom": ["defaultUnitId"],
+          "columnsTo": ["id"],
+          "name": "item_defaultUnitId_unit_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "cascade",
+          "tableFrom": "item",
+          "tableTo": "unit"
+        }
+      },
+      "indexes": {
+        "item_name_unique": {
+          "columns": ["name"],
+          "isUnique": true,
+          "name": "item_name_unique"
+        }
+      },
+      "name": "item",
+      "uniqueConstraints": {}
+    },
+    "schedule": {
+      "checkConstraints": {},
+      "columns": {
+        "adHoc": {
+          "autoincrement": false,
+          "default": false,
+          "name": "adHoc",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "amount": {
+          "autoincrement": false,
+          "name": "amount",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "real"
+        },
+        "categoryId": {
+          "autoincrement": false,
+          "name": "categoryId",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "completedAt": {
+          "autoincrement": false,
+          "name": "completedAt",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "createdAt": {
+          "autoincrement": false,
+          "default": "(unixepoch('subsec') * 1000)",
+          "name": "createdAt",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "cycleOffDays": {
+          "autoincrement": false,
+          "default": 0,
+          "name": "cycleOffDays",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "cycleOnDays": {
+          "autoincrement": false,
+          "default": 0,
+          "name": "cycleOnDays",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "dayMask": {
+          "autoincrement": false,
+          "default": 127,
+          "name": "dayMask",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "deletedAt": {
+          "autoincrement": false,
+          "name": "deletedAt",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "dueAt": {
+          "autoincrement": false,
+          "name": "dueAt",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "enabled": {
+          "autoincrement": false,
+          "default": true,
+          "name": "enabled",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "endAt": {
+          "autoincrement": false,
+          "name": "endAt",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "hour": {
+          "autoincrement": false,
+          "default": 7,
+          "name": "hour",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "integer"
+        },
+        "itemId": {
+          "autoincrement": false,
+          "name": "itemId",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "lastAmount": {
+          "autoincrement": false,
+          "name": "lastAmount",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "real"
+        },
+        "minute": {
+          "autoincrement": false,
+          "default": 0,
+          "name": "minute",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "monthMask": {
+          "autoincrement": false,
+          "default": 4095,
+          "name": "monthMask",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "repeatCount": {
+          "autoincrement": false,
+          "default": 1,
+          "name": "repeatCount",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "restDays": {
+          "autoincrement": false,
+          "default": 0,
+          "name": "restDays",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "skippedAt": {
+          "autoincrement": false,
+          "name": "skippedAt",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "sort": {
+          "autoincrement": false,
+          "default": 0,
+          "name": "sort",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "startAt": {
+          "autoincrement": false,
+          "default": "(unixepoch('now','start of day'))",
+          "name": "startAt",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "unitId": {
+          "autoincrement": false,
+          "name": "unitId",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "updatedAt": {
+          "autoincrement": false,
+          "default": "(unixepoch('subsec') * 1000)",
+          "name": "updatedAt",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {
+        "schedule_categoryId_category_id_fk": {
+          "columnsFrom": ["categoryId"],
+          "columnsTo": ["id"],
+          "name": "schedule_categoryId_category_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "cascade",
+          "tableFrom": "schedule",
+          "tableTo": "category"
+        },
+        "schedule_itemId_item_id_fk": {
+          "columnsFrom": ["itemId"],
+          "columnsTo": ["id"],
+          "name": "schedule_itemId_item_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "cascade",
+          "tableFrom": "schedule",
+          "tableTo": "item"
+        },
+        "schedule_unitId_unit_id_fk": {
+          "columnsFrom": ["unitId"],
+          "columnsTo": ["id"],
+          "name": "schedule_unitId_unit_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "cascade",
+          "tableFrom": "schedule",
+          "tableTo": "unit"
+        }
+      },
+      "indexes": {
+        "scheduleUnique": {
+          "columns": ["categoryId", "itemId", "unitId", "hour", "minute"],
+          "isUnique": true,
+          "name": "scheduleUnique"
+        }
+      },
+      "name": "schedule",
+      "uniqueConstraints": {}
+    },
+    "unit": {
+      "checkConstraints": {},
+      "columns": {
+        "createdAt": {
+          "autoincrement": false,
+          "default": "(unixepoch('subsec') * 1000)",
+          "name": "createdAt",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "deletedAt": {
+          "autoincrement": false,
+          "name": "deletedAt",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "integer"
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "updatedAt": {
+          "autoincrement": false,
+          "name": "updatedAt",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {},
+      "indexes": {
+        "unit_name_unique": {
+          "columns": ["name"],
+          "isUnique": true,
+          "name": "unit_name_unique"
+        }
+      },
+      "name": "unit",
+      "uniqueConstraints": {}
+    }
+  },
+  "version": "6",
+  "views": {}
+}

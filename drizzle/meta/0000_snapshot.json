@@ -1,0 +1,747 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "6",
+  "dialect": "sqlite",
+  "tables": {
+    "category": {
+      "name": "category",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "category_name": {
+          "autoincrement": false,
+          "name": "category_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hue": {
+          "autoincrement": false,
+          "name": "hue",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "category_category_name_unique": {
+          "name": "category_category_name_unique",
+          "columns": ["category_name"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "history": {
+      "name": "history",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "schedule_id": {
+          "autoincrement": false,
+          "name": "schedule_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "autoincrement": false,
+          "name": "amount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scheduled_amount": {
+          "autoincrement": false,
+          "name": "scheduled_amount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scheduled_at": {
+          "autoincrement": false,
+          "name": "scheduled_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "schedule_id_created_at_ix": {
+          "name": "schedule_id_created_at_ix",
+          "columns": ["schedule_id", "created_at"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "history_schedule_id_schedule_id_fk": {
+          "name": "history_schedule_id_schedule_id_fk",
+          "tableFrom": "history",
+          "tableTo": "schedule",
+          "columnsFrom": ["schedule_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "history_status": {
+      "name": "history_status",
+      "columns": {
+        "status_id": {
+          "autoincrement": true,
+          "name": "status_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "status_name": {
+          "autoincrement": false,
+          "name": "status_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "history_status_status_name_unique": {
+          "name": "history_status_status_name_unique",
+          "columns": ["status_name"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "item": {
+      "name": "item",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "item_name": {
+          "autoincrement": false,
+          "name": "item_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_id": {
+          "autoincrement": false,
+          "name": "unit_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sum_total": {
+          "default": true,
+          "autoincrement": false,
+          "name": "sum_total",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tags": {
+          "autoincrement": false,
+          "name": "tags",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "step_size": {
+          "default": 1,
+          "autoincrement": false,
+          "name": "step_size",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "item_item_name_unit_id_unique": {
+          "name": "item_item_name_unit_id_unique",
+          "columns": ["item_name", "unit_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "item_unit_id_unit_id_fk": {
+          "name": "item_unit_id_unit_id_fk",
+          "tableFrom": "item",
+          "tableTo": "unit",
+          "columnsFrom": ["unit_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "schedule": {
+      "name": "schedule",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "item_id": {
+          "autoincrement": false,
+          "name": "item_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category_id": {
+          "autoincrement": false,
+          "name": "category_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hour": {
+          "default": 7,
+          "autoincrement": false,
+          "name": "hour",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "minute": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "default": 1,
+          "autoincrement": false,
+          "name": "amount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "repeat_count": {
+          "default": 1,
+          "autoincrement": false,
+          "name": "repeat_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rest_days": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "rest_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cycle_on_days": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "cycle_on_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cycle_off_days": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "cycle_off_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cycle_total_days_gen": {
+          "autoincrement": false,
+          "name": "cycle_total_days_gen",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "type": "virtual",
+            "as": "(cycle_on_days+cycle_off_days)"
+          }
+        },
+        "start_at": {
+          "default": "(unixepoch('now','start of day'))",
+          "autoincrement": false,
+          "name": "start_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_at": {
+          "autoincrement": false,
+          "name": "end_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day_mask": {
+          "default": "'127'",
+          "autoincrement": false,
+          "name": "day_mask",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "month_mask": {
+          "default": "'4095'",
+          "autoincrement": false,
+          "name": "month_mask",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "enabled": {
+          "default": true,
+          "autoincrement": false,
+          "name": "enabled",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sort": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "sort",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "due_at": {
+          "autoincrement": false,
+          "name": "due_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_at": {
+          "autoincrement": false,
+          "name": "completed_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "migrated_id": {
+          "autoincrement": false,
+          "name": "migrated_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_amount": {
+          "autoincrement": false,
+          "name": "last_amount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "skipped_at": {
+          "autoincrement": false,
+          "name": "skipped_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "schedule_migrated_id_unique": {
+          "name": "schedule_migrated_id_unique",
+          "columns": ["migrated_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "schedule_category_id_category_id_fk": {
+          "name": "schedule_category_id_category_id_fk",
+          "tableFrom": "schedule",
+          "tableTo": "category",
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "schedule_item_id_item_id_fk": {
+          "name": "schedule_item_id_item_id_fk",
+          "tableFrom": "schedule",
+          "tableTo": "item",
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "schedule_status": {
+      "name": "schedule_status",
+      "columns": {
+        "status_id": {
+          "autoincrement": true,
+          "name": "status_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "status_name": {
+          "autoincrement": false,
+          "name": "status_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status_emoji": {
+          "autoincrement": false,
+          "name": "status_emoji",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "schedule_status_status_name_unique": {
+          "name": "schedule_status_status_name_unique",
+          "columns": ["status_name"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "target": {
+      "name": "target",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "item_id": {
+          "autoincrement": false,
+          "name": "item_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "category_id": {
+          "autoincrement": false,
+          "name": "category_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "unit_id": {
+          "autoincrement": false,
+          "name": "unit_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schedule_id": {
+          "autoincrement": false,
+          "name": "schedule_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "target_name": {
+          "autoincrement": false,
+          "name": "target_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_amount": {
+          "autoincrement": false,
+          "name": "target_amount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "num_days": {
+          "default": 1,
+          "autoincrement": false,
+          "name": "num_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hour_start": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "hour_start",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hour_end": {
+          "default": 23,
+          "autoincrement": false,
+          "name": "hour_end",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "enabled": {
+          "default": true,
+          "autoincrement": false,
+          "name": "enabled",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sort": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "sort",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {},
+      "foreignKeys": {
+        "target_schedule_id_schedule_id_fk": {
+          "name": "target_schedule_id_schedule_id_fk",
+          "tableFrom": "target",
+          "tableTo": "schedule",
+          "columnsFrom": ["schedule_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "target_unit_id_unit_id_fk": {
+          "name": "target_unit_id_unit_id_fk",
+          "tableFrom": "target",
+          "tableTo": "unit",
+          "columnsFrom": ["unit_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "target_category_id_category_id_fk": {
+          "name": "target_category_id_category_id_fk",
+          "tableFrom": "target",
+          "tableTo": "category",
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "target_item_id_item_id_fk": {
+          "name": "target_item_id_item_id_fk",
+          "tableFrom": "target",
+          "tableTo": "item",
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "test": {
+      "name": "test",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "day_mask": {
+          "autoincrement": false,
+          "name": "day_mask",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "some_text": {
+          "autoincrement": false,
+          "name": "some_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "unit": {
+      "name": "unit",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "unit_name": {
+          "autoincrement": false,
+          "name": "unit_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "default": "(unixepoch())",
+          "autoincrement": false,
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {
+        "unit_unit_name_unique": {
+          "name": "unit_unit_name_unique",
+          "columns": ["unit_name"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}
