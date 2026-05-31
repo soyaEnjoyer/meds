@@ -1,1 +1,0 @@
-ALTER TABLE `item` ADD `step_size` real DEFAULT 1 NOT NULL;
