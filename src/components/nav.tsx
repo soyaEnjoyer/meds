@@ -68,7 +68,7 @@ function NavExtraMenu({
           },
         ],
         [
-          'Newn item',
+          'New item',
           Plus,
           'Item',
           () => {

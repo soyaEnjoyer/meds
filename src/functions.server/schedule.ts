@@ -96,8 +96,13 @@ const scheduleAction = createServerOnlyFn(
       const overdueAt = dateAdd(now, { hour: -MAX_OVERDUE_HOURS });
       const nextDueAt =
         amount === null
-          ? dateAdd(overdueAt < schedule.dueAt ? schedule.dueAt : dateMax(schedule.dueAt, now), { day: 1 })
-          : dateAdd(overdueAt < schedule.dueAt ? schedule.dueAt : now, { day: schedule.restDays + 1 });
+          ? dateAdd(
+              schedule.dueAt < now && overdueAt < schedule.dueAt ? schedule.dueAt : dateMax(schedule.dueAt, now),
+              { day: 1 }
+            )
+          : dateAdd(schedule.dueAt < now && overdueAt < schedule.dueAt ? schedule.dueAt : now, {
+              day: schedule.restDays + 1,
+            });
       nextDueAt.setHours(0, 0, 0, 0);
 
       // week starts on monday

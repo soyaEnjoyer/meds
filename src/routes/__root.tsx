@@ -23,7 +23,7 @@ export const Route = createRootRoute({
 
 const headProps: ComponentProps<typeof HeadContent> = {
   assetCrossOrigin: {
-    modulepreload: 'anonymous',
+    script: 'anonymous',
     stylesheet: 'anonymous',
   },
 };
