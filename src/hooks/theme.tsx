@@ -123,27 +123,37 @@ export function useThemeResult() {
   const serverTheme = getServerThemeCookieFn();
   const reactiveTheme = useTheme((state) => ({
     font: state.font,
+    hueCenter: state.hueCenter,
+    hueWidth: state.hueWidth,
     radius: state.radius,
     scale: state.scale,
     scheme: state.scheme,
   }));
-  const { className, style } = useMemo(() => {
+  const { className, hueCenter, hueWidth, style } = useMemo(() => {
     // reactiveTheme is invalid on the server, serverTheme is undefined on client
-    const { font, radius, scale, scheme } = { ...themeDefault, ...reactiveTheme, ...serverTheme };
+    // oxlint-disable-next-line no-shadow
+    const { font, hueCenter, hueWidth, radius, scale, scheme } = { ...themeDefault, ...reactiveTheme, ...serverTheme };
     return {
       className: cn(
         font === 'sans' ? 'font-sans' : font === 'serif' ? 'font-serif' : 'font-mono',
         scheme === 'dark' ? 'scheme-dark' : scheme === 'light' ? 'scheme-light' : 'scheme-light-dark'
       ),
+      hueCenter,
+      hueWidth,
       style: {
         '--radius': `${radius}rem`,
         fontSize: `${Math.round(16 * scale)}px`,
       },
-    } satisfies { className: string; style: CSSProperties & Record<`--${string}`, string> };
+    } satisfies {
+      className: string;
+      hueCenter: number;
+      hueWidth: number;
+      style: CSSProperties & Record<`--${string}`, string>;
+    };
   }, [reactiveTheme, serverTheme]);
 
   // using suppressHydrationWarning because the server is actually adding className and style attribs twice - looks like a bug in tanstack router
-  return { className, style };
+  return { className, hueCenter, hueWidth, style };
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

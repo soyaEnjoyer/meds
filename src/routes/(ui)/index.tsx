@@ -16,7 +16,7 @@ import { useScheduleDoneMutator, useScheduleRescheduleMutator, useScheduleSkipMu
 import { useCategoriesQuery } from '@/hooks/query/queries/base';
 import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { ACCORDION_PRE_EXPAND_HOURS, useFilteredScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
-import { useTheme } from '@/hooks/theme';
+import { useThemeResult } from '@/hooks/theme';
 import { dateAdd, dateMax, dateSet, formatDatetimeIso } from '@/lib/date';
 import { cn } from '@/lib/utils';
 
@@ -196,7 +196,7 @@ function ScheduleAccordionGroup({
   const scheduleSkipMutator = useScheduleSkipMutator();
   const scheduleRescheduleMutator = useScheduleRescheduleMutator();
   const categoriesQuery = useCategoriesQuery();
-  const [hueCenter, hueWidth] = useTheme((state) => [state.hueCenter, state.hueWidth]);
+  const { hueCenter, hueWidth } = useThemeResult();
 
   const handleDoneClick = useCallback(
     async (event: MouseEvent<HTMLButtonElement>) => {
