@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { LoaderCircle } from 'lucide-react';
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense } from 'react';
 
 import { HeadUpdater } from '@/components/head-updater';
 import { Nav } from '@/components/nav';
@@ -22,6 +22,7 @@ import { itemGet } from '@/functions.server/item';
 import { scheduleGet } from '@/functions.server/schedule';
 import { getTextStatus } from '@/functions.server/status';
 import { unitGet } from '@/functions.server/unit';
+import { DevToolsProvider, useDevTools } from '@/hooks/dev-tools';
 import { DialogProvider } from '@/hooks/dialog';
 import { FilterProvider, ItemState } from '@/hooks/filter';
 import { PagerProvider } from '@/hooks/pager';
@@ -98,13 +99,10 @@ const ReactQueryDevtoolsProduction = lazy(async () => {
   return { default: ReactQueryDevtools };
 });
 
-// tanstack start doesn't seem to have a way to opt individual components out of ssr
 function ReactQueryDevtoolsProductionClient() {
-  const [isClient, setIsClient] = useState(false);
+  const { show } = useDevTools();
 
-  useEffect(() => setIsClient(true), []);
-
-  if (!isClient) return null;
+  if (!show) return null;
 
   return (
     <Suspense fallback={null}>
@@ -115,31 +113,33 @@ function ReactQueryDevtoolsProductionClient() {
 
 function UiLayout() {
   return (
-    <ToastProvider>
-      <DialogProvider>
-        <PagerProvider>
-          <QueryClientProvider client={queryClient}>
-            <FilterProvider defaultState={ItemState.Scheduled}>
-              <Nav />
-              <main className='@container mx-auto mt-16 max-w-2xl px-4 pb-4 has-[.snap-y]:max-w-none has-[.snap-y]:px-0'>
-                <Outlet />
-              </main>
-              <MultimodeFormDialog dialogName='category' form={CategoryForm} />
-              <MultimodeFormDialog dialogName='item' form={ItemForm} />
-              <MultimodeFormDialog dialogName='unit' form={UnitForm} />
-              <MultimodeFormDialog dialogName='schedule' form={ScheduleForm} className='xl:max-w-xl' />
-              <BasicFormDialog dialogName='doneCustom' form={DoneCustomForm} />
-              <BasicFormDialog dialogName='history' form={HistoryForm} />
-              <ThemeDialog />
-              <ScheduleHistoryDialog />
-              <ScrollTopButton />
-              <HeadUpdater />
-            </FilterProvider>
-            <SseClient />
-            <ReactQueryDevtoolsProductionClient />
-          </QueryClientProvider>
-        </PagerProvider>
-      </DialogProvider>
-    </ToastProvider>
+    <DevToolsProvider>
+      <ToastProvider>
+        <DialogProvider>
+          <PagerProvider>
+            <QueryClientProvider client={queryClient}>
+              <FilterProvider defaultState={ItemState.Scheduled}>
+                <Nav />
+                <main className='@container mx-auto mt-16 max-w-2xl px-4 pb-4 has-[.snap-y]:max-w-none has-[.snap-y]:px-0'>
+                  <Outlet />
+                </main>
+                <MultimodeFormDialog dialogName='category' form={CategoryForm} />
+                <MultimodeFormDialog dialogName='item' form={ItemForm} />
+                <MultimodeFormDialog dialogName='unit' form={UnitForm} />
+                <MultimodeFormDialog dialogName='schedule' form={ScheduleForm} className='xl:max-w-xl' />
+                <BasicFormDialog dialogName='doneCustom' form={DoneCustomForm} />
+                <BasicFormDialog dialogName='history' form={HistoryForm} />
+                <ThemeDialog />
+                <ScheduleHistoryDialog />
+                <ScrollTopButton />
+                <HeadUpdater />
+              </FilterProvider>
+              <SseClient />
+              <ReactQueryDevtoolsProductionClient />
+            </QueryClientProvider>
+          </PagerProvider>
+        </DialogProvider>
+      </ToastProvider>
+    </DevToolsProvider>
   );
 }

@@ -1,9 +1,9 @@
 import { displayName } from '@root/package.json';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { createIsomorphicFn } from '@tanstack/react-start';
-import type { LucideProps } from 'lucide-react';
-import { Contrast, EllipsisVertical, Menu, MessageCircle, Plus, X } from 'lucide-react';
-import type { Dispatch, ForwardRefExoticComponent, KeyboardEvent, RefAttributes, SetStateAction } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { Bug, Contrast, EllipsisVertical, Menu, MessageCircle, Plus, X } from 'lucide-react';
+import type { Dispatch, KeyboardEvent, SetStateAction } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AppIcon } from '@/components/app-icon';
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group';
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useDevTools } from '@/hooks/dev-tools';
 import { useDialog } from '@/hooks/dialog';
 import type { ItemState } from '@/hooks/filter';
 import { itemStateNames, itemStates, useFilter } from '@/hooks/filter';
@@ -40,13 +41,9 @@ function NavExtraMenu({
   mode: 'dropdown' | 'buttons';
 }) {
   const openDialog = useDialog((state) => state.actions.open);
+  const { setShow } = useDevTools();
 
-  const buttons: [
-    description: string,
-    Icon: ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>,
-    label: string,
-    handleClick: () => void,
-  ][] = useMemo(
+  const buttons: [description: string, Icon: LucideIcon, label: string, handleClick: () => void][] = useMemo(
     () =>
       [
         [
@@ -94,8 +91,9 @@ function NavExtraMenu({
             setSideBarOpen?.(false);
           },
         ],
+        ['Show dev tools', Bug, 'Dev tools', () => setShow((prev) => !prev)],
       ] as const,
-    [setSideBarOpen, openDialog]
+    [openDialog, setShow, setSideBarOpen]
   );
 
   if (mode === 'buttons')
