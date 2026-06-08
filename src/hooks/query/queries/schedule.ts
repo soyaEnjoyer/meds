@@ -25,6 +25,7 @@ export interface ScheduleGroup {
   categoryName: string;
   dueAtLabel: string;
   dueAtIso: string;
+  dueAtKey: string;
   dueAtTs: number;
   items: ScheduleRowWithNames[];
 }
@@ -82,16 +83,16 @@ export function useFilteredScheduleGroupsQuery() {
         (item) =>
           `${
             filterState === ItemState.AdHoc || filterState === ItemState.Skipped
-              ? itemStateNames[filterState]
+              ? `${itemStateNames[filterState]}|${itemStateNames[filterState]}`
               : item.dueAt === null
-                ? 'Unscheduled'
+                ? 'Unscheduled|Unscheduled'
                 : item.dueAt <= now
-                  ? 'Due'
+                  ? 'Due|Due'
                   : item.dueAt <= todayEnd
-                    ? formatTimeIso(item.dueAt)
+                    ? `${formatDatetimeIso(item.dueAt)}|${formatTimeIso(item.dueAt)}`
                     : item.dueAt <= in7dEnd
-                      ? `${weekdays[(item.dueAt.getDay() || 7) - 1][1].slice(0, 3)} ${formatTimeIso(item.dueAt)}`
-                      : formatDateIso(item.dueAt)
+                      ? `${formatDatetimeIso(item.dueAt)}|${weekdays[(item.dueAt.getDay() || 7) - 1][1].slice(0, 3)} ${formatTimeIso(item.dueAt)}`
+                      : `${formatDateIso(item.dueAt)}|${formatDateIso(item.dueAt)}`
           }|${item.categoryId}|${item.categoryName}`
       )
     )
@@ -100,7 +101,7 @@ export function useFilteredScheduleGroupsQuery() {
           typeof item[1] !== 'undefined' && Array.isArray(item[1]) && item[1].length > 0
       )
       .map(([key, items]) => {
-        const [dueAtLabel, categoryIdStr, categoryName] = key.split('|');
+        const [dueAtKey, dueAtLabel, categoryIdStr, categoryName] = key.split('|');
         const categoryId = Number(categoryIdStr);
         const dueAtTs = items.reduce((acc, item) => Math.min(acc, item.dueAt?.getTime() ?? Infinity), Infinity);
         const dueAtIso = dueAtTs === Infinity ? 'Unscheduled' : formatDatetimeIso(new Date(dueAtTs));
@@ -108,6 +109,7 @@ export function useFilteredScheduleGroupsQuery() {
           categoryId,
           categoryName,
           dueAtIso,
+          dueAtKey,
           dueAtLabel,
           dueAtTs,
           items,
