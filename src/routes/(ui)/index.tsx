@@ -16,7 +16,7 @@ import { useScheduleDoneMutator, useScheduleRescheduleMutator, useScheduleSkipMu
 import { useCategoriesQuery } from '@/hooks/query/queries/base';
 import type { ScheduleGroup, ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
 import { ACCORDION_PRE_EXPAND_HOURS, useFilteredScheduleGroupsQuery } from '@/hooks/query/queries/schedule';
-import { useThemeResult } from '@/hooks/theme';
+import { useTheme, useThemeResult } from '@/hooks/theme';
 import { dateAdd, dateMax, dateSet, formatDatetimeIso } from '@/lib/date';
 import { cn } from '@/lib/utils';
 
@@ -31,17 +31,21 @@ function ScheduleAccordionItemName({
   itemName,
   withInfo,
   withStar,
+  scheduleId,
   ...props
 }: {
   itemName: string | undefined;
   withInfo?: boolean;
   withStar?: boolean;
+  scheduleId: number;
 } & ComponentProps<'h3'>) {
+  const showIds = useTheme((state) => state.showIds);
   return (
     <h3
       className={cn('group me-auto flex shrink-0 grow items-center gap-1 text-base wrap-anywhere', className)}
       {...props}
     >
+      {showIds && <span className='text-xs text-muted-foreground'>{`#${scheduleId}`}</span>}
       {withInfo && (
         <Info className='ite size-4 text-muted-foreground transition-colors group-hover:text-primary group-active:text-primary' />
       )}
@@ -105,7 +109,7 @@ function ScheduleAccordionItem({
       {description ? (
         <Popover>
           <PopoverTrigger
-            render={<ScheduleAccordionItemName itemName={itemName} withInfo withStar={withStar} />}
+            render={<ScheduleAccordionItemName itemName={itemName} withInfo withStar={withStar} scheduleId={id} />}
             nativeButton={false}
           />
           <PopoverContent className='max-w-fit whitespace-pre-wrap' align='start'>
@@ -113,7 +117,7 @@ function ScheduleAccordionItem({
           </PopoverContent>
         </Popover>
       ) : (
-        <ScheduleAccordionItemName itemName={itemName} withStar={withStar} />
+        <ScheduleAccordionItemName itemName={itemName} withStar={withStar} scheduleId={id} />
       )}
       <ScheduleSummary className='shrink grow-0' amount={amount} {...props} />
       <Button onClick={amount ? handleDoneClick : handleCustomClick}>

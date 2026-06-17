@@ -21,6 +21,7 @@ export interface ThemeState {
   radius: number;
   scale: number;
   scheme: Scheme;
+  showIds: boolean;
 }
 
 interface ThemeStore extends ThemeState {
@@ -32,6 +33,7 @@ interface ThemeStore extends ThemeState {
     setRadius: (radius: ThemeState['radius']) => void;
     setScale: (scale: ThemeState['scale']) => void;
     setScheme: (scheme: ThemeState['scheme']) => void;
+    setShowIds: (showIds: ThemeState['showIds']) => void;
   };
 }
 
@@ -42,6 +44,7 @@ export const themeDefault: ThemeState = {
   radius: 0.625,
   scale: 1,
   scheme: 'auto',
+  showIds: false,
 } as const;
 export const themeCookieName = `${name}.theme`;
 
@@ -69,6 +72,9 @@ const store = createStore(
         },
         setScheme(scheme) {
           set(() => ({ scheme }));
+        },
+        setShowIds(showIds) {
+          set(() => ({ showIds }));
         },
       },
       ...themeDefault,

@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { useDialog } from '@/hooks/dialog';
 import type { Font, Scheme } from '@/hooks/theme';
 import { useTheme } from '@/hooks/theme';
@@ -38,13 +39,14 @@ function FontButton({ font, className }: { font: Font; className?: string }) {
 export function ThemeDialog() {
   const setDialog = useDialog((state) => state.actions.set);
   const dialogState = useDialog((state) => state.theme);
-  const [hueCenter, hueWidth, radius, scale] = useTheme((state) => [
+  const [hueCenter, hueWidth, radius, scale, showIds] = useTheme((state) => [
     state.hueCenter,
     state.hueWidth,
     state.radius,
     state.scale,
+    state.showIds,
   ]);
-  const { reset, setHueCenter, setHueWidth, setScale, setRadius } = useTheme((state) => state.actions);
+  const { reset, setHueCenter, setHueWidth, setScale, setRadius, setShowIds } = useTheme((state) => state.actions);
 
   const handleScaleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => setScale(event.target.valueAsNumber),
@@ -140,6 +142,10 @@ export function ThemeDialog() {
               />
               <span>{hueWidth}</span>
             </div>
+          </label>
+          <label className='contents'>
+            Show IDs
+            <Switch value={showIds} onValueChange={setShowIds} />
           </label>
         </DialogBody>
         <DialogFooter className='flex justify-around gap-4'>
