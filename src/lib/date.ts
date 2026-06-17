@@ -22,9 +22,9 @@ export function formatTimeIso(value: Date | null | Time): string {
   return `${value.hour.toString().padStart(2, '0')}:${value.minute.toString().padStart(2, '0')}`;
 }
 
-export function formatDateDistance(value: Date | null): string {
+export function formatDateDistance(value: Date | null, ref?: Date | null): string {
   if (!value) return '';
-  const dayStart = new Date();
+  const dayStart = ref ? new Date(ref) : new Date();
   dayStart.setHours(0, 0, 0, 0);
   const valueStart = new Date(value);
   valueStart.setHours(0, 0, 0, 0);

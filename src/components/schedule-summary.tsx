@@ -3,7 +3,7 @@ import { useMemo, type ReactElement, type ReactNode } from 'react';
 
 import { DateText } from '@/components/date-text';
 import type { ScheduleRowWithNames } from '@/hooks/query/queries/schedule';
-import { daysDiff } from '@/lib/date';
+import { dateAdd, dateMax, daysDiff, formatDateDistance } from '@/lib/date';
 import { months, weekdays, type MonthTuple, type WeekdayTuple } from '@/lib/enums';
 import { cn } from '@/lib/utils';
 
@@ -24,12 +24,15 @@ function formatRepeatRules({
 >): string | null {
   if (dueAt === null || dayMask === 0 || monthMask === 0) return 'Never';
   const items: (string | { toString: () => string })[] = [];
-  if (restDays) items.push(`${restDays + 1}d`);
-  if (cycleOffDays) {
-    const cycleLength = cycleOnDays + cycleOffDays;
-    const cycleDay = daysDiff(startAt, new Date()) % cycleLength;
-    if (cycleOffDays) items.push(cycleOnDays, cycleOffDays, cycleDay);
-  }
+  const now = new Date();
+  // if (restDays) items.push(`${restDays + 1}d`);
+  if (restDays) items.push(formatDateDistance(now, dateAdd(now, { day: restDays + 1 })));
+  if (cycleOffDays)
+    items.push(
+      cycleOnDays,
+      cycleOffDays,
+      daysDiff(startAt, dueAt ? dateMax(dueAt, now) : now) % (cycleOnDays + cycleOffDays)
+    );
   if (dayMask < 127)
     items.push(
       weekdays
@@ -141,7 +144,7 @@ export function ScheduleSummary({
           icon={Calendar}
           className={skippedAt && skippedAt > completedAt ? 'text-danger' : undefined}
         >
-          <DateText date={completedAt} as='dist' size='xs' />
+          <DateText date={completedAt} as='dist' size='xs' ref={dueAt} />
         </ScheduleSummarySection>
       )}
       {formattedRepeat && <ScheduleSummarySection icon={RotateCw}>{formattedRepeat}</ScheduleSummarySection>}
