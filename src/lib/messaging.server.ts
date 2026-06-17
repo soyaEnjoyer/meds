@@ -35,7 +35,7 @@ type ClientToServerMessage =
 
 type Callback<Topic extends MessageTopic> = (message: Extract<Message, { topic: Topic }>) => void | Promise<void>;
 
-type Unsubscribe = () => void;
+export type Unsubscribe = () => void;
 
 export class MessageServer {
   readonly #topicClients = new Map<MessageTopic, Set<Socket>>();

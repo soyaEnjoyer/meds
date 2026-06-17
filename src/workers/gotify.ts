@@ -1,39 +1,13 @@
-// oxlint-disable import/no-nodejs-modules
-import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { cwd, env } from 'node:process';
-import { parseEnv } from 'node:util';
-
 import { getTextStatusServer } from '@/functions.server/status.server-only';
 import { HOUR_MS } from '@/lib/date';
+import { envOrThrow, loadEnv } from '@/lib/env.server';
 import { createLoggerServer } from '@/lib/logger/server';
 
 const INTERVAL_MS = HOUR_MS / 4;
-const MAX_ENV_TRAVERSALS = 2;
 
 let timeout: NodeJS.Timeout | null = null;
 let interval: NodeJS.Timeout | null = null;
 const logger = createLoggerServer(import.meta.url);
-
-// vite processes .env files in the project root, but nitro builds to a subdirectory
-function loadEnv(): void {
-  let dirPath = cwd();
-  for (let i = 0; i < MAX_ENV_TRAVERSALS; ++i) {
-    const envPath = join(dirPath, '.env');
-    if (existsSync(envPath)) {
-      const parsed = parseEnv(readFileSync(envPath, { encoding: 'utf8' }));
-      for (const [key, val] of Object.entries(parsed)) env[key] = val;
-      return;
-    }
-    dirPath = dirname(dirPath);
-  }
-}
-
-function envOrThrow(key: string): string {
-  const value = env[key];
-  if (typeof value === 'undefined') throw new Error(`undefined env var: ${key}`);
-  return value;
-}
 
 function start(): void {
   loadEnv();

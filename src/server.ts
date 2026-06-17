@@ -5,9 +5,10 @@ import handler from '@tanstack/react-start/server-entry';
 import { createLoggerServer } from '@/lib/logger/server';
 import { worker as gotifyWorker } from '@/workers/gotify';
 import { worker as messageWorker } from '@/workers/message-bus';
+import { worker as webhookWorker } from '@/workers/webhook';
 // https://tanstack.com/start/latest/docs/framework/react/guide/server-entry-point
 
-const workers: { start: () => void; stop: () => void }[] = [gotifyWorker, messageWorker];
+const workers: { start: () => void; stop: () => void }[] = [gotifyWorker, messageWorker, webhookWorker];
 const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];
 const logger = createLoggerServer(import.meta.url);
 
