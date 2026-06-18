@@ -75,6 +75,10 @@ export function daysDiff(a: Date, b: Date): number {
   return Math.round((bStart - aStart) / DAY_MS);
 }
 
+export function millisDiff(a: Date, b: Date): number {
+  return Math.round(a.getTime() - b.getTime());
+}
+
 export function dateMin(a: Date, b: Date): Date {
   return a < b ? a : b;
 }

@@ -1,8 +1,12 @@
 import { getTextStatusServer } from '@/functions.server/status.server-only';
+import { MINUTE_MS } from '@/lib/date';
 import { envOrThrow, loadEnv } from '@/lib/env.server';
 import { createLoggerServer } from '@/lib/logger/server';
 import type { Unsubscribe } from '@/lib/messaging.server';
 import { MessageClient } from '@/lib/messaging.server';
+import { debounce } from '@/lib/utils';
+
+const DEBOUNCE_MS = MINUTE_MS / 2;
 
 let unsubscribe: Unsubscribe | null = null;
 const logger = createLoggerServer(import.meta.url);
@@ -46,7 +50,7 @@ function start(): void {
   }
 
   void send();
-  unsubscribe = client.subscribe('invalidate', send);
+  unsubscribe = client.subscribe('invalidate', debounce(send, DEBOUNCE_MS));
 }
 
 function stop(): void {

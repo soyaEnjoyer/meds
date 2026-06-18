@@ -1,13 +1,19 @@
 import { getTextStatusServer } from '@/functions.server/status.server-only';
-import { HOUR_MS } from '@/lib/date';
+import { HOUR_MS, MINUTE_MS } from '@/lib/date';
 import { envOrThrow, loadEnv } from '@/lib/env.server';
 import { createLoggerServer } from '@/lib/logger/server';
+import type { Unsubscribe } from '@/lib/messaging.server';
+import { MessageClient } from '@/lib/messaging.server';
+import { debounce } from '@/lib/utils';
 
 const INTERVAL_MS = HOUR_MS / 4;
+const DEBOUNCE_MS = MINUTE_MS / 2;
 
+let unsubscribe: Unsubscribe | null = null;
 let timeout: NodeJS.Timeout | null = null;
 let interval: NodeJS.Timeout | null = null;
 const logger = createLoggerServer(import.meta.url);
+const client = new MessageClient(import.meta.url);
 
 function start(): void {
   loadEnv();
@@ -56,6 +62,8 @@ function start(): void {
     } else logger.error('error sending', await response.text());
   }
 
+  unsubscribe = client.subscribe('invalidate', debounce(send, DEBOUNCE_MS));
+
   void send();
   const now = Date.now();
   const next = now - (now % INTERVAL_MS) + INTERVAL_MS;
@@ -68,8 +76,10 @@ function start(): void {
 function stop(): void {
   if (timeout) clearTimeout(timeout);
   if (interval) clearInterval(interval);
+  unsubscribe?.();
   timeout = null;
   interval = null;
+  unsubscribe = null;
 }
 
 export const worker = { start, stop };
