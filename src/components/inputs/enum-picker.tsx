@@ -81,7 +81,7 @@ export function EnumPicker({
       <Button onClick={handleToggleClick} variant='outline' size='icon-sm'>
         <Circle className={value === maxVal ? 'fill-current' : undefined} />
       </Button>
-      <div className={cn('grid grid-flow-col size-full grid-cols-[repeat(auto-fit,minmax(1px,1fr))]', className)}>
+      <div className={cn('grid grid-flow-row size-full grid-cols-[repeat(auto-fit,minmax(1px,1fr))]', className)}>
         {items.map((item) => (
           <EnumButton key={item[0]} item={item} value={value} onValueChange={onValueChange} />
         ))}
@@ -96,5 +96,5 @@ export function DayPicker(props: Omit<ComponentProps<typeof EnumPicker>, 'items'
 }
 
 export function MonthPicker(props: Omit<ComponentProps<typeof EnumPicker>, 'items'>) {
-  return <EnumPicker {...props} items={months} className='@max-md:grid-rows-2' />;
+  return <EnumPicker {...props} items={months} className='@max-md:grid-cols-6' />;
 }
